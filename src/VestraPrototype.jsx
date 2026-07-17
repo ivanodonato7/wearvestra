@@ -68,6 +68,7 @@ const UI = {
     wardrobeTitle: "Wardrobe", wardrobeEmpty: "Outfits you save from your stylist will live here.",
     bagTitle: "Bag", bagEmpty: "Save an outfit to see its items here, grouped by retailer.", checkoutWith: "Checkout with",
     profileTitle: "Profile", nameLabel: "Name", styleArchetypeLabel: "Style Archetype", fitPreferenceLabel: "Fit Preference",
+    lifestyleLabel: "Day-to-day",
     dressingForLabel: "Dressing for",
     paletteLabel: "Palette", budgetLabel: "Budget", dressesForLabel: "Dresses For",
     prototypeNote: "This is a click-through prototype — no real account exists yet.", languageLabel: "Language",
@@ -146,6 +147,7 @@ const UI = {
     wardrobeTitle: "Armario", wardrobeEmpty: "Los looks que guardes de tu estilista aparecerán aquí.",
     bagTitle: "Bolsa", bagEmpty: "Guarda un look para ver sus prendas aquí, agrupadas por tienda.", checkoutWith: "Comprar en",
     profileTitle: "Perfil", nameLabel: "Nombre", styleArchetypeLabel: "Arquetipo de Estilo", fitPreferenceLabel: "Preferencia de Ajuste",
+    lifestyleLabel: "Día a día",
     dressingForLabel: "Vestuario para",
     paletteLabel: "Paleta", budgetLabel: "Presupuesto", dressesForLabel: "Se Viste Para",
     prototypeNote: "Esto es un prototipo interactivo — aún no existe ninguna cuenta real.", languageLabel: "Idioma",
@@ -224,6 +226,7 @@ const UI = {
     wardrobeTitle: "Garde-robe", wardrobeEmpty: "Les tenues que vous enregistrez apparaîtront ici.",
     bagTitle: "Panier", bagEmpty: "Enregistrez une tenue pour voir ses articles ici, regroupés par enseigne.", checkoutWith: "Payer chez",
     profileTitle: "Profil", nameLabel: "Prénom", styleArchetypeLabel: "Archétype de Style", fitPreferenceLabel: "Préférence de Coupe",
+    lifestyleLabel: "Quotidien",
     dressingForLabel: "S'habille pour",
     paletteLabel: "Palette", budgetLabel: "Budget", dressesForLabel: "S'habille Pour",
     prototypeNote: "Ceci est un prototype interactif — aucun compte réel n'existe encore.", languageLabel: "Langue",
@@ -731,18 +734,132 @@ function revisionIntroKey(revision) {
 
 /** Recipe library — scored against the user's prompt + profile to pick varied looks. */
 const OUTFIT_RECIPES = [
-  { id: "formal-olive", outer: "blazer", top: "shirt", bottom: "trouser", shoe: "shoe", acc: "belt", occasions: ["wedding", "formal", "event", "work"], vibe: ["quiet", "classic", "polished"] },
-  { id: "formal-linen", outer: "blazerAlt", top: "shirt", bottom: "trouser", shoe: "shoe", acc: "belt", occasions: ["wedding", "formal", "event", "travel"], vibe: ["relaxed", "warm", "classic"] },
-  { id: "sharp-evening", outer: "blazer", top: "shirt", bottom: "trouserAlt", shoe: "shoe", acc: "scarf", occasions: ["dinner", "date", "evening", "event"], vibe: ["modern", "bold", "romantic"] },
-  { id: "dinner-easy", outer: null, top: "shirt", bottom: "trouser", shoe: "shoe", acc: "scarf", occasions: ["dinner", "date", "work", "evening"], vibe: ["quiet", "classic", "minimal"] },
-  { id: "dinner-knit", outer: null, top: "shirtAlt", bottom: "trouser", shoe: "shoeAlt", acc: "scarf", occasions: ["dinner", "date", "evening", "weekend"], vibe: ["warm", "relaxed", "romantic"] },
-  { id: "work-tailored", outer: "blazer", top: "shirt", bottom: "trouser", shoe: "shoe", acc: null, occasions: ["work", "office", "meeting", "client"], vibe: ["quiet", "classic", "modern", "polished"] },
-  { id: "work-directional", outer: "blazer", top: "shirtAlt", bottom: "trouserAlt", shoe: "shoe", acc: "belt", occasions: ["work", "office", "meeting"], vibe: ["modern", "minimal", "bold"] },
-  { id: "weekend-sun", outer: null, top: "shirt", bottom: "trouserAlt", shoe: "shoeAlt", acc: "sunglasses", occasions: ["weekend", "casual", "travel", "everyday", "sunny"], vibe: ["relaxed", "minimal", "warm"] },
-  { id: "travel-layer", outer: "blazerAlt", top: "shirt", bottom: "trouserAlt", shoe: "shoeAlt", acc: "sunglasses", occasions: ["travel", "weekend", "casual"], vibe: ["relaxed", "warm", "modern"] },
-  { id: "everyday-clean", outer: null, top: "shirt", bottom: "trouser", shoe: "shoe", acc: "sunglasses", occasions: ["everyday", "casual", "weekend"], vibe: ["quiet", "minimal", "classic"] },
-  { id: "everyday-knit", outer: null, top: "shirtAlt", bottom: "trouser", shoe: "shoe", acc: "belt", occasions: ["everyday", "work", "weekend"], vibe: ["warm", "relaxed", "quiet"] },
-  { id: "bold-layer", outer: "blazerAlt", top: "shirtAlt", bottom: "trouserAlt", shoe: "shoeAlt", acc: "sunglasses", occasions: ["weekend", "travel", "casual", "date"], vibe: ["bold", "modern", "warm"] },
+  {
+    id: "quiet-tailored-work",
+    outer: "blazer", top: "shirt", bottom: "trouser", shoe: "shoe", acc: "belt",
+    occasions: ["work", "office", "meeting", "client", "formal", "wedding", "event"],
+    vibe: ["quiet", "classic", "polished"],
+    archetypes: ["Quiet Tailored", "Classic Polished"],
+    lifestyles: ["Office / client-facing"],
+    structure: "tailored",
+  },
+  {
+    id: "classic-polished-event",
+    outer: "blazer", top: "shirt", bottom: "trouser", shoe: "shoe", acc: "scarf",
+    occasions: ["wedding", "formal", "event", "dinner"],
+    vibe: ["classic", "polished", "quiet"],
+    archetypes: ["Classic Polished", "Quiet Tailored"],
+    lifestyles: ["Office / client-facing", "On the move — travel, events, varied"],
+    structure: "tailored",
+  },
+  {
+    id: "modern-sharp-work",
+    outer: "blazer", top: "shirtAlt", bottom: "trouserAlt", shoe: "shoe", acc: "belt",
+    occasions: ["work", "office", "meeting", "dinner", "evening"],
+    vibe: ["modern", "minimal", "bold"],
+    archetypes: ["Modern Sharp", "Minimal Directional", "Bold Expressive"],
+    lifestyles: ["Office / client-facing", "Creative or flexible workplace"],
+    structure: "structured",
+  },
+  {
+    id: "minimal-clean",
+    outer: null, top: "shirt", bottom: "trouser", shoe: "shoe", acc: "sunglasses",
+    occasions: ["everyday", "casual", "weekend", "work"],
+    vibe: ["minimal", "quiet", "modern"],
+    archetypes: ["Minimal Directional", "Quiet Tailored", "Modern Sharp"],
+    lifestyles: ["Remote, mostly at home", "Creative or flexible workplace", "Student life"],
+    structure: "tailored",
+  },
+  {
+    id: "relaxed-considered",
+    outer: "blazerAlt", top: "shirt", bottom: "trouserAlt", shoe: "shoeAlt", acc: "sunglasses",
+    occasions: ["weekend", "casual", "travel", "everyday", "dinner"],
+    vibe: ["relaxed", "warm", "classic"],
+    archetypes: ["Relaxed Considered", "Warm Layered"],
+    lifestyles: ["Creative or flexible workplace", "Remote, mostly at home", "On the move — travel, events, varied"],
+    structure: "relaxed",
+  },
+  {
+    id: "warm-layered-knit",
+    outer: null, top: "shirtAlt", bottom: "trouser", shoe: "shoeAlt", acc: "scarf",
+    occasions: ["dinner", "date", "evening", "weekend", "everyday"],
+    vibe: ["warm", "relaxed", "romantic"],
+    archetypes: ["Warm Layered", "Romantic Soft", "Relaxed Considered"],
+    lifestyles: ["Remote, mostly at home", "Creative or flexible workplace"],
+    structure: "relaxed",
+  },
+  {
+    id: "romantic-soft-dinner",
+    outer: null, top: "shirt", bottom: "trouserAlt", shoe: "shoe", acc: "scarf",
+    occasions: ["dinner", "date", "evening", "event"],
+    vibe: ["romantic", "warm", "soft"],
+    archetypes: ["Romantic Soft", "Warm Layered"],
+    lifestyles: ["Creative or flexible workplace", "On the move — travel, events, varied"],
+    structure: "relaxed",
+  },
+  {
+    id: "bold-expressive",
+    outer: "blazerAlt", top: "shirtAlt", bottom: "trouserAlt", shoe: "shoeAlt", acc: "sunglasses",
+    occasions: ["weekend", "travel", "casual", "date", "event"],
+    vibe: ["bold", "modern", "warm"],
+    archetypes: ["Bold Expressive", "Modern Sharp"],
+    lifestyles: ["Creative or flexible workplace", "Student life", "On the move — travel, events, varied"],
+    structure: "relaxed",
+  },
+  {
+    id: "travel-easy",
+    outer: "blazerAlt", top: "shirt", bottom: "trouserAlt", shoe: "shoeAlt", acc: "sunglasses",
+    occasions: ["travel", "weekend", "casual", "everyday"],
+    vibe: ["relaxed", "warm", "modern"],
+    archetypes: ["Relaxed Considered", "Warm Layered", "Minimal Directional"],
+    lifestyles: ["On the move — travel, events, varied", "Student life"],
+    structure: "relaxed",
+  },
+  {
+    id: "office-no-fuss",
+    outer: "blazer", top: "shirt", bottom: "trouser", shoe: "shoe", acc: null,
+    occasions: ["work", "office", "meeting", "client"],
+    vibe: ["quiet", "classic", "modern", "polished"],
+    archetypes: ["Quiet Tailored", "Classic Polished", "Minimal Directional"],
+    lifestyles: ["Office / client-facing"],
+    structure: "tailored",
+  },
+  {
+    id: "remote-elevated",
+    outer: null, top: "shirtAlt", bottom: "trouser", shoe: "shoe", acc: "belt",
+    occasions: ["everyday", "work", "weekend", "casual"],
+    vibe: ["warm", "relaxed", "quiet", "minimal"],
+    archetypes: ["Relaxed Considered", "Warm Layered", "Minimal Directional"],
+    lifestyles: ["Remote, mostly at home", "Student life"],
+    structure: "relaxed",
+  },
+  {
+    id: "student-sun",
+    outer: null, top: "shirt", bottom: "trouserAlt", shoe: "shoeAlt", acc: "sunglasses",
+    occasions: ["weekend", "casual", "everyday", "sunny", "travel"],
+    vibe: ["relaxed", "minimal", "warm", "bold"],
+    archetypes: ["Relaxed Considered", "Bold Expressive", "Minimal Directional"],
+    lifestyles: ["Student life", "Remote, mostly at home"],
+    structure: "relaxed",
+  },
+  {
+    id: "sharp-evening",
+    outer: "blazer", top: "shirt", bottom: "trouserAlt", shoe: "shoe", acc: "scarf",
+    occasions: ["dinner", "date", "evening", "event"],
+    vibe: ["modern", "bold", "romantic", "polished"],
+    archetypes: ["Modern Sharp", "Bold Expressive", "Romantic Soft", "Classic Polished"],
+    lifestyles: ["On the move — travel, events, varied", "Creative or flexible workplace"],
+    structure: "structured",
+  },
+  {
+    id: "formal-linen",
+    outer: "blazerAlt", top: "shirt", bottom: "trouser", shoe: "shoe", acc: "belt",
+    occasions: ["wedding", "formal", "event", "travel"],
+    vibe: ["relaxed", "warm", "classic"],
+    archetypes: ["Relaxed Considered", "Warm Layered", "Classic Polished"],
+    lifestyles: ["On the move — travel, events, varied", "Creative or flexible workplace"],
+    structure: "relaxed",
+  },
 ];
 
 const OCCASION_KEYWORDS = [
@@ -764,16 +881,20 @@ function detectOccasions(text) {
   return hits;
 }
 
+function normalizeArchetype(archetype) {
+  return String(archetype || "").replace(/\s*&\s*/g, " ").replace(/\s+/g, " ").trim();
+}
+
 function archetypeVibes(archetype) {
-  const a = (archetype || "").toLowerCase();
-  if (a.includes("quiet") || a.includes("tailored")) return ["quiet", "classic", "polished"];
-  if (a.includes("relaxed") || a.includes("considered")) return ["relaxed", "warm"];
-  if (a.includes("modern") || a.includes("sharp")) return ["modern", "minimal"];
-  if (a.includes("warm") || a.includes("layered")) return ["warm", "relaxed"];
-  if (a.includes("classic") || a.includes("polished")) return ["classic", "polished", "quiet"];
-  if (a.includes("minimal") || a.includes("directional")) return ["minimal", "modern"];
-  if (a.includes("romantic") || a.includes("soft")) return ["romantic", "warm"];
-  if (a.includes("bold") || a.includes("expressive")) return ["bold", "modern"];
+  const a = normalizeArchetype(archetype).toLowerCase();
+  if (a.includes("quiet")) return ["quiet", "classic", "polished"];
+  if (a.includes("relaxed")) return ["relaxed", "warm", "classic"];
+  if (a.includes("modern")) return ["modern", "minimal", "bold"];
+  if (a.includes("warm")) return ["warm", "relaxed", "romantic"];
+  if (a.includes("classic")) return ["classic", "polished", "quiet"];
+  if (a.includes("minimal")) return ["minimal", "modern", "quiet"];
+  if (a.includes("romantic")) return ["romantic", "warm", "soft"];
+  if (a.includes("bold")) return ["bold", "modern", "warm"];
   return ["quiet", "classic"];
 }
 
@@ -788,8 +909,62 @@ function profileOccasionIds(profile) {
   return (profile?.occasions || []).map((o) => map[o]).filter(Boolean);
 }
 
+function lifestyleSignals(lifestyle) {
+  const l = lifestyle || "";
+  if (l.includes("Office")) return { occasions: ["work"], preferStructure: "tailored", preferOuter: true };
+  if (l.includes("Creative")) return { occasions: ["work", "weekend", "dinner"], preferStructure: "relaxed", preferOuter: false };
+  if (l.includes("Remote")) return { occasions: ["everyday", "weekend"], preferStructure: "relaxed", preferOuter: false };
+  if (l.includes("On the move") || l.includes("travel")) return { occasions: ["travel", "event", "weekend"], preferStructure: "relaxed", preferOuter: true };
+  if (l.includes("Student")) return { occasions: ["everyday", "weekend", "casual"], preferStructure: "relaxed", preferOuter: false };
+  return { occasions: [], preferStructure: null, preferOuter: null };
+}
+
+function fitSignals(fit) {
+  const f = (fit || "").toLowerCase();
+  if (f.includes("fitted") || f.includes("tailored")) return { structure: "tailored", preferBase: true, preferOuter: true };
+  if (f.includes("structured") || f.includes("true to size")) return { structure: "structured", preferBase: true, preferOuter: true };
+  if (f.includes("oversized")) return { structure: "relaxed", preferBase: false, preferOuter: false };
+  if (f.includes("relaxed")) return { structure: "relaxed", preferBase: false, preferOuter: null };
+  return { structure: null, preferBase: null, preferOuter: null };
+}
+
 function recipeItems(recipe) {
   return [recipe.outer, recipe.top, recipe.bottom, recipe.shoe, recipe.acc].filter(Boolean);
+}
+
+/** Pick base vs alt using palette AND fit/archetype structure — not color alone. */
+function tuneItemsToProfile(itemKeys, profile) {
+  const palette = profile?.palette || [];
+  const avoid = profile?.avoid || [];
+  const vibes = archetypeVibes(profile?.archetype);
+  const fit = fitSignals(profile?.fit);
+  const life = lifestyleSignals(profile?.lifestyle);
+  const wantTailored = fit.structure === "tailored" || fit.structure === "structured"
+    || life.preferStructure === "tailored"
+    || vibes.some((v) => ["quiet", "classic", "polished", "minimal"].includes(v));
+  const wantRelaxed = fit.structure === "relaxed"
+    || life.preferStructure === "relaxed"
+    || vibes.some((v) => ["relaxed", "warm", "romantic", "bold"].includes(v));
+
+  return itemKeys.map((key) => {
+    const base = ALT_MAP_REV[key] || key;
+    const alt = ALT_MAP[base];
+    if (!alt) return key;
+    let scoreBase = itemPaletteScore(base, palette, avoid);
+    let scoreAlt = itemPaletteScore(alt, palette, avoid);
+    // Structure: base catalog pieces read more tailored; alts more relaxed/wide
+    if (wantTailored && !wantRelaxed) scoreBase += 10;
+    if (wantRelaxed && !wantTailored) scoreAlt += 10;
+    if (wantTailored && wantRelaxed) {
+      // Mixed signals — lean fit first
+      if (fit.preferBase === true) scoreBase += 6;
+      if (fit.preferBase === false) scoreAlt += 6;
+    }
+    if (vibes.includes("bold") && (base === "trouser" || base === "shoe" || base === "shirt")) scoreAlt += 4;
+    if (vibes.includes("romantic") && (base === "shirt" || base === "scarf")) scoreAlt += 3;
+    if (vibes.includes("quiet") && base === "blazer") scoreBase += 5;
+    return scoreAlt > scoreBase ? alt : base;
+  });
 }
 
 function hashSeed(str) {
@@ -801,52 +976,53 @@ function hashSeed(str) {
   return Math.abs(h);
 }
 
-function buildRationale(recipe, occasionIds, lang, palette = []) {
+function buildRationale(recipe, occasionIds, lang, profile = {}) {
+  const palette = profile?.palette || [];
   const hasBlazer = !!recipe.outer;
-  const acc = recipe.acc;
   const primary = occasionIds[0] || "everyday";
-  const colorHint = (palette || []).slice(0, 2).join(", ");
+  const colorHint = palette.slice(0, 2).join(", ");
+  const arch = normalizeArchetype(profile?.archetype) || "your style";
+  const fit = profile?.fit || "";
+  const fitBit = fit ? ` ${fit.toLowerCase()} fit,` : "";
   const en = {
     wedding: hasBlazer
-      ? `A tailored outer layer keeps this occasion-ready without feeling stiff — kept in your ${colorHint || "chosen"} palette, with clean shirt, grounded trousers, and a belt to finish.`
-      : `Polished pieces in your ${colorHint || "chosen"} colors for a formal moment — nothing costume-y, just considered.`,
-    dinner: acc === "scarf"
-      ? `Smart, not stiff — a crisp top and tailored trouser for dinner in your ${colorHint || "palette"} tones, with a scarf if the room runs cool.`
-      : `Evening-ready with clean lines in your ${colorHint || "chosen"} colors — elevated enough for dinner, easy enough to wear.`,
+      ? `Built for your ${arch} profile —${fitBit} a tailored outer layer in ${colorHint || "your palette"}, clean shirt, and trousers that hold the line.`
+      : `For your ${arch} taste — polished pieces in ${colorHint || "your colors"} without going costume.`,
+    dinner: `Dialed to your ${arch} DNA —${fitBit} evening-ready in ${colorHint || "your palette"}, finished so it feels intentional.`,
     work: hasBlazer
-      ? `Client-ready tailoring in your ${colorHint || "palette"}: structured outer layer, crisp top, and trousers that hold a sharp line.`
-      : `Desk-to-dinner ease in your ${colorHint || "chosen"} colors — polished basics that read intentional.`,
-    travel: `Travel-smart layering in your ${colorHint || "palette"} — pieces that move and still look put together. Sunglasses for the glare.`,
-    weekend: `Weekend ease with intention — relaxed proportions in your ${colorHint || "chosen"} colors, finished so it never looks unfinished.`,
-    event: `Celebration-ready polish in your ${colorHint || "palette"} — a clear silhouette and one strong finishing piece.`,
-    everyday: `A quiet everyday edit built around ${colorHint || "your palette"} — clean lines, nothing shouting, easy to live in.`,
-    formal: `Formal without the stiffness — tailored pieces in your ${colorHint || "chosen"} colors with a refined finish.`,
-    evening: `Evening polish in your ${colorHint || "palette"} — elevated, wearable, and ready for low light.`,
-    casual: `Casual with a point of view — easy pieces in your ${colorHint || "chosen"} colors, finished so you look considered.`,
+      ? `Client-ready for how you actually dress (${arch}) —${fitBit} structured layers in ${colorHint || "your palette"}.`
+      : `Work-appropriate for your ${arch} style —${fitBit} elevated basics in ${colorHint || "your colors"}.`,
+    travel: `Travel-smart for your ${arch} wardrobe — pieces in ${colorHint || "your palette"} that move and still look put together.`,
+    weekend: `Weekend ease matched to your ${arch} answers —${fitBit} relaxed intention in ${colorHint || "your colors"}.`,
+    event: `Celebration polish for a ${arch} dresser —${fitBit} clear silhouette in ${colorHint || "your palette"}.`,
+    everyday: `An everyday edit from your profile (${arch}) —${fitBit} built around ${colorHint || "your palette"}, nothing shouting.`,
+    formal: `Formal without stiffness — aligned to your ${arch} choices and ${colorHint || "chosen"} colors.`,
+    evening: `Evening polish for your ${arch} style — ${colorHint || "your palette"}, wearable in low light.`,
+    casual: `Casual with your point of view (${arch}) — easy pieces in ${colorHint || "your colors"}.`,
   };
   const es = {
-    wedding: `Una capa sastre en tu paleta (${colorHint || "elegida"}) lo deja listo para la ocasión sin rigidez.`,
-    dinner: `Elegante, sin rigidez — tonos de tu paleta (${colorHint || "elegida"}) para cenar.`,
-    work: `Sastrería lista para cliente en tu paleta (${colorHint || "elegida"}).`,
-    travel: `Capas para viajar en tu paleta (${colorHint || "elegida"}).`,
-    weekend: `Fin de semana con intención en tus colores (${colorHint || "elegidos"}).`,
-    event: `Brillo de celebración en tu paleta (${colorHint || "elegida"}).`,
-    everyday: `Un edit diario alrededor de ${colorHint || "tu paleta"}.`,
-    formal: `Formal sin rigidez en tus colores (${colorHint || "elegidos"}).`,
-    evening: `Brillo de noche en tu paleta (${colorHint || "elegida"}).`,
-    casual: `Casual con criterio en tus colores (${colorHint || "elegidos"}).`,
+    wedding: `Según tu perfil ${arch} — capa sastre en ${colorHint || "tu paleta"}.`,
+    dinner: `Ajustado a tu estilo ${arch} — listo para la noche en ${colorHint || "tu paleta"}.`,
+    work: `Listo para el trabajo según tu perfil ${arch} — ${colorHint || "tu paleta"}.`,
+    travel: `Viaje inteligente para tu estilo ${arch} — ${colorHint || "tu paleta"}.`,
+    weekend: `Fin de semana según tus respuestas (${arch}) — ${colorHint || "tus colores"}.`,
+    event: `Brillo de celebración para un estilo ${arch} — ${colorHint || "tu paleta"}.`,
+    everyday: `Edit diario desde tu perfil (${arch}) — alrededor de ${colorHint || "tu paleta"}.`,
+    formal: `Formal sin rigidez — alineado a tu ${arch} y ${colorHint || "tus colores"}.`,
+    evening: `Noche según tu estilo ${arch} — ${colorHint || "tu paleta"}.`,
+    casual: `Casual con tu criterio (${arch}) — ${colorHint || "tus colores"}.`,
   };
   const fr = {
-    wedding: `Une couche tailleur dans votre palette (${colorHint || "choisie"}) pour l'occasion, sans rigidité.`,
-    dinner: `Chic, sans raideur — vos tons (${colorHint || "choisis"}) pour dîner.`,
-    work: `Tailleur prêt pour le client dans votre palette (${colorHint || "choisie"}).`,
-    travel: `Superpositions voyage dans votre palette (${colorHint || "choisie"}).`,
-    weekend: `Week-end intentionnel dans vos couleurs (${colorHint || "choisies"}).`,
-    event: `Éclat de célébration dans votre palette (${colorHint || "choisie"}).`,
-    everyday: `Un edit quotidien autour de ${colorHint || "votre palette"}.`,
-    formal: `Formel sans rigidité dans vos couleurs (${colorHint || "choisies"}).`,
-    evening: `Éclat du soir dans votre palette (${colorHint || "choisie"}).`,
-    casual: `Casual avec un point de vue dans vos couleurs (${colorHint || "choisies"}).`,
+    wedding: `Selon votre profil ${arch} — couche tailleur dans ${colorHint || "votre palette"}.`,
+    dinner: `Calé sur votre style ${arch} — prêt pour le soir dans ${colorHint || "votre palette"}.`,
+    work: `Prêt pour le bureau selon votre profil ${arch} — ${colorHint || "votre palette"}.`,
+    travel: `Voyage malin pour votre style ${arch} — ${colorHint || "votre palette"}.`,
+    weekend: `Week-end selon vos réponses (${arch}) — ${colorHint || "vos couleurs"}.`,
+    event: `Éclat de célébration pour un style ${arch} — ${colorHint || "votre palette"}.`,
+    everyday: `Edit quotidien depuis votre profil (${arch}) — autour de ${colorHint || "votre palette"}.`,
+    formal: `Formel sans rigidité — aligné sur votre ${arch} et ${colorHint || "vos couleurs"}.`,
+    evening: `Soir selon votre style ${arch} — ${colorHint || "votre palette"}.`,
+    casual: `Casual avec votre point de vue (${arch}) — ${colorHint || "vos couleurs"}.`,
   };
   const table = lang === "es" ? es : lang === "fr" ? fr : en;
   return table[primary] || table.everyday;
@@ -858,47 +1034,114 @@ function composeOutfits(prompt, profile, lang = "en", count = 3) {
   stylistTurn += 1;
   const promptOccasions = detectOccasions(prompt);
   const profileOccasions = profileOccasionIds(profile);
-  const occasions = [...new Set([...promptOccasions, ...profileOccasions])];
+  const life = lifestyleSignals(profile?.lifestyle);
+  const fit = fitSignals(profile?.fit);
+  const occasions = [...new Set([...promptOccasions, ...profileOccasions, ...life.occasions])];
   if (!occasions.length) occasions.push("everyday");
-  const vibes = archetypeVibes(profile?.archetype);
+  const arch = normalizeArchetype(profile?.archetype);
+  const vibes = archetypeVibes(arch);
   const palette = profile?.palette || [];
   const avoid = profile?.avoid || [];
-  const seed = hashSeed(`${prompt}|${profile?.archetype}|${palette.join(",")}|${stylistTurn}`);
+  const budget = profile?.budget || "balanced";
+  // Seed from full profile so different quiz answers shuffle differently
+  const seed = hashSeed([
+    prompt,
+    arch,
+    profile?.fit,
+    profile?.lifestyle,
+    budget,
+    (profileOccasions || []).join(","),
+    palette.join(","),
+    (avoid || []).join(","),
+    stylistTurn,
+  ].join("|"));
 
   const scored = OUTFIT_RECIPES.map((recipe, i) => {
     let items = recipeItems(recipe);
-    items = tuneItemsToPalette(items, palette, avoid);
-    let score = (seed + i * 17) % 5; // light shuffle
-    for (const o of recipe.occasions) {
-      if (promptOccasions.includes(o)) score += 12;
-      if (profileOccasions.includes(o)) score += 6;
-      if (occasions.includes(o)) score += 2;
+    items = tuneItemsToProfile(items, profile);
+    let score = (seed + i * 31) % 7; // light shuffle only
+
+    // --- Archetype (strongest style signal) ---
+    const recipeArch = (recipe.archetypes || []).map(normalizeArchetype);
+    if (arch && recipeArch.includes(arch)) score += 40;
+    else if (arch && recipeArch.some((a) => a.split(" ")[0] === arch.split(" ")[0])) score += 18;
+    else score -= 8;
+    for (const v of recipe.vibe || []) {
+      if (vibes.includes(v)) score += 8;
+      else score -= 2;
     }
-    for (const v of recipe.vibe) {
-      if (vibes.includes(v)) score += 5;
+
+    // --- Lifestyle ---
+    const recipeLife = recipe.lifestyles || [];
+    if (profile?.lifestyle && recipeLife.includes(profile.lifestyle)) score += 28;
+    else if (profile?.lifestyle) score -= 4;
+    for (const o of life.occasions) {
+      if ((recipe.occasions || []).includes(o)) score += 10;
     }
-    // Palette precision — dominant signal so colors match what the user chose
-    score += outfitPaletteScore(items, palette, avoid);
-    const fit = (profile?.fit || "").toLowerCase();
-    if (fit.includes("fitted") && items.includes("blazer")) score += 3;
-    if (fit.includes("oversized") && (items.includes("blazerAlt") || !items.some((k) => k === "blazer" || k === "blazerAlt"))) score += 3;
-    if (fit.includes("relaxed") && (items.includes("blazerAlt") || !items.includes("blazer"))) score += 2;
+
+    // --- Fit / structure ---
+    if (fit.structure && recipe.structure === fit.structure) score += 22;
+    else if (fit.structure === "tailored" && recipe.structure === "structured") score += 14;
+    else if (fit.structure === "structured" && recipe.structure === "tailored") score += 14;
+    else if (fit.structure && recipe.structure && fit.structure !== recipe.structure) score -= 12;
+
+    const hasOuter = items.some((k) => familyOfKey(k) === "blazer");
+    if (fit.preferOuter === true && hasOuter) score += 10;
+    if (fit.preferOuter === false && !hasOuter) score += 10;
+    if (fit.preferOuter === true && !hasOuter) score -= 6;
+    if (life.preferOuter === true && hasOuter) score += 6;
+    if (life.preferOuter === false && !hasOuter) score += 6;
+
+    // Prefer base vs alt pieces per fit
+    const altCount = items.filter((k) => ALT_MAP_REV[k]).length;
+    if (fit.preferBase === true) score += Math.max(0, 4 - altCount) * 3;
+    if (fit.preferBase === false) score += altCount * 3;
+
+    // --- Occasions (prompt beats profile) ---
+    for (const o of recipe.occasions || []) {
+      if (promptOccasions.includes(o)) score += 24;
+      else if (profileOccasions.includes(o)) score += 14;
+      else if (occasions.includes(o)) score += 4;
+    }
+    // Penalize formal recipes for casual prompts and vice versa
+    if (promptOccasions.includes("weekend") || promptOccasions.includes("everyday")) {
+      if ((recipe.occasions || []).includes("wedding") || (recipe.occasions || []).includes("formal")) score -= 10;
+    }
+    if (promptOccasions.includes("wedding") || promptOccasions.includes("formal")) {
+      if (!hasOuter) score -= 8;
+    }
+
+    // --- Palette (important, but capped so it can't erase style) ---
+    const paletteScore = outfitPaletteScore(items, palette, avoid);
+    score += Math.min(24, paletteScore);
+
+    // --- Budget ---
+    if (budget === "elevated" && hasOuter) score += 8;
+    if (budget === "elevated" && items.some((k) => familyOfKey(k) === "scarf")) score += 4;
+    if (budget === "considered" && !hasOuter) score += 6;
+    if (budget === "considered" && hasOuter) score -= 2;
+    if (budget === "mixed") score += (seed + i) % 5;
+
     return { recipe, score, items };
   }).sort((a, b) => b.score - a.score);
 
   const picked = [];
   const usedSigs = new Set();
+  const usedRecipeIds = new Set();
   for (const row of scored) {
     const sig = outfitSignature(row.items);
     const core = row.items.filter((k) => !ACCESSORY_KEYS.has(k)).join("+");
-    if (usedSigs.has(sig) || usedSigs.has(`core:${core}`)) continue;
+    if (usedSigs.has(sig) || usedSigs.has(`core:${core}`) || usedRecipeIds.has(row.recipe.id)) continue;
     usedSigs.add(sig);
     usedSigs.add(`core:${core}`);
+    usedRecipeIds.add(row.recipe.id);
     picked.push({
       id: `${row.recipe.id}-${stylistTurn}-${picked.length}`,
       option: picked.length + 1,
       items: row.items,
-      rationale: buildRationale(row.recipe, occasions, lang, palette),
+      rationale: buildRationale(row.recipe, occasions, lang, profile),
+      recipeId: row.recipe.id,
+      score: row.score,
     });
     if (picked.length >= count) break;
   }
@@ -909,7 +1152,8 @@ function composeOutfits(prompt, profile, lang = "en", count = 3) {
       id: `${row.recipe.id}-fill-${picked.length}`,
       option: picked.length + 1,
       items: [...row.items],
-      rationale: buildRationale(row.recipe, occasions, lang, palette),
+      rationale: buildRationale(row.recipe, occasions, lang, profile),
+      recipeId: row.recipe.id,
     });
   }
   return picked;
@@ -1144,6 +1388,7 @@ const DEFAULT_PROFILE = {
   audience: "Ladies",
   archetype: "Quiet Tailored",
   fit: "Fitted & tailored",
+  lifestyle: "Office / client-facing",
   palette: ["Olive", "Ivory / Cream", "Black", "Camel / Tan"],
   avoid: [],
   budget: "balanced",
@@ -1940,6 +2185,7 @@ function ProfileScreen({ profile, onToggleFavoriteStore }) {
     [t("dressingForLabel"), tOpt(profile.audience || DEFAULT_PROFILE.audience)],
     [t("styleArchetypeLabel"), tOpt(profile.archetype)],
     [t("fitPreferenceLabel"), tOpt(profile.fit)],
+    [t("lifestyleLabel"), tOpt(profile.lifestyle || DEFAULT_PROFILE.lifestyle)],
     [t("paletteLabel"), (profile.palette || []).map(tOpt).join(", ")],
     [t("colorsToAvoidLabel"), (profile.avoid || []).map(tOpt).join(", ") || "—"],
     [t("budgetLabel"), budgetLabel],
@@ -2101,6 +2347,7 @@ export default function VestraPrototype() {
       audience,
       archetype: archetypeShortEn,
       fit: answers.fit,
+      lifestyle: answers.lifestyle || DEFAULT_PROFILE.lifestyle,
       palette: answers.palette.length ? answers.palette : DEFAULT_PROFILE.palette,
       avoid: answers.avoid || [],
       budget: answers.budget,
