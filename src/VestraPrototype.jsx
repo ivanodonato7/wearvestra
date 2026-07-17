@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, createContext, useContext } from "react";
 import { Home, MessageCircle, Bookmark, ShoppingBag, User, Send, RefreshCw, Check, Sparkles, ArrowLeft, ExternalLink, X } from "lucide-react";
+import { fetchStylistLooks } from "./stylistApi";
 
 // ==================== LANGUAGE / i18n ====================
 // A real backend barely needs any of this — Claude already answers fluently
@@ -57,6 +58,9 @@ const UI = {
     goodEvening: "Good evening", styleDnaLabel: "Style DNA", silhouettesWord: "silhouettes", budgetWord: "budget",
     askYourStylist: "Ask your stylist", askPlaceholder: "Tell your stylist what you need…",
     chipDressWedding: "Dress me for a wedding", chipWorkDinner: "Work dinner tonight", chipWeekendCasual: "Weekend, nothing fussy",
+    chipMoreCasual: "More casual", chipAddBlazer: "Add a blazer", chipUnder200: "Under $200 / piece", chipDifferentBelt: "Different belt",
+    refineLooks: "Refine these looks",
+    stylistLive: "Styled with your profile live.",
     yourStylist: "Your Stylist", chatEmpty: "Tell me what you're dressing for — an occasion, a mood, anything.",
     composing: "Composing your outfit…", revising: "Tweaking that piece…",
     chatInputPlaceholder: "e.g. wedding in June, or “different belt”",
@@ -136,6 +140,9 @@ const UI = {
     goodEvening: "Buenas tardes", styleDnaLabel: "ADN de Estilo", silhouettesWord: "siluetas", budgetWord: "presupuesto",
     askYourStylist: "Pregunta a tu estilista", askPlaceholder: "Dile a tu estilista qué necesitas…",
     chipDressWedding: "Vísteme para una boda", chipWorkDinner: "Cena de trabajo esta noche", chipWeekendCasual: "Fin de semana, sin complicaciones",
+    chipMoreCasual: "Más casual", chipAddBlazer: "Añade un blazer", chipUnder200: "Menos de $200 / prenda", chipDifferentBelt: "Otro cinturón",
+    refineLooks: "Afina estos looks",
+    stylistLive: "Estilizado en vivo con tu perfil.",
     yourStylist: "Tu Estilista", chatEmpty: "Cuéntame para qué te estás vistiendo — una ocasión, un estado de ánimo, lo que sea.",
     composing: "Componiendo tu look…", revising: "Ajustando esa prenda…",
     chatInputPlaceholder: "ej. boda en junio, o “otro cinturón”",
@@ -215,6 +222,9 @@ const UI = {
     goodEvening: "Bonsoir", styleDnaLabel: "ADN Style", silhouettesWord: "silhouettes", budgetWord: "budget",
     askYourStylist: "Demandez à votre styliste", askPlaceholder: "Dites à votre styliste ce dont vous avez besoin…",
     chipDressWedding: "Habillez-moi pour un mariage", chipWorkDinner: "Dîner professionnel ce soir", chipWeekendCasual: "Week-end, sans prise de tête",
+    chipMoreCasual: "Plus casual", chipAddBlazer: "Ajouter un blazer", chipUnder200: "Moins de 200 $ / pièce", chipDifferentBelt: "Autre ceinture",
+    refineLooks: "Affiner ces looks",
+    stylistLive: "Stylisé en direct selon votre profil.",
     yourStylist: "Votre Styliste", chatEmpty: "Dites-moi pour quoi vous vous habillez — une occasion, une humeur, n'importe quoi.",
     composing: "Composition de votre tenue…", revising: "Ajustement de cette pièce…",
     chatInputPlaceholder: "ex. mariage en juin, ou « autre ceinture »",
@@ -316,15 +326,19 @@ const FIT_SHORT = {
 };
 const PRODUCT_NAMES_I18N = {
   es: {
-    p1: "Blazer Sastre de Mezcla de Lana", p1b: "Blazer de Lino sin Estructura", p2: "Camisa de Algodón Impecable",
-    p2b: "Cuello Alto de Merino Fino", p3: "Pantalón Recto Sastre", p3b: "Pantalón de Lana de Pierna Ancha",
-    p4: "Zapato Derby de Piel", p4b: "Botín Chelsea de Ante", p5: "Bufanda de Lana Fina", p5b: "Pañuelo de Bolsillo de Cachemira",
+    p1: "Blazer Sastre de Mezcla de Lana", p1b: "Blazer de Lino sin Estructura", p1c: "Blazer Sastre Marino", p1d: "Blazer Sastre Negro",
+    p2: "Camisa de Algodón Impecable", p2b: "Cuello Alto de Merino Fino",
+    p3: "Pantalón Recto Sastre", p3b: "Pantalón de Lana de Pierna Ancha", p3c: "Pantalón Sastre Marino", p3d: "Pantalón Sastre Negro",
+    p4: "Zapato Derby de Piel", p4b: "Botín Chelsea de Ante", p4c: "Derby de Piel Negro",
+    p5: "Bufanda de Lana Fina", p5b: "Pañuelo de Bolsillo de Cachemira", p5c: "Bufanda de Lana Burdeos",
     p6: "Cinturón de Piel", p6b: "Cinturón de Piel Negro", p7: "Gafas de Sol de Acetato", p7b: "Gafas de Sol Negras",
   },
   fr: {
-    p1: "Blazer Cintré en Mélange de Laine", p1b: "Blazer en Lin Déstructuré", p2: "Chemise en Coton Impeccable",
-    p2b: "Col Roulé en Mérinos Fin", p3: "Pantalon Droit Tailleur", p3b: "Pantalon en Laine Large",
-    p4: "Chaussure Derby en Cuir", p4b: "Boot Chelsea en Daim", p5: "Écharpe en Laine Fine", p5b: "Pochette en Cachemire",
+    p1: "Blazer Cintré en Mélange de Laine", p1b: "Blazer en Lin Déstructuré", p1c: "Blazer Cintré Marine", p1d: "Blazer Cintré Noir",
+    p2: "Chemise en Coton Impeccable", p2b: "Col Roulé en Mérinos Fin",
+    p3: "Pantalon Droit Tailleur", p3b: "Pantalon en Laine Large", p3c: "Pantalon Tailleur Marine", p3d: "Pantalon Tailleur Noir",
+    p4: "Chaussure Derby en Cuir", p4b: "Boot Chelsea en Daim", p4c: "Derby en Cuir Noir",
+    p5: "Écharpe en Laine Fine", p5b: "Pochette en Cachemire", p5c: "Écharpe en Laine Bordeaux",
     p6: "Ceinture en Cuir", p6b: "Ceinture en Cuir Noir", p7: "Lunettes de Soleil en Acétate", p7b: "Lunettes de Soleil Noires",
   },
 };
@@ -372,7 +386,7 @@ function LanguageSwitcher({ corner }) {
 }
 
 // ---------- Product catalog (mirrors the seed data in the real backend) ----------
-const ASSET_V = "9";
+const ASSET_V = "10";
 const assetUrl = (path) => `${path}?v=${ASSET_V}`;
 
 const GREEN_PALETTE = new Set(["Olive", "Forest Green"]);
@@ -381,14 +395,20 @@ const NEUTRAL_PALETTE = new Set(["Black", "Ivory / Cream", "White", "Grey / Char
 const CATALOG = {
   blazer: { key: "blazer", id: "p1", name: "Wool-Blend Tailored Blazer", price: 320, retailer: "Considered Studio", type: "blazer", color: "#3E4228", paletteTags: ["Olive", "Forest Green"], image: assetUrl("/products/blazer.jpg"), searchQuery: "olive green wool tailored blazer", searchNoun: "wool tailored blazer" },
   blazerAlt: { key: "blazerAlt", id: "p1b", name: "Unstructured Linen Blazer", price: 265, retailer: "North & Field", type: "blazer", color: "#cbb994", paletteTags: ["Sand / Beige", "Camel / Tan", "Ivory / Cream"], image: assetUrl("/products/blazer-alt.jpg"), searchQuery: "sand beige unstructured linen blazer", searchNoun: "unstructured linen blazer" },
+  blazerNavy: { key: "blazerNavy", id: "p1c", name: "Navy Wool Tailored Blazer", price: 310, retailer: "Considered Studio", type: "blazer", color: "#1f2a44", paletteTags: ["Navy"], image: assetUrl("/products/blazer-navy.jpg"), searchQuery: "navy wool tailored blazer", searchNoun: "wool tailored blazer" },
+  blazerBlack: { key: "blazerBlack", id: "p1d", name: "Black Wool Tailored Blazer", price: 315, retailer: "Considered Studio", type: "blazer", color: "#161616", paletteTags: ["Black"], image: assetUrl("/products/blazer-black.jpg"), searchQuery: "black wool tailored blazer", searchNoun: "wool tailored blazer" },
   shirt: { key: "shirt", id: "p2", name: "Crisp Cotton Shirt", price: 95, retailer: "Considered Studio", type: "shirt", color: "#F5F2E9", paletteTags: ["Ivory / Cream", "White"], image: assetUrl("/products/shirt.jpg"), searchQuery: "ivory crisp cotton dress shirt", searchNoun: "crisp cotton dress shirt" },
   shirtAlt: { key: "shirtAlt", id: "p2b", name: "Fine Merino Turtleneck", price: 110, retailer: "North & Field", type: "shirt", color: "#4a4a48", paletteTags: ["Grey / Charcoal", "Black"], image: assetUrl("/products/shirt-alt.jpg"), searchQuery: "charcoal fine merino turtleneck sweater", searchNoun: "fine merino turtleneck sweater" },
   trouser: { key: "trouser", id: "p3", name: "Tailored Straight Trouser", price: 140, retailer: "Considered Studio", type: "trouser", color: "#3E4228", paletteTags: ["Olive", "Forest Green"], image: assetUrl("/products/trouser.jpg"), searchQuery: "olive tailored straight leg trousers", searchNoun: "tailored straight leg trousers" },
   trouserAlt: { key: "trouserAlt", id: "p3b", name: "Wide-Leg Wool Trouser", price: 165, retailer: "Considered Studio", type: "trouser", color: "#6b6b63", paletteTags: ["Grey / Charcoal"], image: assetUrl("/products/trouser-alt.jpg"), searchQuery: "grey wide leg wool trousers", searchNoun: "wide leg wool trousers" },
+  trouserNavy: { key: "trouserNavy", id: "p3c", name: "Navy Tailored Trouser", price: 145, retailer: "Considered Studio", type: "trouser", color: "#1f2a44", paletteTags: ["Navy"], image: assetUrl("/products/trouser-navy.jpg"), searchQuery: "navy tailored dress trousers", searchNoun: "tailored dress trousers" },
+  trouserBlack: { key: "trouserBlack", id: "p3d", name: "Black Tailored Trouser", price: 145, retailer: "Considered Studio", type: "trouser", color: "#161616", paletteTags: ["Black"], image: assetUrl("/products/trouser-black.jpg"), searchQuery: "black tailored dress trousers", searchNoun: "tailored dress trousers" },
   shoe: { key: "shoe", id: "p4", name: "Leather Derby Shoe", price: 210, retailer: "Aldern & Co.", type: "shoe", color: "#6b3f22", paletteTags: ["Camel / Tan", "Rust / Terracotta"], image: assetUrl("/products/shoe.jpg"), searchQuery: "brown leather derby dress shoes", searchNoun: "leather derby dress shoes" },
   shoeAlt: { key: "shoeAlt", id: "p4b", name: "Suede Chelsea Boot", price: 245, retailer: "Aldern & Co.", type: "shoe", color: "#4a3527", paletteTags: ["Camel / Tan", "Black"], image: assetUrl("/products/shoe-alt.jpg"), searchQuery: "dark brown suede chelsea boots", searchNoun: "suede chelsea boots" },
+  shoeBlack: { key: "shoeBlack", id: "p4c", name: "Black Leather Derby", price: 220, retailer: "Aldern & Co.", type: "shoe", color: "#161616", paletteTags: ["Black"], image: assetUrl("/products/shoe-black.jpg"), searchQuery: "black leather derby dress shoes", searchNoun: "leather derby dress shoes" },
   scarf: { key: "scarf", id: "p5", name: "Fine Wool Scarf", price: 85, retailer: "North & Field", type: "accessory", color: "#b08a5c", paletteTags: ["Camel / Tan"], image: assetUrl("/products/scarf.jpg"), searchQuery: "camel tan fine wool scarf", searchNoun: "fine wool scarf" },
   scarfAlt: { key: "scarfAlt", id: "p5b", name: "Cashmere Pocket Square", price: 65, retailer: "Aldern & Co.", type: "accessory", color: "#C6A567", paletteTags: ["Bold Color", "Camel / Tan"], image: assetUrl("/products/scarf-alt.jpg"), searchQuery: "gold cashmere pocket square", searchNoun: "cashmere pocket square" },
+  scarfBurgundy: { key: "scarfBurgundy", id: "p5c", name: "Burgundy Wool Scarf", price: 88, retailer: "North & Field", type: "accessory", color: "#5c1f2e", paletteTags: ["Burgundy"], image: assetUrl("/products/scarf-burgundy.jpg"), searchQuery: "burgundy wool scarf", searchNoun: "wool scarf" },
   belt: { key: "belt", id: "p6", name: "Leather Belt", price: 95, retailer: "Aldern & Co.", type: "accessory", color: "#6b3f22", paletteTags: ["Camel / Tan", "Rust / Terracotta"], image: assetUrl("/products/belt.jpg"), searchQuery: "brown leather dress belt", searchNoun: "leather dress belt" },
   beltAlt: { key: "beltAlt", id: "p6b", name: "Black Leather Belt", price: 90, retailer: "Aldern & Co.", type: "accessory", color: "#161616", paletteTags: ["Black"], image: assetUrl("/products/belt-alt.jpg"), searchQuery: "black leather dress belt", searchNoun: "leather dress belt" },
   sunglasses: { key: "sunglasses", id: "p7", name: "Acetate Sunglasses", price: 145, retailer: "North & Field", type: "accessory", color: "#8B5A2B", paletteTags: ["Camel / Tan", "Rust / Terracotta"], image: assetUrl("/products/sunglasses.jpg"), searchQuery: "tortoise acetate sunglasses", searchNoun: "acetate sunglasses" },
@@ -458,21 +478,15 @@ function outfitPaletteScore(itemKeys, palette = [], avoid = []) {
 
 /** Prefer the alt/base variant that best matches the user's palette. */
 function bestVariantForPalette(baseKey, palette = [], avoid = []) {
-  const alt = ALT_MAP[baseKey] || ALT_MAP_REV[baseKey];
-  if (!alt) return baseKey;
-  const a = itemPaletteScore(baseKey, palette, avoid);
-  const b = itemPaletteScore(alt, palette, avoid);
-  return b > a ? alt : baseKey;
+  const fam = familyOfKey(baseKey) || baseKey;
+  return bestVariantInFamily(fam, palette, avoid);
 }
 
 function tuneItemsToPalette(itemKeys, palette = [], avoid = []) {
   return itemKeys.map((key) => {
-    const base = ALT_MAP_REV[key] || key;
-    // Keep accessory family, but pick best color variant
-    if (ACCESSORY_KEYS.has(key) || ACCESSORY_KEYS.has(base)) {
-      return bestVariantForPalette(ALT_MAP[base] ? base : key, palette, avoid);
-    }
-    return bestVariantForPalette(base, palette, avoid);
+    const fam = familyOfKey(key);
+    if (!fam) return key;
+    return bestVariantInFamily(fam, palette, avoid);
   });
 }
 
@@ -583,15 +597,56 @@ const ALT_MAP = {
 };
 const ALT_MAP_REV = Object.fromEntries(Object.entries(ALT_MAP).map(([k, v]) => [v, k]));
 
-const ITEM_FAMILIES = {
-  blazer: ["blazer", "blazerAlt"],
+/** All color/cut variants per garment family — palette picker chooses among these. */
+const ITEM_FAMILY_VARIANTS = {
+  blazer: ["blazer", "blazerAlt", "blazerNavy", "blazerBlack"],
   shirt: ["shirt", "shirtAlt"],
-  trouser: ["trouser", "trouserAlt"],
-  shoe: ["shoe", "shoeAlt"],
-  scarf: ["scarf", "scarfAlt"],
+  trouser: ["trouser", "trouserAlt", "trouserNavy", "trouserBlack"],
+  shoe: ["shoe", "shoeAlt", "shoeBlack"],
+  scarf: ["scarf", "scarfAlt", "scarfBurgundy"],
   belt: ["belt", "beltAlt"],
   sunglasses: ["sunglasses", "sunglassesAlt"],
 };
+const KEY_TO_FAMILY = Object.fromEntries(
+  Object.entries(ITEM_FAMILY_VARIANTS).flatMap(([fam, keys]) => keys.map((k) => [k, fam]))
+);
+
+function familyOfKey(key) {
+  if (!key) return null;
+  return KEY_TO_FAMILY[key] || (ITEM_FAMILY_VARIANTS[key] ? key : null);
+}
+
+function variantsForKey(key) {
+  const fam = familyOfKey(key);
+  return fam ? ITEM_FAMILY_VARIANTS[fam] : [key];
+}
+
+/** Best catalog variant for a family given the user's palette. */
+function bestVariantInFamily(family, palette = [], avoid = [], structureHint = null) {
+  const variants = ITEM_FAMILY_VARIANTS[family] || [];
+  if (!variants.length) return family;
+  let best = variants[0];
+  let bestScore = -Infinity;
+  for (const v of variants) {
+    let s = itemPaletteScore(v, palette, avoid);
+    // Prefer structured (non-Alt linen/wide) when tailored
+    if (structureHint === "tailored" && !String(v).includes("Alt")) s += 4;
+    if (structureHint === "relaxed" && String(v).includes("Alt")) s += 4;
+    if (s > bestScore) {
+      bestScore = s;
+      best = v;
+    }
+  }
+  return best;
+}
+
+function nextVariantInFamily(currentKey) {
+  const variants = variantsForKey(currentKey);
+  const idx = variants.indexOf(currentKey);
+  if (idx < 0) return variants[0] || currentKey;
+  return variants[(idx + 1) % variants.length];
+}
+
 const ACCESSORY_FAMILIES = ["belt", "scarf", "sunglasses"];
 const ITEM_LABELS = {
   en: { blazer: "blazer", shirt: "shirt", trouser: "trousers", shoe: "shoes", belt: "belt", scarf: "scarf", sunglasses: "sunglasses" },
@@ -608,19 +663,13 @@ const ITEM_KEYWORDS = {
   sunglasses: ["sunglass", "sunglasses", "glasses", "gafas", "lunettes"],
 };
 
-function familyOfKey(key) {
-  if (!key) return null;
-  if (ITEM_FAMILIES[key]) return key;
-  return ALT_MAP_REV[key] || null;
-}
-
 /** Detect “change the belt / different shirt / everything but the shoes” style requests. */
 function detectRevisionRequest(text) {
   const raw = (text || "").trim();
   const lower = raw.toLowerCase();
   if (!lower) return null;
 
-  const revisionCue = /\b(different|another|change|swap|replace|instead|not the|don't like|dont like|hate|wrong|update|tweak|switch|new|other|remove|drop|lose|sin el|sin la|cambia|cambiar|otro|otra|diferente|no me gusta|quita|quitar|changer|autre|différent|different|remplace|remplacer|pas le|pas la|enlever|retire)\b/i.test(lower)
+  const revisionCue = /\b(different|another|change|swap|replace|instead|not the|don't like|dont like|hate|wrong|update|tweak|switch|new|other|remove|drop|lose|add|sin el|sin la|cambia|cambiar|otro|otra|diferente|no me gusta|quita|quitar|añade|anade|changer|autre|différent|different|remplace|remplacer|pas le|pas la|enlever|retire|ajouter)\b/i.test(lower)
     || /\b(everything|rest|else).{0,40}\b(but|except|aside|menos|sauf)\b/i.test(lower)
     || /\b(but|except|menos|sauf).{0,20}\b(the|el|la|le|les)?\s*(belt|shirt|blazer|trouser|pant|shoe|scarf|sunglass|cintur|ceinture|camisa|chemise)/i.test(lower);
 
@@ -652,7 +701,7 @@ function otherAccessoryKey(currentFamily, items, palette, avoid, turn = 0) {
 }
 
 function reviseItemInList(items, family, { remove = false, turn = 0, palette = [], avoid = [] } = {}) {
-  const variants = ITEM_FAMILIES[family] || [];
+  const variants = ITEM_FAMILY_VARIANTS[family] || [];
   const idx = items.findIndex((k) => variants.includes(k));
   const next = [...items];
 
@@ -668,29 +717,18 @@ function reviseItemInList(items, family, { remove = false, turn = 0, palette = [
   }
 
   if (idx >= 0) {
-    const current = next[idx];
-    const alt = ALT_MAP[current] || ALT_MAP_REV[current];
-    if (alt && turn % 2 === 0) {
-      next[idx] = alt;
-      return next;
-    }
-    // Second ask (or no alt): for accessories, swap to a different accessory type
-    if (ACCESSORY_FAMILIES.includes(family)) {
+    // Cycle through color variants in the family
+    next[idx] = nextVariantInFamily(next[idx]);
+    // Every other ask on accessories: jump to a different accessory type
+    if (ACCESSORY_FAMILIES.includes(family) && turn % 3 === 2) {
       const other = otherAccessoryKey(family, items, palette, avoid, turn);
-      if (other) {
-        next[idx] = other;
-        return next;
-      }
-    }
-    if (alt) {
-      next[idx] = alt;
-      return next;
+      if (other) next[idx] = other;
     }
     return next;
   }
 
-  // Target not in outfit — add best palette variant (replace existing accessory if needed)
-  const addKey = bestVariantForPalette(family, palette, avoid);
+  // Target not in outfit — add best palette variant
+  const addKey = bestVariantInFamily(family, palette, avoid);
   if (ACCESSORY_FAMILIES.includes(family)) {
     const accIdx = next.findIndex((k) => ACCESSORY_FAMILIES.includes(familyOfKey(k)));
     if (accIdx >= 0) next[accIdx] = addKey;
@@ -955,45 +993,25 @@ function recipeItems(recipe) {
   return [recipe.outer, recipe.top, recipe.bottom, recipe.shoe, recipe.acc].filter(Boolean);
 }
 
-/** Pick base vs alt using palette first, then fit/archetype — never force green off-palette. */
+/** Pick the best color variant per family using palette first, then fit. */
 function tuneItemsToProfile(itemKeys, profile) {
   const palette = profile?.palette || [];
   const avoid = profile?.avoid || [];
-  const vibes = archetypeVibes(profile?.archetype);
   const fit = fitSignals(profile?.fit);
   const life = lifestyleSignals(profile?.lifestyle);
+  const vibes = archetypeVibes(profile?.archetype);
   const wantTailored = fit.structure === "tailored" || fit.structure === "structured"
     || life.preferStructure === "tailored"
     || vibes.some((v) => ["quiet", "classic", "polished", "minimal"].includes(v));
   const wantRelaxed = fit.structure === "relaxed"
     || life.preferStructure === "relaxed"
     || vibes.some((v) => ["relaxed", "warm", "romantic", "bold"].includes(v));
-  const banGreen = palette.length > 0 && !paletteWantsGreen(palette);
+  const structureHint = wantRelaxed && !wantTailored ? "relaxed" : wantTailored && !wantRelaxed ? "tailored" : fit.structure;
 
   return itemKeys.map((key) => {
-    const base = ALT_MAP_REV[key] || key;
-    const alt = ALT_MAP[base];
-    if (!alt) {
-      // Single variant — still reject green when banned by swapping accessory family later
-      return key;
-    }
-    let scoreBase = itemPaletteScore(base, palette, avoid);
-    let scoreAlt = itemPaletteScore(alt, palette, avoid);
-    if (banGreen && itemIsGreen(base)) scoreBase -= 80;
-    if (banGreen && itemIsGreen(alt)) scoreAlt -= 80;
-    // Structure is secondary to color
-    if (wantTailored && !wantRelaxed) scoreBase += 6;
-    if (wantRelaxed && !wantTailored) scoreAlt += 6;
-    if (wantTailored && wantRelaxed) {
-      if (fit.preferBase === true) scoreBase += 3;
-      if (fit.preferBase === false) scoreAlt += 3;
-    }
-    if (vibes.includes("bold") && (base === "trouser" || base === "shoe" || base === "shirt")) scoreAlt += 3;
-    if (vibes.includes("romantic") && (base === "shirt" || base === "scarf")) scoreAlt += 2;
-    if (vibes.includes("quiet") && base === "blazer" && !banGreen) scoreBase += 3;
-    // Black accessories when palette includes black
-    if (palette.includes("Black") && (base === "belt" || base === "sunglasses")) scoreAlt += 8;
-    return scoreAlt > scoreBase ? alt : base;
+    const fam = familyOfKey(key);
+    if (!fam) return key;
+    return bestVariantInFamily(fam, palette, avoid, structureHint);
   });
 }
 
@@ -1152,12 +1170,20 @@ function composeOutfits(prompt, profile, lang = "en", count = 3) {
       score += greenCount * 12;
     }
 
-    // --- Budget ---
+    // --- Budget / price cap from prompt ("under $200") ---
     if (budget === "elevated" && hasOuter) score += 8;
     if (budget === "elevated" && items.some((k) => familyOfKey(k) === "scarf")) score += 4;
     if (budget === "considered" && !hasOuter) score += 6;
     if (budget === "considered" && hasOuter) score -= 2;
     if (budget === "mixed") score += (seed + i) % 5;
+    const priceCap = (prompt || "").match(/under\s*\$?\s*(\d+)/i) || (prompt || "").match(/menos\s*de\s*\$?\s*(\d+)/i) || (prompt || "").match(/moins\s*de\s*(\d+)/i);
+    if (priceCap) {
+      const cap = Number(priceCap[1]);
+      const over = items.reduce((n, k) => n + ((CATALOG[k]?.price || 0) > cap ? 1 : 0), 0);
+      score -= over * 18;
+      const under = items.reduce((n, k) => n + ((CATALOG[k]?.price || 0) <= cap ? 1 : 0), 0);
+      score += under * 4;
+    }
 
     return { recipe, score, items };
   }).sort((a, b) => b.score - a.score);
@@ -1198,10 +1224,15 @@ function composeOutfits(prompt, profile, lang = "en", count = 3) {
 
 // AI-generated model photos keyed by gender + outfit signature (catalog keys, stable order)
 const MODEL_KEY_ORDER = [
-  "blazer", "blazerAlt", "shirt", "shirtAlt", "trouser", "trouserAlt",
-  "shoe", "shoeAlt", "scarf", "scarfAlt", "belt", "beltAlt", "sunglasses", "sunglassesAlt",
+  "blazer", "blazerAlt", "blazerNavy", "blazerBlack",
+  "shirt", "shirtAlt",
+  "trouser", "trouserAlt", "trouserNavy", "trouserBlack",
+  "shoe", "shoeAlt", "shoeBlack",
+  "scarf", "scarfAlt", "scarfBurgundy",
+  "belt", "beltAlt",
+  "sunglasses", "sunglassesAlt",
 ];
-const ACCESSORY_KEYS = new Set(["scarf", "scarfAlt", "belt", "beltAlt", "sunglasses", "sunglassesAlt"]);
+const ACCESSORY_KEYS = new Set(["scarf", "scarfAlt", "scarfBurgundy", "belt", "beltAlt", "sunglasses", "sunglassesAlt"]);
 function outfitSignature(itemKeys) {
   return [...itemKeys].sort((a, b) => MODEL_KEY_ORDER.indexOf(a) - MODEL_KEY_ORDER.indexOf(b)).join("+");
 }
@@ -1228,8 +1259,8 @@ function resolveModelImage(itemKeys, gender) {
   const sig = outfitSignature(itemKeys);
   if (map[sig]) return map[sig];
 
-  // Normalize alt keys to base family for fuzzy match (blazerAlt → blazer)
-  const family = (k) => ALT_MAP_REV[k] || k;
+  // Normalize keys to garment family for fuzzy match
+  const family = (k) => familyOfKey(k) || ALT_MAP_REV[k] || k;
   // Ignore accessories when matching model photos (models don't always wear them)
   const coreWant = itemKeys.filter((k) => !ACCESSORY_KEYS.has(k)).map(family);
   const want = new Set(coreWant);
@@ -2100,6 +2131,8 @@ function ChatScreen({ messages, onSend, input, setInput, onSwap, onSave, savedId
   const { t } = useLang();
   const endRef = useRef(null);
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, pending]);
+  const refineKeys = ["chipMoreCasual", "chipAddBlazer", "chipUnder200", "chipDifferentBelt"];
+  const hasLooks = messages.some((m) => m.outfits?.length || m.outfit);
 
   return (
     <div className="chat-wrap">
@@ -2150,6 +2183,16 @@ function ChatScreen({ messages, onSend, input, setInput, onSwap, onSave, savedId
           return <div key={i} className="bubble-assistant-text">{m.text}</div>;
         })}
         {pending && <div className="typing"><span className="dot" />{t("composing")}</div>}
+        {hasLooks && !pending && (
+          <div className="refine-block">
+            <div className="refine-label">{t("refineLooks")}</div>
+            <div className="chip-row">
+              {refineKeys.map((k) => (
+                <button key={k} type="button" className="chip" onClick={() => onSend(t(k))}>{t(k)}</button>
+              ))}
+            </div>
+          </div>
+        )}
         <div ref={endRef} />
       </div>
       <form className="chat-input-row" onSubmit={(e) => { e.preventDefault(); onSend(); }}>
@@ -2314,26 +2357,55 @@ function ProfileScreen({ profile, onToggleFavoriteStore }) {
 }
 
 // ==================== ROOT APP ====================
+const STORAGE_KEY = "vestra.profile.v1";
+
+function loadStoredState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
 export default function VestraPrototype() {
-  const [lang, setLang] = useState("en");
-  const [stage, setStage] = useState("welcome"); // welcome | signup | onboarding | reveal | occasion | app
+  const stored = typeof window !== "undefined" ? loadStoredState() : null;
+  const [lang, setLang] = useState(stored?.lang || "en");
+  const [stage, setStage] = useState(stored?.stage === "app" && stored?.profile?.name ? "app" : "welcome");
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState({ name: "", audience: null, lifestyle: null, archetype: null, fit: null, palette: [], avoid: [], budget: null, occasions: [], sizes: {} });
-  const [profile, setProfile] = useState(DEFAULT_PROFILE);
+  const [profile, setProfile] = useState(stored?.profile || DEFAULT_PROFILE);
 
-  const [tab, setTab] = useState("home");
-  const [messages, setMessages] = useState([]);
+  const [tab, setTab] = useState(stored?.tab || "home");
+  const [messages, setMessages] = useState(stored?.messages || []);
   const [input, setInput] = useState("");
   const [homeInput, setHomeInput] = useState("");
   const [pending, setPending] = useState(false);
   const [savedIds, setSavedIds] = useState(new Set());
-  const [savedOutfits, setSavedOutfits] = useState([]);
+  const [savedOutfits, setSavedOutfits] = useState(stored?.savedOutfits || []);
 
   const t = (key) => (UI[lang] && UI[lang][key]) || UI.en[key] || key;
   const tOpt = (value) => (OPTIONS_I18N[lang] && OPTIONS_I18N[lang][value]) || value;
   const tName = (item) => (PRODUCT_NAMES_I18N[lang] && PRODUCT_NAMES_I18N[lang][item.id]) || item.name;
 
-  function sendMessage(text, profileOverride) {
+  useEffect(() => {
+    try {
+      const payload = {
+        lang,
+        stage,
+        tab,
+        profile,
+        savedOutfits: savedOutfits.slice(-20),
+        messages: messages.slice(-30),
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    } catch {
+      /* ignore quota */
+    }
+  }, [lang, stage, tab, profile, savedOutfits, messages]);
+
+  async function sendMessage(text, profileOverride) {
     const finalText = text ?? input;
     if (!finalText.trim()) return;
     const activeProfile = profileOverride || profile;
@@ -2342,29 +2414,56 @@ export default function VestraPrototype() {
     setMessages((m) => [...m, { role: "user", text: finalText }]);
     setInput("");
     setPending(true);
-    setTimeout(() => {
-      if (revision && priorOutfits) {
-        const base = priorOutfits.outfits?.length
-          ? priorOutfits.outfits
-          : priorOutfits.outfit
-            ? [priorOutfits.outfit]
-            : [];
-        if (base.length) {
-          stylistTurn += 1;
-          const outfits = reviseOutfits(base, revision, activeProfile, lang);
-          const labels = ITEM_LABELS[lang] || ITEM_LABELS.en;
-          const itemLabel = revision.targets.map((f) => labels[f] || f).join(", ");
-          const introKey = revisionIntroKey(revision);
-          const intro = ((UI[lang] && UI[lang][introKey]) || UI.en[introKey] || "").replace("{item}", itemLabel);
-          setMessages((m) => [...m, { role: "assistant", text: intro, outfits, revision: true }]);
-          setPending(false);
-          return;
-        }
+
+    // Piece revisions stay local and instant
+    if (revision && priorOutfits) {
+      const base = priorOutfits.outfits?.length
+        ? priorOutfits.outfits
+        : priorOutfits.outfit
+          ? [priorOutfits.outfit]
+          : [];
+      if (base.length) {
+        await new Promise((r) => setTimeout(r, 450));
+        stylistTurn += 1;
+        const outfits = reviseOutfits(base, revision, activeProfile, lang);
+        const labels = ITEM_LABELS[lang] || ITEM_LABELS.en;
+        const itemLabel = revision.targets.map((f) => labels[f] || f).join(", ");
+        const introKey = revisionIntroKey(revision);
+        const intro = ((UI[lang] && UI[lang][introKey]) || UI.en[introKey] || "").replace("{item}", itemLabel);
+        setMessages((m) => [...m, { role: "assistant", text: intro, outfits, revision: true }]);
+        setPending(false);
+        return;
       }
-      const outfits = composeOutfits(finalText, activeProfile, lang, 3);
-      setMessages((m) => [...m, { role: "assistant", outfits }]);
-      setPending(false);
-    }, 700);
+    }
+
+    // Try live Claude stylist (Netlify function / custom endpoint), else local composer
+    const live = await fetchStylistLooks({
+      prompt: finalText,
+      profile: activeProfile,
+      lang,
+      catalogKeys: Object.keys(CATALOG),
+    });
+    if (live?.outfits?.length) {
+      const outfits = live.outfits.map((o, i) => ({
+        ...o,
+        option: o.option || i + 1,
+        items: (o.items || []).filter((k) => CATALOG[k]),
+      })).filter((o) => o.items.length >= 3);
+      if (outfits.length) {
+        setMessages((m) => [...m, {
+          role: "assistant",
+          text: live.source === "claude" ? t("stylistLive") : undefined,
+          outfits,
+        }]);
+        setPending(false);
+        return;
+      }
+    }
+
+    await new Promise((r) => setTimeout(r, 500));
+    const outfits = composeOutfits(finalText, activeProfile, lang, 3);
+    setMessages((m) => [...m, { role: "assistant", outfits }]);
+    setPending(false);
   }
 
   function handlePrompt(p) {
@@ -2374,8 +2473,18 @@ export default function VestraPrototype() {
   }
 
   function handleSwap(msgIndex, outfitIndex, key) {
-    const nextKey = ALT_MAP[key] || ALT_MAP_REV[key];
-    if (!nextKey) return;
+    const nextKey = nextVariantInFamily(key);
+    if (!nextKey || nextKey === key) {
+      // fall back to classic alt toggle
+      const fallback = ALT_MAP[key] || ALT_MAP_REV[key];
+      if (!fallback) return;
+      applyItemSwap(msgIndex, outfitIndex, key, fallback);
+      return;
+    }
+    applyItemSwap(msgIndex, outfitIndex, key, nextKey);
+  }
+
+  function applyItemSwap(msgIndex, outfitIndex, key, nextKey) {
     setMessages((m) =>
       m.map((msg, i) => {
         if (i !== msgIndex || msg.role !== "assistant") return msg;
@@ -2588,7 +2697,8 @@ export default function VestraPrototype() {
         .home-ask-row{ display:flex; gap:8px; align-items:center; margin-bottom:12px; }
         .home-ask-input{ flex:1; font-size:13px; background:#fff; border:1px solid #e6e0d2; border-radius:4px; padding:13px 14px; outline:none; font-family:'Inter',sans-serif; }
         .home-ask-input:focus{ border-color:#C6A567; box-shadow:0 0 0 2px rgba(198,165,103,0.25); }
-        .chip-row{ display:flex; flex-wrap:wrap; gap:8px; }
+        .refine-block{ padding:8px 4px 16px; }
+        .refine-label{ font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:#8b877a; margin-bottom:8px; }
         .chip{ font-size:11.5px; color:#5b5748; background:#fff; border:1px solid #e6e0d2; border-radius:999px; padding:8px 14px; cursor:pointer; font-family:'Inter',sans-serif; transition:all .2s; }
         .chip:hover{ border-color:#C6A567; color:#0B0B0C; }
 
@@ -2875,7 +2985,7 @@ export default function VestraPrototype() {
                   messages={messages}
                   input={input}
                   setInput={setInput}
-                  onSend={() => sendMessage()}
+                  onSend={(text) => sendMessage(text)}
                   onSwap={handleSwap}
                   onSave={handleSave}
                   savedIds={savedIds}

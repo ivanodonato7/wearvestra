@@ -32,6 +32,11 @@ npm run build
 # Publish the contents of dist/ to the gh-pages branch
 ```
 
+## Live Claude stylist (optional)
+
+On **Netlify**, set `ANTHROPIC_API_KEY` and deploy — the app calls `/.netlify/functions/stylist`.
+Without the key (e.g. GitHub Pages), Vestra uses the on-device composer, still driven by the user’s profile and palette.
+
 ## Install as an app
 
 Once HTTPS works on wearvestra.com:
