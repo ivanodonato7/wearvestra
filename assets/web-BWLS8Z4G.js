@@ -1,0 +1,1 @@
+import{WebPlugin as e}from"./dist-DuAoa07x.js";var t=class extends e{async show(e){}async hide(e){}};export{t as SplashScreenWeb};
