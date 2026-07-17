@@ -1,0 +1,19 @@
+{
+  "appId": "com.wearvestra.app",
+  "appName": "Vestra",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 1200,
+      "backgroundColor": "#F6F1E7",
+      "showSpinner": false
+    },
+    "StatusBar": {
+      "style": "DARK",
+      "backgroundColor": "#F6F1E7"
+    }
+  }
+}

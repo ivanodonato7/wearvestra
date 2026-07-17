@@ -1,30 +1,38 @@
-# Vestra — AI Stylist Prototype
+# Vestra — AI Stylist
 
-Interactive fashion styling app from the Claude artifact
-[vestra-prototype.jsx](https://claude.ai/public/artifacts/435fc56d-b0e0-44f9-9294-6b9dbfa3af98).
+Installable fashion stylist app for **[wearvestra.com](https://wearvestra.com)**.
 
-Features:
+Source prototype: [Claude artifact](https://claude.ai/public/artifacts/435fc56d-b0e0-44f9-9294-6b9dbfa3af98).
+
+## Features
 
 - Multilingual onboarding (EN / ES / FR)
-- Style DNA profiling (archetype, fit, palette, budget, occasions)
+- Style DNA profiling
 - Mock AI stylist chat with outfit recommendations
-- Wardrobe saves and bag grouped by retailer
-- Phone-frame click-through prototype UI
+- Wardrobe + bag by retailer
+- Progressive Web App (install to home screen)
+- Capacitor Android shell (`com.wearvestra.app`)
 
-## Run
+## Develop
 
 ```bash
 npm install
 npm run dev
 ```
 
-## Build
+## Production build
 
 ```bash
 npm run build
 npm run preview
 ```
 
-## Notes
+## Publish to wearvestra.com
 
-This is a front-end prototype. Chat replies and product links are simulated — no real account, payments, or retailer checkout.
+See [DEPLOY.md](./DEPLOY.md). Domain is on Porkbun — point DNS at Vercel, Netlify, or Porkbun Static Hosting after deploying `dist/`.
+
+## Native app
+
+```bash
+npm run cap:android   # Android Studio
+```

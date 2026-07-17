@@ -921,11 +921,19 @@ export default function VestraPrototype() {
     <div className="app-outer">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@300;400;500;600&display=swap');
-        .app-outer{ min-height:100vh; background:#e9e4d6; display:flex; align-items:center; justify-content:center; padding:24px; font-family:'Inter',sans-serif; }
-        .phone{ width:380px; height:780px; background:#F6F1E7; border-radius:2.2rem; border:8px solid #0B0B0C; box-shadow:0 30px 60px rgba(0,0,0,0.35); overflow:hidden; position:relative; display:flex; flex-direction:column; }
+        .app-outer{ min-height:100vh; min-height:100dvh; background:#e9e4d6; display:flex; align-items:center; justify-content:center; padding:24px; font-family:'Inter',sans-serif; }
+        .phone{ width:380px; height:min(780px, calc(100dvh - 48px)); background:#F6F1E7; border-radius:2.2rem; border:8px solid #0B0B0C; box-shadow:0 30px 60px rgba(0,0,0,0.35); overflow:hidden; position:relative; display:flex; flex-direction:column; }
         .notch{ position:absolute; top:0; left:50%; transform:translateX(-50%); width:112px; height:20px; background:#0B0B0C; border-radius:0 0 12px 12px; z-index:20; }
-        .phone-body{ flex:1; overflow:hidden; padding-top:20px; }
-        .screen{ padding:24px 20px 90px; height:100%; overflow-y:auto; box-sizing:border-box; }
+        .phone-body{ flex:1; overflow:hidden; padding-top:20px; min-height:0; }
+        .screen{ padding:24px 20px 90px; height:100%; overflow-y:auto; box-sizing:border-box; -webkit-overflow-scrolling:touch; }
+        @media (max-width: 480px) {
+          .app-outer{ padding:0; background:#F6F1E7; align-items:stretch; }
+          .phone{ width:100%; height:100dvh; max-height:none; border:none; border-radius:0; box-shadow:none; }
+          .notch{ display:none; }
+          .phone-body{ padding-top: env(safe-area-inset-top, 0px); }
+          .tabbar{ padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px)); }
+          .lang-switcher-corner{ top: calc(12px + env(safe-area-inset-top, 0px)); }
+        }
         .eyebrow{ font-size:10px; letter-spacing:0.18em; text-transform:uppercase; font-weight:600; margin-bottom:4px; }
         .eyebrow.muted{ color:#A8895C; }
         .eyebrow.gold{ color:#C6A567; margin-bottom:12px; }
