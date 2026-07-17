@@ -306,16 +306,16 @@ function GarmentPhoto({ type, color = "#3E4228" }) {
 
 // ---------- Product catalog (mirrors the seed data in the real backend) ----------
 const CATALOG = {
-  blazer: { id: "p1", name: "Wool-Blend Tailored Blazer", price: 320, retailer: "Considered Studio", type: "blazer", color: "#3E4228", productUrl: "https://example.com/considered-studio/products/wool-blend-tailored-blazer" },
-  blazerAlt: { id: "p1b", name: "Unstructured Linen Blazer", price: 265, retailer: "North & Field", type: "blazer", color: "#cbb994", productUrl: "https://example.com/north-and-field/products/unstructured-linen-blazer" },
-  shirt: { id: "p2", name: "Crisp Cotton Shirt", price: 95, retailer: "Considered Studio", type: "shirt", color: "#F5F2E9", productUrl: "https://example.com/considered-studio/products/crisp-cotton-shirt" },
-  shirtAlt: { id: "p2b", name: "Fine Merino Turtleneck", price: 110, retailer: "North & Field", type: "shirt", color: "#4a4a48", productUrl: "https://example.com/north-and-field/products/fine-merino-turtleneck" },
-  trouser: { id: "p3", name: "Tailored Straight Trouser", price: 140, retailer: "Considered Studio", type: "trouser", color: "#3E4228", productUrl: "https://example.com/considered-studio/products/tailored-straight-trouser" },
-  trouserAlt: { id: "p3b", name: "Wide-Leg Wool Trouser", price: 165, retailer: "Considered Studio", type: "trouser", color: "#6b6b63", productUrl: "https://example.com/considered-studio/products/wide-leg-wool-trouser" },
-  shoe: { id: "p4", name: "Leather Derby Shoe", price: 210, retailer: "Aldern & Co.", type: "shoe", color: "#6b3f22", productUrl: "https://example.com/aldern-and-co/products/leather-derby-shoe" },
-  shoeAlt: { id: "p4b", name: "Suede Chelsea Boot", price: 245, retailer: "Aldern & Co.", type: "shoe", color: "#4a3527", productUrl: "https://example.com/aldern-and-co/products/suede-chelsea-boot" },
-  scarf: { id: "p5", name: "Fine Wool Scarf", price: 85, retailer: "North & Field", type: "scarf", color: "#b08a5c", productUrl: "https://example.com/north-and-field/products/fine-wool-scarf" },
-  scarfAlt: { id: "p5b", name: "Cashmere Pocket Square", price: 65, retailer: "Aldern & Co.", type: "scarf", color: "#C6A567", productUrl: "https://example.com/aldern-and-co/products/cashmere-pocket-square" },
+  blazer: { id: "p1", name: "Wool-Blend Tailored Blazer", price: 320, retailer: "Considered Studio", type: "blazer", color: "#3E4228", image: "/products/blazer.jpg", productUrl: "https://example.com/considered-studio/products/wool-blend-tailored-blazer" },
+  blazerAlt: { id: "p1b", name: "Unstructured Linen Blazer", price: 265, retailer: "North & Field", type: "blazer", color: "#cbb994", image: "/products/blazer-alt.jpg", productUrl: "https://example.com/north-and-field/products/unstructured-linen-blazer" },
+  shirt: { id: "p2", name: "Crisp Cotton Shirt", price: 95, retailer: "Considered Studio", type: "shirt", color: "#F5F2E9", image: "/products/shirt.jpg", productUrl: "https://example.com/considered-studio/products/crisp-cotton-shirt" },
+  shirtAlt: { id: "p2b", name: "Fine Merino Turtleneck", price: 110, retailer: "North & Field", type: "shirt", color: "#4a4a48", image: "/products/shirt-alt.jpg", productUrl: "https://example.com/north-and-field/products/fine-merino-turtleneck" },
+  trouser: { id: "p3", name: "Tailored Straight Trouser", price: 140, retailer: "Considered Studio", type: "trouser", color: "#3E4228", image: "/products/trouser.jpg", productUrl: "https://example.com/considered-studio/products/tailored-straight-trouser" },
+  trouserAlt: { id: "p3b", name: "Wide-Leg Wool Trouser", price: 165, retailer: "Considered Studio", type: "trouser", color: "#6b6b63", image: "/products/trouser-alt.jpg", productUrl: "https://example.com/considered-studio/products/wide-leg-wool-trouser" },
+  shoe: { id: "p4", name: "Leather Derby Shoe", price: 210, retailer: "Aldern & Co.", type: "shoe", color: "#6b3f22", image: "/products/shoe.jpg", productUrl: "https://example.com/aldern-and-co/products/leather-derby-shoe" },
+  shoeAlt: { id: "p4b", name: "Suede Chelsea Boot", price: 245, retailer: "Aldern & Co.", type: "shoe", color: "#4a3527", image: "/products/shoe-alt.jpg", productUrl: "https://example.com/aldern-and-co/products/suede-chelsea-boot" },
+  scarf: { id: "p5", name: "Fine Wool Scarf", price: 85, retailer: "North & Field", type: "scarf", color: "#b08a5c", image: "/products/scarf.jpg", productUrl: "https://example.com/north-and-field/products/fine-wool-scarf" },
+  scarfAlt: { id: "p5b", name: "Cashmere Pocket Square", price: 65, retailer: "Aldern & Co.", type: "scarf", color: "#C6A567", image: "/products/scarf-alt.jpg", productUrl: "https://example.com/aldern-and-co/products/cashmere-pocket-square" },
 };
 const RETAILER_SITES = {
   "Considered Studio": "https://example.com/considered-studio",
@@ -712,17 +712,29 @@ function OutfitCard({ outfit, onSwap, onSave, saved, modelGender, onModelGenderC
           {outfit.items.map((key) => {
             const item = CATALOG[key];
             return (
-              <div key={item.id} className="item-row">
-                <span className="item-row-swatch" style={{ background: item.color }} />
-                <a className="item-row-info" href={item.productUrl} target="_blank" rel="noopener noreferrer" title={t("viewProduct")}>
+              <a
+                key={item.id}
+                className="item-row"
+                href={item.productUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={t("viewProduct")}
+              >
+                <img className="item-row-image" src={item.image} alt={tName(item)} loading="lazy" />
+                <div className="item-row-info">
+                  <div className="item-row-brand">{item.retailer}</div>
                   <div className="item-row-name">{tName(item)}</div>
-                  <div className="item-row-meta">{item.retailer} · ${item.price}</div>
-                </a>
-                <a className="link-btn-sm" href={item.productUrl} target="_blank" rel="noopener noreferrer" title={t("viewProduct")}>
-                  <ExternalLink size={11} />
-                </a>
-                <button className="swap-btn-sm" onClick={() => onSwap(key)} title={t("swapItem")}><RefreshCw size={11} /></button>
-              </div>
+                  <div className="item-row-meta">${item.price}</div>
+                </div>
+                <button
+                  type="button"
+                  className="swap-btn-sm"
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); onSwap(key); }}
+                  title={t("swapItem")}
+                >
+                  <RefreshCw size={11} />
+                </button>
+              </a>
             );
           })}
         </div>
@@ -851,8 +863,12 @@ function BagScreen({ savedOutfits }) {
             <div className="section-label">{retailer}</div>
             {items.map((item, idx) => (
               <a key={item.id + idx} className="bag-row" href={item.productUrl} target="_blank" rel="noopener noreferrer" title={t("viewProduct")}>
-                <div className="bag-icon"><GarmentPhoto type={item.type} color={item.color} /></div>
-                <div className="bag-info"><div className="bag-name">{tName(item)}</div><div className="bag-price">${item.price}</div></div>
+                <img className="bag-image" src={item.image} alt={tName(item)} loading="lazy" />
+                <div className="bag-info">
+                  <div className="bag-brand">{item.retailer}</div>
+                  <div className="bag-name">{tName(item)}</div>
+                  <div className="bag-price">${item.price}</div>
+                </div>
                 <ExternalLink size={13} color="#8b877a" />
               </a>
             ))}
@@ -1097,7 +1113,10 @@ export default function VestraPrototype() {
           .outfit-visual{ gap:28px; }
           .model-wrap{ width:48%; max-width:380px; min-height:480px; }
           .item-row{ padding:12px 14px; }
+          .item-row-image{ width:72px; height:72px; }
+          .item-row-brand{ font-size:10.5px; }
           .item-row-name{ font-size:13px; white-space:normal; }
+          .item-row-meta{ font-size:12px; }
           .item-row-meta{ font-size:12px; }
           .rationale{ font-size:15px; max-width:56ch; }
           .card{ padding:24px; }
@@ -1151,12 +1170,14 @@ export default function VestraPrototype() {
         .model-gender-switch{ display:flex; gap:4px; }
         .model-gender-pill{ font-size:10px; letter-spacing:0.04em; padding:5px 10px; border-radius:999px; border:1px solid #2a2a26; background:#151513; color:#8b877a; cursor:pointer; font-family:'Inter',sans-serif; }
         .model-gender-pill.active{ background:#C6A567; color:#0B0B0C; border-color:#C6A567; }
-        .item-list{ flex:1; display:flex; flex-direction:column; gap:6px; min-width:0; }
-        .item-row{ display:flex; align-items:center; gap:8px; background:#151513; border:1px solid #2a2a26; border-radius:4px; padding:8px; }
-        .item-row-swatch{ width:16px; height:16px; border-radius:50%; flex-shrink:0; border:1px solid rgba(246,241,231,0.25); }
-        .item-row-info{ flex:1; min-width:0; color:inherit; text-decoration:none; display:block; cursor:pointer; }
-        .item-row-name{ font-size:10.5px; line-height:1.3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-        .item-row-meta{ font-size:9.5px; color:#8b877a; margin-top:1px; }
+        .item-list{ flex:1; display:flex; flex-direction:column; gap:8px; min-width:0; }
+        .item-row{ display:flex; align-items:center; gap:10px; background:#151513; border:1px solid #2a2a26; border-radius:4px; padding:8px; text-decoration:none; color:inherit; transition:border-color .2s; }
+        .item-row:hover{ border-color:#C6A567; }
+        .item-row-image{ width:52px; height:52px; border-radius:4px; object-fit:cover; flex-shrink:0; background:#1c1c19; }
+        .item-row-info{ flex:1; min-width:0; display:block; }
+        .item-row-brand{ font-size:9.5px; letter-spacing:0.08em; text-transform:uppercase; color:#C6A567; margin-bottom:2px; }
+        .item-row-name{ font-size:11.5px; line-height:1.3; color:#F6F1E7; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .item-row-meta{ font-size:10.5px; color:#8b877a; margin-top:2px; }
         .swap-btn-sm{ flex-shrink:0; background:none; border:1px solid #2a2a26; border-radius:4px; color:#8b877a; padding:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .2s; }
         .swap-btn-sm:hover{ color:#C6A567; border-color:#C6A567; }
         .link-btn-sm{ flex-shrink:0; background:none; border:1px solid #2a2a26; border-radius:4px; color:#8b877a; padding:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .2s; text-decoration:none; }
@@ -1173,11 +1194,11 @@ export default function VestraPrototype() {
         .retailer-group{ margin-bottom:20px; }
         .bag-row{ display:flex; align-items:center; gap:12px; background:#fff; border:1px solid #e6e0d2; border-radius:4px; padding:10px; margin-bottom:8px; text-decoration:none; color:inherit; transition:border-color .2s; }
         .bag-row:hover{ border-color:#C6A567; }
-        .bag-icon{ width:44px; height:44px; background:radial-gradient(ellipse at center, #fbf8f1 0%, #f4efe4 100%); border-radius:4px; display:flex; align-items:center; justify-content:center; padding:4px; }
-        .bag-icon svg{ width:36px; height:30px; filter:drop-shadow(0 2px 3px rgba(0,0,0,0.12)); }
-        .bag-info{ flex:1; }
-        .bag-name{ font-size:12px; color:#0B0B0C; }
-        .bag-price{ font-size:11px; color:#8b877a; margin-top:2px; }
+        .bag-image{ width:56px; height:56px; border-radius:4px; object-fit:cover; flex-shrink:0; background:#f4efe4; }
+        .bag-info{ flex:1; min-width:0; }
+        .bag-brand{ font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#A8895C; margin-bottom:2px; }
+        .bag-name{ font-size:13px; color:#0B0B0C; }
+        .bag-price{ font-size:12px; color:#8b877a; margin-top:2px; }
         .checkout-btn{ width:100%; box-sizing:border-box; display:flex; align-items:center; justify-content:center; font-size:10.5px; letter-spacing:0.05em; text-transform:uppercase; color:#0B0B0C; background:none; border:1px solid #0B0B0C; border-radius:4px; padding:10px; cursor:pointer; margin-top:4px; font-family:'Inter',sans-serif; text-decoration:none; transition:all .2s; }
         .checkout-btn:hover{ background:#0B0B0C; color:#C6A567; }
 
