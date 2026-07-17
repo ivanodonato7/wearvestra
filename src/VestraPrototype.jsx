@@ -372,8 +372,11 @@ function LanguageSwitcher({ corner }) {
 }
 
 // ---------- Product catalog (mirrors the seed data in the real backend) ----------
-const ASSET_V = "8";
+const ASSET_V = "9";
 const assetUrl = (path) => `${path}?v=${ASSET_V}`;
+
+const GREEN_PALETTE = new Set(["Olive", "Forest Green"]);
+const NEUTRAL_PALETTE = new Set(["Black", "Ivory / Cream", "White", "Grey / Charcoal"]);
 
 const CATALOG = {
   blazer: { key: "blazer", id: "p1", name: "Wool-Blend Tailored Blazer", price: 320, retailer: "Considered Studio", type: "blazer", color: "#3E4228", paletteTags: ["Olive", "Forest Green"], image: assetUrl("/products/blazer.jpg"), searchQuery: "olive green wool tailored blazer", searchNoun: "wool tailored blazer" },
@@ -412,18 +415,38 @@ function colorTermsForLabels(labels = []) {
   return labels.flatMap((l) => COLOR_SEARCH_TERMS[l] || [String(l).toLowerCase()]);
 }
 
+function itemIsGreen(itemKey) {
+  const tags = CATALOG[itemKey]?.paletteTags || [];
+  return tags.some((t) => GREEN_PALETTE.has(t));
+}
+
+function paletteWantsGreen(palette = []) {
+  return (palette || []).some((t) => GREEN_PALETTE.has(t));
+}
+
 function itemPaletteScore(itemKey, palette = [], avoid = []) {
   const item = CATALOG[itemKey];
   if (!item) return 0;
   const tags = item.paletteTags || [];
   let score = 0;
   for (const tag of tags) {
-    if (avoid.includes(tag)) score -= 20;
-    if (palette.includes(tag)) score += 14;
+    if (avoid.includes(tag)) score -= 50;
+    if (palette.includes(tag)) score += 20;
   }
-  // Soft bonus if no direct tag match but item is a neutral that works with most palettes
-  if (score === 0 && tags.some((t) => t === "Ivory / Cream" || t === "Black" || t === "Grey / Charcoal")) {
-    score += 2;
+  // Never push olive/forest when the user did not choose those colors
+  if (itemIsGreen(itemKey) && palette.length && !paletteWantsGreen(palette)) {
+    score -= 60;
+  }
+  // Direct overlap is required for strong pieces; neutrals get a smaller consolation
+  if (score <= 0 && tags.some((t) => NEUTRAL_PALETTE.has(t))) {
+    const wantsNeutral = palette.some((t) => NEUTRAL_PALETTE.has(t) || t === "Navy" || t === "Sand / Beige" || t === "Camel / Tan");
+    score += wantsNeutral ? 8 : 1;
+  }
+  // Soft match: sand/camel pieces for warm palettes without green
+  if (score <= 0 && tags.some((t) => t === "Sand / Beige" || t === "Camel / Tan")) {
+    if (palette.some((t) => ["Sand / Beige", "Camel / Tan", "Ivory / Cream", "Rust / Terracotta", "Navy", "Burgundy"].includes(t))) {
+      score += 10;
+    }
   }
   return score;
 }
@@ -932,7 +955,7 @@ function recipeItems(recipe) {
   return [recipe.outer, recipe.top, recipe.bottom, recipe.shoe, recipe.acc].filter(Boolean);
 }
 
-/** Pick base vs alt using palette AND fit/archetype structure — not color alone. */
+/** Pick base vs alt using palette first, then fit/archetype — never force green off-palette. */
 function tuneItemsToProfile(itemKeys, profile) {
   const palette = profile?.palette || [];
   const avoid = profile?.avoid || [];
@@ -945,24 +968,31 @@ function tuneItemsToProfile(itemKeys, profile) {
   const wantRelaxed = fit.structure === "relaxed"
     || life.preferStructure === "relaxed"
     || vibes.some((v) => ["relaxed", "warm", "romantic", "bold"].includes(v));
+  const banGreen = palette.length > 0 && !paletteWantsGreen(palette);
 
   return itemKeys.map((key) => {
     const base = ALT_MAP_REV[key] || key;
     const alt = ALT_MAP[base];
-    if (!alt) return key;
+    if (!alt) {
+      // Single variant — still reject green when banned by swapping accessory family later
+      return key;
+    }
     let scoreBase = itemPaletteScore(base, palette, avoid);
     let scoreAlt = itemPaletteScore(alt, palette, avoid);
-    // Structure: base catalog pieces read more tailored; alts more relaxed/wide
-    if (wantTailored && !wantRelaxed) scoreBase += 10;
-    if (wantRelaxed && !wantTailored) scoreAlt += 10;
+    if (banGreen && itemIsGreen(base)) scoreBase -= 80;
+    if (banGreen && itemIsGreen(alt)) scoreAlt -= 80;
+    // Structure is secondary to color
+    if (wantTailored && !wantRelaxed) scoreBase += 6;
+    if (wantRelaxed && !wantTailored) scoreAlt += 6;
     if (wantTailored && wantRelaxed) {
-      // Mixed signals — lean fit first
-      if (fit.preferBase === true) scoreBase += 6;
-      if (fit.preferBase === false) scoreAlt += 6;
+      if (fit.preferBase === true) scoreBase += 3;
+      if (fit.preferBase === false) scoreAlt += 3;
     }
-    if (vibes.includes("bold") && (base === "trouser" || base === "shoe" || base === "shirt")) scoreAlt += 4;
-    if (vibes.includes("romantic") && (base === "shirt" || base === "scarf")) scoreAlt += 3;
-    if (vibes.includes("quiet") && base === "blazer") scoreBase += 5;
+    if (vibes.includes("bold") && (base === "trouser" || base === "shoe" || base === "shirt")) scoreAlt += 3;
+    if (vibes.includes("romantic") && (base === "shirt" || base === "scarf")) scoreAlt += 2;
+    if (vibes.includes("quiet") && base === "blazer" && !banGreen) scoreBase += 3;
+    // Black accessories when palette includes black
+    if (palette.includes("Black") && (base === "belt" || base === "sunglasses")) scoreAlt += 8;
     return scoreAlt > scoreBase ? alt : base;
   });
 }
@@ -1111,9 +1141,16 @@ function composeOutfits(prompt, profile, lang = "en", count = 3) {
       if (!hasOuter) score -= 8;
     }
 
-    // --- Palette (important, but capped so it can't erase style) ---
+    // --- Palette (hard constraint — green only when chosen) ---
     const paletteScore = outfitPaletteScore(items, palette, avoid);
-    score += Math.min(24, paletteScore);
+    score += Math.min(36, paletteScore);
+    if (palette.length && !paletteWantsGreen(palette)) {
+      const greenCount = items.filter((k) => itemIsGreen(k)).length;
+      score -= greenCount * 35;
+    } else if (paletteWantsGreen(palette)) {
+      const greenCount = items.filter((k) => itemIsGreen(k)).length;
+      score += greenCount * 12;
+    }
 
     // --- Budget ---
     if (budget === "elevated" && hasOuter) score += 8;
@@ -1389,7 +1426,7 @@ const DEFAULT_PROFILE = {
   archetype: "Quiet Tailored",
   fit: "Fitted & tailored",
   lifestyle: "Office / client-facing",
-  palette: ["Olive", "Ivory / Cream", "Black", "Camel / Tan"],
+  palette: ["Navy", "Ivory / Cream", "Black", "Camel / Tan"],
   avoid: [],
   budget: "balanced",
   occasions: ["Work", "Events & celebrations"],
@@ -1730,21 +1767,49 @@ function OccasionScreen({ onSubmit, onSkip }) {
   );
 }
 
-// ==================== MODEL HERO ====================
-// AI-generated model photos wearing the suggested pieces.
-// Swaps pick the closest matching pre-rendered look.
-function ModelHero({ itemKeys, gender }) {
-  const src = resolveModelImage(itemKeys, gender);
+// ==================== OUTFIT HERO ====================
+// Hero is built from the exact catalog images in the outfit list —
+// so what you see is what you can tap to shop.
+function OutfitHero({ itemKeys, palette = [] }) {
+  const { tName } = useLang();
+  const items = (itemKeys || []).map((k) => CATALOG[k]).filter(Boolean);
+  const outer = items.find((i) => i.type === "blazer");
+  const top = items.find((i) => i.type === "shirt");
+  const bottom = items.find((i) => i.type === "trouser");
+  const shoe = items.find((i) => i.type === "shoe");
+  const acc = items.find((i) => i.type === "accessory");
+  const swatches = (palette || [])
+    .map((label) => (COLOR_OPTIONS.find((c) => c.label === label) || {}).hex)
+    .filter(Boolean)
+    .slice(0, 4);
+  const accent = swatches[0] || (outer || top || bottom)?.color || "#3E4228";
+
   return (
-    <div className="model-wrap">
-      <img
-        className="model-photo"
-        src={src}
-        alt="Outfit on model"
-        loading="lazy"
-        decoding="async"
-        sizes="(max-width: 767px) 100vw, (max-width: 1023px) 42vw, 340px"
-      />
+    <div className="model-wrap outfit-hero-wrap" style={{ "--hero-accent": accent }}>
+      <div className="outfit-hero-stage">
+        {swatches.length > 0 && (
+          <div className="outfit-hero-swatches" aria-hidden="true">
+            {swatches.map((hex) => <span key={hex} style={{ background: hex }} />)}
+          </div>
+        )}
+        <div className={`outfit-hero-figure ${outer ? "has-outer" : "no-outer"} ${shoe ? "has-shoe" : "no-shoe"}`}>
+          {outer && (
+            <img className="hero-layer hero-outer" src={outer.image} alt={tName(outer)} loading="lazy" />
+          )}
+          {top && (
+            <img className={`hero-layer hero-top ${outer ? "with-outer" : ""}`} src={top.image} alt={tName(top)} loading="lazy" />
+          )}
+          {bottom && (
+            <img className="hero-layer hero-bottom" src={bottom.image} alt={tName(bottom)} loading="lazy" />
+          )}
+          {shoe && (
+            <img className="hero-layer hero-shoe" src={shoe.image} alt={tName(shoe)} loading="lazy" />
+          )}
+          {acc && (
+            <img className="hero-layer hero-acc" src={acc.image} alt={tName(acc)} loading="lazy" />
+          )}
+        </div>
+      </div>
     </div>
   );
 }
@@ -1946,7 +2011,7 @@ function OutfitCard({ outfit, onSwap, onSave, saved, modelGender, onModelGenderC
         </div>
       </div>
       <div className="outfit-visual">
-        <ModelHero itemKeys={outfit.items} gender={modelGender} />
+        <OutfitHero itemKeys={outfit.items} palette={palette} />
         <div className="item-list">
           {outfit.items.map((key) => {
             const item = CATALOG[key];
@@ -2548,6 +2613,21 @@ export default function VestraPrototype() {
         .outfit-visual{ display:flex; gap:12px; margin-bottom:14px; align-items:stretch; }
         .model-wrap{ width:148px; flex-shrink:0; border-radius:6px; overflow:hidden; background:#151513; aspect-ratio:3/4; }
         .model-photo{ width:100%; height:100%; object-fit:cover; object-position:center top; display:block; image-rendering:auto; -webkit-backface-visibility:hidden; transform:translateZ(0); }
+        .outfit-hero-wrap{ background:linear-gradient(165deg, #1a1916 0%, #0e0e0c 55%, #1c1812 100%); position:relative; }
+        .outfit-hero-stage{ position:relative; width:100%; height:100%; padding:10px 8px 12px; box-sizing:border-box; display:flex; flex-direction:column; }
+        .outfit-hero-swatches{ display:flex; gap:4px; margin-bottom:8px; }
+        .outfit-hero-swatches span{ width:12px; height:12px; border-radius:50%; border:1px solid rgba(255,255,255,0.25); flex-shrink:0; }
+        .outfit-hero-figure{ position:relative; flex:1; min-height:0; display:grid; grid-template-columns:1.15fr 0.85fr; grid-template-rows:1.1fr 1fr 0.55fr; gap:6px; }
+        .hero-layer{ width:100%; height:100%; object-fit:cover; border-radius:4px; background:#222; display:block; box-shadow:0 2px 10px rgba(0,0,0,0.35); }
+        .hero-outer{ grid-column:1; grid-row:1 / span 2; }
+        .hero-top{ grid-column:2; grid-row:1; }
+        .hero-top.with-outer{ opacity:0.98; }
+        .hero-bottom{ grid-column:2; grid-row:2; }
+        .hero-shoe{ grid-column:1; grid-row:3; }
+        .hero-acc{ grid-column:2; grid-row:3; }
+        .outfit-hero-figure.no-outer .hero-top{ grid-column:1; grid-row:1 / span 2; }
+        .outfit-hero-figure.no-outer .hero-bottom{ grid-column:2; grid-row:1 / span 2; }
+        .outfit-hero-figure.no-shoe .hero-acc{ grid-column:1 / -1; }
         .model-gender-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px; }
         .model-gender-label{ font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#8b877a; }
         .model-gender-switch{ display:flex; gap:4px; }
