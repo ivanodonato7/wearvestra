@@ -308,17 +308,20 @@ function LanguageSwitcher({ corner }) {
 }
 
 // ---------- Product catalog (mirrors the seed data in the real backend) ----------
+const ASSET_V = "3";
+const assetUrl = (path) => `${path}?v=${ASSET_V}`;
+
 const CATALOG = {
-  blazer: { key: "blazer", id: "p1", name: "Wool-Blend Tailored Blazer", price: 320, retailer: "Considered Studio", type: "blazer", color: "#3E4228", image: "/products/blazer.jpg", searchQuery: "olive green wool tailored blazer men women" },
-  blazerAlt: { key: "blazerAlt", id: "p1b", name: "Unstructured Linen Blazer", price: 265, retailer: "North & Field", type: "blazer", color: "#cbb994", image: "/products/blazer-alt.jpg", searchQuery: "sand beige unstructured linen blazer" },
-  shirt: { key: "shirt", id: "p2", name: "Crisp Cotton Shirt", price: 95, retailer: "Considered Studio", type: "shirt", color: "#F5F2E9", image: "/products/shirt.jpg", searchQuery: "ivory crisp cotton dress shirt" },
-  shirtAlt: { key: "shirtAlt", id: "p2b", name: "Fine Merino Turtleneck", price: 110, retailer: "North & Field", type: "shirt", color: "#4a4a48", image: "/products/shirt-alt.jpg", searchQuery: "charcoal fine merino turtleneck sweater" },
-  trouser: { key: "trouser", id: "p3", name: "Tailored Straight Trouser", price: 140, retailer: "Considered Studio", type: "trouser", color: "#3E4228", image: "/products/trouser.jpg", searchQuery: "olive tailored straight leg trousers" },
-  trouserAlt: { key: "trouserAlt", id: "p3b", name: "Wide-Leg Wool Trouser", price: 165, retailer: "Considered Studio", type: "trouser", color: "#6b6b63", image: "/products/trouser-alt.jpg", searchQuery: "grey wide leg wool trousers" },
-  shoe: { key: "shoe", id: "p4", name: "Leather Derby Shoe", price: 210, retailer: "Aldern & Co.", type: "shoe", color: "#6b3f22", image: "/products/shoe.jpg", searchQuery: "brown leather derby dress shoes" },
-  shoeAlt: { key: "shoeAlt", id: "p4b", name: "Suede Chelsea Boot", price: 245, retailer: "Aldern & Co.", type: "shoe", color: "#4a3527", image: "/products/shoe-alt.jpg", searchQuery: "dark brown suede chelsea boots" },
-  scarf: { key: "scarf", id: "p5", name: "Fine Wool Scarf", price: 85, retailer: "North & Field", type: "scarf", color: "#b08a5c", image: "/products/scarf.jpg", searchQuery: "camel tan fine wool scarf" },
-  scarfAlt: { key: "scarfAlt", id: "p5b", name: "Cashmere Pocket Square", price: 65, retailer: "Aldern & Co.", type: "scarf", color: "#C6A567", image: "/products/scarf-alt.jpg", searchQuery: "gold cashmere pocket square" },
+  blazer: { key: "blazer", id: "p1", name: "Wool-Blend Tailored Blazer", price: 320, retailer: "Considered Studio", type: "blazer", color: "#3E4228", image: assetUrl("/products/blazer.jpg"), searchQuery: "olive green wool tailored blazer men women" },
+  blazerAlt: { key: "blazerAlt", id: "p1b", name: "Unstructured Linen Blazer", price: 265, retailer: "North & Field", type: "blazer", color: "#cbb994", image: assetUrl("/products/blazer-alt.jpg"), searchQuery: "sand beige unstructured linen blazer" },
+  shirt: { key: "shirt", id: "p2", name: "Crisp Cotton Shirt", price: 95, retailer: "Considered Studio", type: "shirt", color: "#F5F2E9", image: assetUrl("/products/shirt.jpg"), searchQuery: "ivory crisp cotton dress shirt" },
+  shirtAlt: { key: "shirtAlt", id: "p2b", name: "Fine Merino Turtleneck", price: 110, retailer: "North & Field", type: "shirt", color: "#4a4a48", image: assetUrl("/products/shirt-alt.jpg"), searchQuery: "charcoal fine merino turtleneck sweater" },
+  trouser: { key: "trouser", id: "p3", name: "Tailored Straight Trouser", price: 140, retailer: "Considered Studio", type: "trouser", color: "#3E4228", image: assetUrl("/products/trouser.jpg"), searchQuery: "olive tailored straight leg trousers" },
+  trouserAlt: { key: "trouserAlt", id: "p3b", name: "Wide-Leg Wool Trouser", price: 165, retailer: "Considered Studio", type: "trouser", color: "#6b6b63", image: assetUrl("/products/trouser-alt.jpg"), searchQuery: "grey wide leg wool trousers" },
+  shoe: { key: "shoe", id: "p4", name: "Leather Derby Shoe", price: 210, retailer: "Aldern & Co.", type: "shoe", color: "#6b3f22", image: assetUrl("/products/shoe.jpg"), searchQuery: "brown leather derby dress shoes" },
+  shoeAlt: { key: "shoeAlt", id: "p4b", name: "Suede Chelsea Boot", price: 245, retailer: "Aldern & Co.", type: "shoe", color: "#4a3527", image: assetUrl("/products/shoe-alt.jpg"), searchQuery: "dark brown suede chelsea boots" },
+  scarf: { key: "scarf", id: "p5", name: "Fine Wool Scarf", price: 85, retailer: "North & Field", type: "scarf", color: "#b08a5c", image: assetUrl("/products/scarf.jpg"), searchQuery: "camel tan fine wool scarf" },
+  scarfAlt: { key: "scarfAlt", id: "p5b", name: "Cashmere Pocket Square", price: 65, retailer: "Aldern & Co.", type: "scarf", color: "#C6A567", image: assetUrl("/products/scarf-alt.jpg"), searchQuery: "gold cashmere pocket square" },
 };
 
 function catalogKeyForItem(item) {
@@ -395,18 +398,18 @@ function outfitSignature(itemKeys) {
 
 const MODEL_IMAGES = {
   woman: {
-    "blazer+shirt+trouser+shoe": "/models/model-woman-wedding.jpg",
-    "blazerAlt+shirt+trouser+shoe": "/models/model-woman-wedding-linen.jpg",
-    "shirt+trouser+shoe+scarf": "/models/model-woman-dinner.jpg",
-    "shirt+trouser+shoe": "/models/model-woman-everyday.jpg",
+    "blazer+shirt+trouser+shoe": assetUrl("/models/model-woman-wedding.jpg"),
+    "blazerAlt+shirt+trouser+shoe": assetUrl("/models/model-woman-wedding-linen.jpg"),
+    "shirt+trouser+shoe+scarf": assetUrl("/models/model-woman-dinner.jpg"),
+    "shirt+trouser+shoe": assetUrl("/models/model-woman-everyday.jpg"),
   },
   man: {
-    "blazer+shirt+trouser+shoe": "/models/model-man-wedding.jpg",
-    "blazerAlt+shirt+trouser+shoe": "/models/model-man-wedding-alt.jpg",
-    "blazer+shirtAlt+trouser+shoe": "/models/model-man-wedding-alt.jpg",
-    "blazerAlt+shirtAlt+trouser+shoe": "/models/model-man-wedding-alt.jpg",
-    "shirt+trouser+shoe+scarf": "/models/model-man-dinner.jpg",
-    "shirt+trouser+shoe": "/models/model-man-everyday.jpg",
+    "blazer+shirt+trouser+shoe": assetUrl("/models/model-man-wedding.jpg"),
+    "blazerAlt+shirt+trouser+shoe": assetUrl("/models/model-man-wedding-alt.jpg"),
+    "blazer+shirtAlt+trouser+shoe": assetUrl("/models/model-man-wedding-alt.jpg"),
+    "blazerAlt+shirtAlt+trouser+shoe": assetUrl("/models/model-man-wedding-alt.jpg"),
+    "shirt+trouser+shoe+scarf": assetUrl("/models/model-man-dinner.jpg"),
+    "shirt+trouser+shoe": assetUrl("/models/model-man-everyday.jpg"),
   },
 };
 
@@ -446,60 +449,60 @@ function pickOutfitIndex(text) {
 // ==================== ONBOARDING DATA ====================
 const AUDIENCE_OPTIONS = ["Ladies", "Gentlemen", "Gender neutral"];
 const AUDIENCE_META = {
-  Ladies: { image: "/onboarding/audience-ladies.jpg", modelGender: "woman" },
-  Gentlemen: { image: "/onboarding/audience-gentlemen.jpg", modelGender: "man" },
-  "Gender neutral": { image: "/onboarding/audience-neutral.jpg", modelGender: "woman" },
+  Ladies: { image: assetUrl("/onboarding/audience-ladies.jpg"), modelGender: "woman" },
+  Gentlemen: { image: assetUrl("/onboarding/audience-gentlemen.jpg"), modelGender: "man" },
+  "Gender neutral": { image: assetUrl("/onboarding/audience-neutral.jpg"), modelGender: "woman" },
 };
 const LIFESTYLE_OPTIONS = ["Office / client-facing", "Creative or flexible workplace", "Remote, mostly at home", "On the move — travel, events, varied", "Student life"];
 const LIFESTYLE_META = {
-  "Office / client-facing": { image: "/onboarding/life-office.jpg" },
-  "Creative or flexible workplace": { image: "/onboarding/life-creative.jpg" },
-  "Remote, mostly at home": { image: "/onboarding/life-remote.jpg" },
-  "On the move — travel, events, varied": { image: "/onboarding/life-travel.jpg" },
-  "Student life": { image: "/onboarding/life-student.jpg" },
+  "Office / client-facing": { image: assetUrl("/onboarding/life-office.jpg") },
+  "Creative or flexible workplace": { image: assetUrl("/onboarding/life-creative.jpg") },
+  "Remote, mostly at home": { image: assetUrl("/onboarding/life-remote.jpg") },
+  "On the move — travel, events, varied": { image: assetUrl("/onboarding/life-travel.jpg") },
+  "Student life": { image: assetUrl("/onboarding/life-student.jpg") },
 };
 const ARCHETYPE_OPTIONS = ["Quiet & Tailored", "Relaxed & Considered", "Modern & Sharp", "Warm & Layered", "Classic & Polished", "Minimal & Directional", "Romantic & Soft", "Bold & Expressive"];
 
 const ARCHETYPE_META = {
   "Quiet & Tailored": {
-    image: "/styles/style-quiet-tailored.jpg",
+    image: assetUrl("/styles/style-quiet-tailored.jpg"),
     descKey: "archQuietDesc",
   },
   "Relaxed & Considered": {
-    image: "/styles/style-relaxed-considered.jpg",
+    image: assetUrl("/styles/style-relaxed-considered.jpg"),
     descKey: "archRelaxedDesc",
   },
   "Modern & Sharp": {
-    image: "/styles/style-modern-sharp.jpg",
+    image: assetUrl("/styles/style-modern-sharp.jpg"),
     descKey: "archModernDesc",
   },
   "Warm & Layered": {
-    image: "/styles/style-warm-layered.jpg",
+    image: assetUrl("/styles/style-warm-layered.jpg"),
     descKey: "archWarmDesc",
   },
   "Classic & Polished": {
-    image: "/styles/style-classic-polished.jpg",
+    image: assetUrl("/styles/style-classic-polished.jpg"),
     descKey: "archClassicDesc",
   },
   "Minimal & Directional": {
-    image: "/styles/style-minimal-directional.jpg",
+    image: assetUrl("/styles/style-minimal-directional.jpg"),
     descKey: "archMinimalDesc",
   },
   "Romantic & Soft": {
-    image: "/styles/style-romantic-soft.jpg",
+    image: assetUrl("/styles/style-romantic-soft.jpg"),
     descKey: "archRomanticDesc",
   },
   "Bold & Expressive": {
-    image: "/styles/style-bold-expressive.jpg",
+    image: assetUrl("/styles/style-bold-expressive.jpg"),
     descKey: "archBoldDesc",
   },
 };
 const FIT_OPTIONS = ["Fitted & tailored", "True to size, structured", "Relaxed, room to move", "Oversized, intentionally loose"];
 const FIT_META = {
-  "Fitted & tailored": { image: "/onboarding/fit-fitted.jpg" },
-  "True to size, structured": { image: "/onboarding/fit-structured.jpg" },
-  "Relaxed, room to move": { image: "/onboarding/fit-relaxed.jpg" },
-  "Oversized, intentionally loose": { image: "/onboarding/fit-oversized.jpg" },
+  "Fitted & tailored": { image: assetUrl("/onboarding/fit-fitted.jpg") },
+  "True to size, structured": { image: assetUrl("/onboarding/fit-structured.jpg") },
+  "Relaxed, room to move": { image: assetUrl("/onboarding/fit-relaxed.jpg") },
+  "Oversized, intentionally loose": { image: assetUrl("/onboarding/fit-oversized.jpg") },
 };
 const COLOR_OPTIONS = [
   { label: "Black", hex: "#161616" },
@@ -1393,9 +1396,10 @@ export default function VestraPrototype() {
           .tabbar{ padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px)); }
           .lang-switcher-corner{ top: calc(12px + env(safe-area-inset-top, 0px)); }
           .outfit-visual{ flex-direction:column; }
-          .model-wrap{ width:100%; max-width:none; aspect-ratio:3/4; max-height:min(52vh, 420px); }
+          .model-wrap{ width:100%; max-width:none; aspect-ratio:3/4; max-height:min(58vh, 520px); }
           .bubble-assistant{ max-width:100%; }
           .card{ padding:14px; }
+          .item-row-image{ width:64px; height:64px; }
         }
 
         /* Tablet */
@@ -1403,12 +1407,13 @@ export default function VestraPrototype() {
           .app-outer{ padding:0; }
           .phone{ height:100dvh; }
           .outfit-visual{ gap:16px; }
-          .model-wrap{ width:42%; max-width:300px; }
+          .model-wrap{ width:46%; max-width:340px; }
           .bubble-assistant{ max-width:100%; }
           .screen{ padding:28px 32px 100px; max-width:820px; width:100%; margin:0 auto; }
           .chat-body{ padding:20px 28px; }
           .home-name{ font-size:32px; }
           .onb-screen{ max-width:560px; margin:0 auto; }
+          .item-row-image{ width:68px; height:68px; }
         }
 
         /* Desktop / PC — real website layout */
@@ -1532,8 +1537,8 @@ export default function VestraPrototype() {
 
         .card{ background:#0B0B0C; border:1px solid #2a2a26; border-radius:4px; padding:16px; color:#F6F1E7; }
         .outfit-visual{ display:flex; gap:12px; margin-bottom:14px; align-items:stretch; }
-        .model-wrap{ width:118px; flex-shrink:0; border-radius:4px; overflow:hidden; background:#151513; aspect-ratio:3/4; }
-        .model-photo{ width:100%; height:100%; object-fit:cover; object-position:center top; display:block; }
+        .model-wrap{ width:148px; flex-shrink:0; border-radius:6px; overflow:hidden; background:#151513; aspect-ratio:3/4; }
+        .model-photo{ width:100%; height:100%; object-fit:cover; object-position:center top; display:block; image-rendering:auto; -webkit-backface-visibility:hidden; transform:translateZ(0); }
         .model-gender-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px; }
         .model-gender-label{ font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#8b877a; }
         .model-gender-switch{ display:flex; gap:4px; }
@@ -1543,7 +1548,7 @@ export default function VestraPrototype() {
         .item-row{ display:flex; align-items:center; gap:8px; background:#151513; border:1px solid #2a2a26; border-radius:4px; padding:6px; color:inherit; }
         .item-row:hover{ border-color:#C6A567; }
         .item-row-shop{ flex:1; min-width:0; display:flex; align-items:center; gap:10px; background:none; border:none; padding:2px; cursor:pointer; text-align:left; color:inherit; font-family:'Inter',sans-serif; }
-        .item-row-image{ width:52px; height:52px; border-radius:4px; object-fit:cover; flex-shrink:0; background:#1c1c19; }
+        .item-row-image{ width:60px; height:60px; border-radius:5px; object-fit:cover; flex-shrink:0; background:#1c1c19; }
         .item-row-info{ flex:1; min-width:0; display:block; }
         .item-row-brand{ font-size:9.5px; letter-spacing:0.08em; text-transform:uppercase; color:#C6A567; margin-bottom:2px; }
         .item-row-name{ font-size:11.5px; line-height:1.3; color:#F6F1E7; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -1556,7 +1561,7 @@ export default function VestraPrototype() {
         .shop-sheet{ width:min(560px, 100%); max-height:min(88vh, 760px); overflow:auto; background:#F6F1E7; border-radius:16px 16px 12px 12px; padding:20px 18px 24px; position:relative; box-shadow:0 24px 60px rgba(0,0,0,0.35); }
         .shop-close{ position:absolute; top:14px; right:14px; background:#fff; border:1px solid #e6e0d2; border-radius:999px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:#0B0B0C; }
         .shop-hero{ display:flex; gap:14px; align-items:center; padding-right:36px; margin-bottom:16px; }
-        .shop-hero-image{ width:84px; height:84px; border-radius:8px; object-fit:cover; background:#fff; flex-shrink:0; }
+        .shop-hero-image{ width:104px; height:104px; border-radius:10px; object-fit:cover; background:#fff; flex-shrink:0; }
         .shop-hero-brand{ font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:#A8895C; margin-bottom:4px; }
         .shop-hero-name{ font-family:'Fraunces',serif; font-size:20px; color:#0B0B0C; line-height:1.25; margin-bottom:6px; }
         .shop-hero-sub{ font-size:12.5px; color:#5b5748; font-weight:300; }
@@ -1597,7 +1602,7 @@ export default function VestraPrototype() {
         .retailer-group{ margin-bottom:20px; }
         .bag-row{ display:flex; align-items:center; gap:12px; width:100%; box-sizing:border-box; background:#fff; border:1px solid #e6e0d2; border-radius:4px; padding:10px; margin-bottom:8px; text-decoration:none; color:inherit; transition:border-color .2s; cursor:pointer; font-family:'Inter',sans-serif; text-align:left; }
         .bag-row:hover{ border-color:#C6A567; }
-        .bag-image{ width:56px; height:56px; border-radius:4px; object-fit:cover; flex-shrink:0; background:#f4efe4; }
+        .bag-image{ width:72px; height:72px; border-radius:6px; object-fit:cover; flex-shrink:0; background:#f4efe4; }
         .bag-info{ flex:1; min-width:0; }
         .bag-brand{ font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#A8895C; margin-bottom:2px; }
         .bag-name{ font-size:13px; color:#0B0B0C; }
@@ -1657,25 +1662,25 @@ export default function VestraPrototype() {
         .onb-card-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
         .onb-option-card{ text-align:left; font-size:12.5px; color:#0B0B0C; background:#fff; border:1.5px solid #e6e0d2; border-radius:4px; padding:16px 12px; cursor:pointer; font-family:'Inter',sans-serif; line-height:1.35; transition:all .15s; }
         .onb-option-card.selected{ border-color:#C6A567; background:#faf6ec; }
-        .onb-style-grid{ display:grid; grid-template-columns:1fr; gap:12px; padding-bottom:12px; }
+        .onb-style-grid{ display:grid; grid-template-columns:1fr; gap:14px; padding-bottom:12px; }
         .onb-style-card{
-          display:flex; gap:12px; align-items:stretch; text-align:left;
-          background:#fff; border:1.5px solid #e6e0d2; border-radius:10px; padding:10px;
+          display:flex; gap:14px; align-items:stretch; text-align:left;
+          background:#fff; border:1.5px solid #e6e0d2; border-radius:12px; padding:10px;
           cursor:pointer; font-family:'Inter',sans-serif; transition:all .15s; color:#0B0B0C;
         }
         .onb-style-card.selected{ border-color:#C6A567; background:#faf6ec; box-shadow:0 0 0 1px #C6A567; }
-        .onb-style-image{ width:88px; height:118px; object-fit:cover; border-radius:6px; flex-shrink:0; background:#efe9da; }
+        .onb-style-image{ width:112px; height:150px; object-fit:cover; border-radius:8px; flex-shrink:0; background:#efe9da; }
         .onb-style-copy{ display:flex; flex-direction:column; justify-content:center; min-width:0; padding-right:4px; }
-        .onb-style-title{ font-family:'Fraunces',serif; font-size:16px; margin-bottom:6px; line-height:1.25; }
-        .onb-style-desc{ font-size:12px; color:#5b5748; font-weight:300; line-height:1.45; }
+        .onb-style-title{ font-family:'Fraunces',serif; font-size:17px; margin-bottom:6px; line-height:1.25; }
+        .onb-style-desc{ font-size:12.5px; color:#5b5748; font-weight:300; line-height:1.45; }
         @media (min-width: 768px) {
-          .onb-style-grid{ grid-template-columns:1fr 1fr; gap:14px; }
-          .onb-style-image{ width:100px; height:132px; }
-          .onb-style-title{ font-size:17px; }
-          .onb-style-desc{ font-size:12.5px; }
+          .onb-style-grid{ grid-template-columns:1fr 1fr; gap:16px; }
+          .onb-style-image{ width:128px; height:170px; }
+          .onb-style-title{ font-size:18px; }
+          .onb-style-desc{ font-size:13px; }
         }
         @media (min-width: 1024px) {
-          .onb-style-grid{ grid-template-columns:1fr 1fr; max-width:720px; }
+          .onb-style-grid{ grid-template-columns:1fr 1fr; max-width:760px; }
         }
         .onb-budget-list{ display:flex; flex-direction:column; gap:10px; }
         .onb-budget-card{ text-align:left; background:#fff; border:1.5px solid #e6e0d2; border-radius:4px; padding:14px 16px; cursor:pointer; font-family:'Inter',sans-serif; transition:all .15s; }
@@ -1686,16 +1691,16 @@ export default function VestraPrototype() {
         .onb-visual-grid-3{ grid-template-columns:1fr 1fr 1fr; gap:10px; }
         .onb-visual-card{
           display:flex; flex-direction:column; gap:10px; text-align:left;
-          background:#fff; border:1.5px solid #e6e0d2; border-radius:10px; padding:8px 8px 12px;
+          background:#fff; border:1.5px solid #e6e0d2; border-radius:12px; padding:8px 8px 12px;
           cursor:pointer; font-family:'Inter',sans-serif; transition:all .15s; overflow:hidden;
         }
         .onb-visual-card.selected{ border-color:#C6A567; background:#faf6ec; box-shadow:0 0 0 1px #C6A567; }
-        .onb-visual-image{ width:100%; aspect-ratio:3/4; object-fit:cover; border-radius:7px; background:#efe9da; display:block; }
+        .onb-visual-image{ width:100%; aspect-ratio:3/4; object-fit:cover; border-radius:8px; background:#efe9da; display:block; }
         .onb-visual-label{ font-family:'Fraunces',serif; font-size:14px; line-height:1.3; color:#0B0B0C; padding:0 4px; }
         .onb-visual-grid-3 .onb-visual-label{ font-size:12.5px; text-align:center; padding:0 2px; }
         @media (min-width:720px){
-          .onb-visual-grid{ grid-template-columns:1fr 1fr; gap:14px; max-width:640px; }
-          .onb-visual-grid-3{ grid-template-columns:1fr 1fr 1fr; max-width:720px; }
+          .onb-visual-grid{ grid-template-columns:1fr 1fr; gap:16px; max-width:680px; }
+          .onb-visual-grid-3{ grid-template-columns:1fr 1fr 1fr; max-width:780px; }
           .onb-visual-label{ font-size:15px; }
           .onb-visual-grid-3 .onb-visual-label{ font-size:14px; }
         }
