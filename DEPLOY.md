@@ -1,58 +1,46 @@
 # Deploy Vestra to wearvestra.com
 
-Your domain is registered at **Porkbun** and currently shows the default parking page. Publishing needs two things: host the built site, then point DNS at that host.
+## Live on GitHub
 
-## Option A — Vercel (recommended, free)
+- **Repo:** https://github.com/ivanodonato7/wearvestra
+- **Pages branch:** `gh-pages` (built site)
+- **GitHub Pages:** custom domain set to `wearvestra.com`
 
-1. Push this project to a GitHub repo (or import the folder at [vercel.com/new](https://vercel.com/new)).
-2. In Vercel → Project → Settings → Domains, add:
-   - `wearvestra.com`
-   - `www.wearvestra.com`
-3. In Porkbun → Domain Management → wearvestra.com → DNS Records:
-   - Remove the parking / link A records that point at Porkbun’s placeholder.
-   - Add the records Vercel shows (usually an **A** for `@` → `76.76.21.21` and a **CNAME** for `www` → `cname.vercel-dns.com`).
-4. Wait a few minutes for DNS. Visit https://wearvestra.com
+## Point DNS (Porkbun) — required
 
-CLI (if you have a Vercel account logged in):
+The domain still shows Porkbun’s parking page until DNS points at GitHub Pages.
+
+1. Log in to [Porkbun](https://porkbun.com) → Domain Management → **wearvestra.com** → **DNS Records**
+2. Delete existing parking / link **A** (and ALIAS/CNAME) records for `@` and `www`
+3. Add:
+
+| Type | Host | Answer |
+|------|------|--------|
+| A | *(blank)* | `185.199.108.153` |
+| A | *(blank)* | `185.199.109.153` |
+| A | *(blank)* | `185.199.110.153` |
+| A | *(blank)* | `185.199.111.153` |
+| CNAME | `www` | `ivanodonato7.github.io` |
+
+4. Wait a few minutes, then open https://wearvestra.com
+5. In GitHub → Settings → Pages, click **Check again** if needed, then enable **Enforce HTTPS**
+
+## Redeploy after code changes
 
 ```bash
-npx vercel --prod
-npx vercel domains add wearvestra.com
+npm run build
+# Publish the contents of dist/ to the gh-pages branch
 ```
 
-## Option B — Porkbun Static Hosting
+## Install as an app
 
-1. In Porkbun, open the house icon next to wearvestra.com → **Static Hosting** (15-day trial available).
-2. Upload everything inside the local `dist/` folder after `npm run build` (or connect GitHub).
-3. Make sure `index.html` is at the site root.
+Once HTTPS works on wearvestra.com:
 
-## Option C — Netlify
+- iPhone: Safari → Share → **Add to Home Screen**
+- Android: Chrome → **Install app**
 
-Same idea as Vercel: connect the repo, add `wearvestra.com`, then set the DNS records Netlify provides in Porkbun.
-
----
-
-## Installable app (PWA)
-
-Once the site is live on HTTPS:
-
-- **iPhone**: Safari → Share → Add to Home Screen
-- **Android**: Chrome → menu → Install app / Add to Home screen
-
-That installs Vestra as a standalone app (no App Store required).
-
-## Native Android app (Capacitor)
+## Native Android
 
 ```bash
 npm run cap:android
-```
-
-Opens Android Studio with the `android/` project (`com.wearvestra.app`). Build an APK/AAB from there for Play Store or sideload.
-
-iOS requires a Mac + Xcode:
-
-```bash
-npx cap add ios
-npx cap sync
-npx cap open ios
 ```

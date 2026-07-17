@@ -2,6 +2,8 @@
 
 Installable fashion stylist app for **[wearvestra.com](https://wearvestra.com)**.
 
+**GitHub:** https://github.com/ivanodonato7/wearvestra
+
 Source prototype: [Claude artifact](https://claude.ai/public/artifacts/435fc56d-b0e0-44f9-9294-6b9dbfa3af98).
 
 ## Features
@@ -29,7 +31,7 @@ npm run preview
 
 ## Publish to wearvestra.com
 
-See [DEPLOY.md](./DEPLOY.md). Domain is on Porkbun — point DNS at Vercel, Netlify, or Porkbun Static Hosting after deploying `dist/`.
+Site is deployed via GitHub Pages (`gh-pages` branch). Point Porkbun DNS at GitHub — see [DEPLOY.md](./DEPLOY.md).
 
 ## Native app
 
