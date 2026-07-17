@@ -19,7 +19,12 @@ const UI = {
     createAccountEyebrow: "Create Your Account", whereReachYouLine1: "Where should we", whereReachYouLine2: "reach you?",
     emailPlaceholder: "your@email.com", continueBtn: "Continue", signupNote: "This is a prototype — no account is actually created.",
     stepAudienceTitle: "Who are we dressing?", stepAudiencePrompt: "This helps us show the right fits and inspiration.",
-    step0Title: "Let's get you dressed properly.", step0Prompt: "How would you describe your day-to-day?",
+    step0Title: "How would you describe your day-to-day?", step0Prompt: "Pick the photo that feels closest to your days.",
+    lifeOfficeDesc: "Meetings, clients, and polished days that need to look intentional.",
+    lifeCreativeDesc: "Flexible workplaces where you can dress with a little more ease.",
+    lifeRemoteDesc: "Mostly at home — elevated casual that still feels put together.",
+    lifeTravelDesc: "Travel, events, and days that change — versatile layers.",
+    lifeStudentDesc: "Campus life and moving between classes, work, and evenings.",
     step1Title: "Which of these feels most like you?", step1Prompt: "Not sure of the name? Pick the photo that feels most like you.",
     archQuietDesc: "Clean lines, refined fits, nothing loud — polished without trying too hard.",
     archRelaxedDesc: "Easy fabrics, soft structure, put-together but never stiff.",
@@ -78,7 +83,12 @@ const UI = {
     createAccountEyebrow: "Crea tu cuenta", whereReachYouLine1: "¿Dónde podemos", whereReachYouLine2: "contactarte?",
     emailPlaceholder: "tu@email.com", continueBtn: "Continuar", signupNote: "Esto es un prototipo — no se crea ninguna cuenta real.",
     stepAudienceTitle: "¿Para quién es el estilo?", stepAudiencePrompt: "Así te mostramos los cortes e inspiración adecuados.",
-    step0Title: "Vamos a vestirte como es debido.", step0Prompt: "¿Cómo describirías tu día a día?",
+    step0Title: "¿Cómo describirías tu día a día?", step0Prompt: "Elige la foto que más se parezca a tus días.",
+    lifeOfficeDesc: "Reuniones, clientes y días que piden un look intencional.",
+    lifeCreativeDesc: "Espacios flexibles donde puedes vestirte con más soltura.",
+    lifeRemoteDesc: "Mayormente en casa — casual elevado pero cuidado.",
+    lifeTravelDesc: "Viajes, eventos y días cambiantes — capas versátiles.",
+    lifeStudentDesc: "Vida de campus entre clases, trabajo y noches.",
     step1Title: "¿Cuál de estos se parece más a ti?", step1Prompt: "Si no sabes el nombre, elige la foto que más te represente.",
     archQuietDesc: "Líneas limpias, cortes refinados, nada estridente — elegancia sin esfuerzo.",
     archRelaxedDesc: "Tejidos cómodos, estructura suave, cuidado pero nunca rígido.",
@@ -137,7 +147,12 @@ const UI = {
     createAccountEyebrow: "Créez votre compte", whereReachYouLine1: "Où pouvons-nous", whereReachYouLine2: "vous joindre ?",
     emailPlaceholder: "votre@email.com", continueBtn: "Continuer", signupNote: "Ceci est un prototype — aucun compte n'est réellement créé.",
     stepAudienceTitle: "Pour qui s'habille-t-on ?", stepAudiencePrompt: "Cela nous aide à montrer les coupes et inspirations adaptées.",
-    step0Title: "Habillons-vous comme il se doit.", step0Prompt: "Comment décririez-vous votre quotidien ?",
+    step0Title: "Comment décririez-vous votre quotidien ?", step0Prompt: "Choisissez la photo qui ressemble le plus à vos journées.",
+    lifeOfficeDesc: "Réunions, clients, et des journées qui demandent une allure intentionnelle.",
+    lifeCreativeDesc: "Espaces flexibles où l'on peut s'habiller avec plus de souplesse.",
+    lifeRemoteDesc: "Surtout à la maison — un casual élevé mais soigné.",
+    lifeTravelDesc: "Voyages, événements, journées changeantes — des couches versatiles.",
+    lifeStudentDesc: "Vie de campus entre cours, travail et soirées.",
     step1Title: "Lequel vous ressemble le plus ?", step1Prompt: "Pas sûr du nom ? Choisissez la photo qui vous parle.",
     archQuietDesc: "Lignes nettes, coupes raffinées, rien de criard — élégance sans effort.",
     archRelaxedDesc: "Matières souples, structure douce, soigné sans rigidité.",
@@ -308,7 +323,7 @@ function LanguageSwitcher({ corner }) {
 }
 
 // ---------- Product catalog (mirrors the seed data in the real backend) ----------
-const ASSET_V = "4";
+const ASSET_V = "5";
 const assetUrl = (path) => `${path}?v=${ASSET_V}`;
 
 const CATALOG = {
@@ -470,22 +485,27 @@ const LIFESTYLE_META = {
   "Office / client-facing": {
     woman: assetUrl("/onboarding/life-office.jpg"),
     man: assetUrl("/onboarding/life-office-man.jpg"),
+    descKey: "lifeOfficeDesc",
   },
   "Creative or flexible workplace": {
     woman: assetUrl("/onboarding/life-creative.jpg"),
     man: assetUrl("/onboarding/life-creative-man.jpg"),
+    descKey: "lifeCreativeDesc",
   },
   "Remote, mostly at home": {
     woman: assetUrl("/onboarding/life-remote.jpg"),
     man: assetUrl("/onboarding/life-remote-man.jpg"),
+    descKey: "lifeRemoteDesc",
   },
   "On the move — travel, events, varied": {
     woman: assetUrl("/onboarding/life-travel.jpg"),
     man: assetUrl("/onboarding/life-travel-man.jpg"),
+    descKey: "lifeTravelDesc",
   },
   "Student life": {
     woman: assetUrl("/onboarding/life-student.jpg"),
     man: assetUrl("/onboarding/life-student-man.jpg"),
+    descKey: "lifeStudentDesc",
   },
 };
 const ARCHETYPE_OPTIONS = ["Quiet & Tailored", "Relaxed & Considered", "Modern & Sharp", "Warm & Layered", "Classic & Polished", "Minimal & Directional", "Romantic & Soft", "Bold & Expressive"];
@@ -575,7 +595,7 @@ const OCCASION_OPTIONS = ["Work", "Date nights", "Travel", "Events & celebration
 
 const STEPS = [
   { id: "audience", titleKey: "stepAudienceTitle", promptKey: "stepAudiencePrompt", type: "visual", options: AUDIENCE_OPTIONS, meta: AUDIENCE_META },
-  { id: "lifestyle", titleKey: "step0Title", promptKey: "step0Prompt", type: "visual", options: LIFESTYLE_OPTIONS, meta: LIFESTYLE_META },
+  { id: "lifestyle", titleKey: "step0Title", promptKey: "step0Prompt", type: "photoList", options: LIFESTYLE_OPTIONS, meta: LIFESTYLE_META },
   { id: "archetype", titleKey: "step1Title", promptKey: "step1Prompt", type: "archetype", options: ARCHETYPE_OPTIONS },
   { id: "fit", titleKey: "step2Title", promptKey: "step2Prompt", type: "visual", options: FIT_OPTIONS, meta: FIT_META },
   { id: "palette", titleKey: "step3Title", promptKey: "step3Prompt", type: "palette", options: COLOR_OPTIONS },
@@ -662,7 +682,7 @@ function OnboardingScreen({ step, totalSteps, question, answers, setAnswers, onN
   const canContinue =
     question.type === "sizes"
       ? true
-      : question.type === "single" || question.type === "budget" || question.type === "archetype" || question.type === "visual"
+      : question.type === "single" || question.type === "budget" || question.type === "archetype" || question.type === "visual" || question.type === "photoList"
       ? !!answers[question.id]
       : (answers[question.id] || []).length > 0;
 
@@ -693,6 +713,29 @@ function OnboardingScreen({ step, totalSteps, question, answers, setAnswers, onN
                   <div className="onb-style-copy">
                     <div className="onb-style-title">{tOpt(opt)}</div>
                     <div className="onb-style-desc">{t(meta.descKey)}</div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {question.type === "photoList" && (
+          <div className="onb-style-grid">
+            {question.options.map((opt, idx) => {
+              const meta = (question.meta && question.meta[opt]) || {};
+              const image = resolveAudienceImage(meta, audience, idx);
+              return (
+                <button
+                  key={opt}
+                  type="button"
+                  className={`onb-style-card ${answers[question.id] === opt ? "selected" : ""}`}
+                  onClick={() => selectSingle(opt)}
+                >
+                  <img className="onb-style-image onb-lifestyle-image" src={image} alt={tOpt(opt)} loading="eager" />
+                  <div className="onb-style-copy">
+                    <div className="onb-style-title">{tOpt(opt)}</div>
+                    {meta.descKey && <div className="onb-style-desc">{t(meta.descKey)}</div>}
                   </div>
                 </button>
               );
@@ -1720,12 +1763,14 @@ export default function VestraPrototype() {
         }
         .onb-style-card.selected{ border-color:#C6A567; background:#faf6ec; box-shadow:0 0 0 1px #C6A567; }
         .onb-style-image{ width:112px; height:150px; object-fit:cover; border-radius:8px; flex-shrink:0; background:#efe9da; }
+        .onb-lifestyle-image{ width:120px; height:160px; }
         .onb-style-copy{ display:flex; flex-direction:column; justify-content:center; min-width:0; padding-right:4px; }
         .onb-style-title{ font-family:'Fraunces',serif; font-size:17px; margin-bottom:6px; line-height:1.25; }
         .onb-style-desc{ font-size:12.5px; color:#5b5748; font-weight:300; line-height:1.45; }
         @media (min-width: 768px) {
           .onb-style-grid{ grid-template-columns:1fr 1fr; gap:16px; }
           .onb-style-image{ width:128px; height:170px; }
+          .onb-lifestyle-image{ width:140px; height:186px; }
           .onb-style-title{ font-size:18px; }
           .onb-style-desc{ font-size:13px; }
         }
