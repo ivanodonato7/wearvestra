@@ -411,6 +411,13 @@ function pickOutfitIndex(text) {
 
 // ==================== ONBOARDING DATA ====================
 const LIFESTYLE_OPTIONS = ["Office / client-facing", "Creative or flexible workplace", "Remote, mostly at home", "On the move — travel, events, varied", "Student life"];
+const LIFESTYLE_META = {
+  "Office / client-facing": { image: "/onboarding/life-office.jpg" },
+  "Creative or flexible workplace": { image: "/onboarding/life-creative.jpg" },
+  "Remote, mostly at home": { image: "/onboarding/life-remote.jpg" },
+  "On the move — travel, events, varied": { image: "/onboarding/life-travel.jpg" },
+  "Student life": { image: "/onboarding/life-student.jpg" },
+};
 const ARCHETYPE_OPTIONS = ["Quiet & Tailored", "Relaxed & Considered", "Modern & Sharp", "Warm & Layered", "Classic & Polished", "Minimal & Directional", "Romantic & Soft", "Bold & Expressive"];
 
 const ARCHETYPE_META = {
@@ -448,6 +455,12 @@ const ARCHETYPE_META = {
   },
 };
 const FIT_OPTIONS = ["Fitted & tailored", "True to size, structured", "Relaxed, room to move", "Oversized, intentionally loose"];
+const FIT_META = {
+  "Fitted & tailored": { image: "/onboarding/fit-fitted.jpg" },
+  "True to size, structured": { image: "/onboarding/fit-structured.jpg" },
+  "Relaxed, room to move": { image: "/onboarding/fit-relaxed.jpg" },
+  "Oversized, intentionally loose": { image: "/onboarding/fit-oversized.jpg" },
+};
 const COLOR_OPTIONS = [
   { label: "Black", hex: "#161616" },
   { label: "Ivory / Cream", hex: "#F6F1E7" },
@@ -471,9 +484,9 @@ const BUDGET_OPTIONS = [
 const OCCASION_OPTIONS = ["Work", "Date nights", "Travel", "Events & celebrations", "Everyday, just want to feel put together"];
 
 const STEPS = [
-  { id: "lifestyle", titleKey: "step0Title", promptKey: "step0Prompt", type: "single", options: LIFESTYLE_OPTIONS },
+  { id: "lifestyle", titleKey: "step0Title", promptKey: "step0Prompt", type: "visual", options: LIFESTYLE_OPTIONS, meta: LIFESTYLE_META },
   { id: "archetype", titleKey: "step1Title", promptKey: "step1Prompt", type: "archetype", options: ARCHETYPE_OPTIONS },
-  { id: "fit", titleKey: "step2Title", promptKey: "step2Prompt", type: "single", options: FIT_OPTIONS },
+  { id: "fit", titleKey: "step2Title", promptKey: "step2Prompt", type: "visual", options: FIT_OPTIONS, meta: FIT_META },
   { id: "palette", titleKey: "step3Title", promptKey: "step3Prompt", type: "palette", options: COLOR_OPTIONS },
   { id: "budget", titleKey: "step4Title", promptKey: "step4Prompt", type: "budget", options: BUDGET_OPTIONS },
   { id: "occasions", titleKey: "step5Title", promptKey: "step5Prompt", type: "multi", options: OCCASION_OPTIONS },
@@ -556,7 +569,7 @@ function OnboardingScreen({ step, totalSteps, question, answers, setAnswers, onN
   const canContinue =
     question.type === "sizes"
       ? true
-      : question.type === "single" || question.type === "budget" || question.type === "archetype"
+      : question.type === "single" || question.type === "budget" || question.type === "archetype" || question.type === "visual"
       ? !!answers[question.id]
       : (answers[question.id] || []).length > 0;
 
@@ -587,6 +600,25 @@ function OnboardingScreen({ step, totalSteps, question, answers, setAnswers, onN
                     <div className="onb-style-title">{tOpt(opt)}</div>
                     <div className="onb-style-desc">{t(meta.descKey)}</div>
                   </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {question.type === "visual" && (
+          <div className="onb-visual-grid">
+            {question.options.map((opt) => {
+              const meta = (question.meta && question.meta[opt]) || {};
+              return (
+                <button
+                  key={opt}
+                  type="button"
+                  className={`onb-visual-card ${answers[question.id] === opt ? "selected" : ""}`}
+                  onClick={() => selectSingle(opt)}
+                >
+                  <img className="onb-visual-image" src={meta.image} alt={tOpt(opt)} loading="lazy" />
+                  <span className="onb-visual-label">{tOpt(opt)}</span>
                 </button>
               );
             })}
@@ -1512,12 +1544,30 @@ export default function VestraPrototype() {
         .onb-budget-card.selected{ border-color:#C6A567; background:#faf6ec; }
         .onb-budget-label{ font-size:13.5px; color:#0B0B0C; margin-bottom:2px; }
         .onb-budget-sub{ font-size:11px; color:#8b877a; }
-        .onb-swatch-grid{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:14px; }
-        .onb-swatch-card{ display:flex; flex-direction:column; align-items:center; gap:6px; background:#fff; border:1.5px solid #e6e0d2; border-radius:4px; padding:10px 4px; cursor:pointer; font-family:'Inter',sans-serif; transition:all .15s; }
-        .onb-swatch-card.selected{ border-color:#C6A567; background:#faf6ec; }
-        .onb-swatch-card.avoid.selected{ border-color:#a85832; background:#fbf1ec; }
-        .onb-swatch-dot{ width:22px; height:22px; border-radius:50%; border:1px solid rgba(0,0,0,0.12); }
-        .onb-swatch-label{ font-size:9.5px; color:#5b5748; text-align:center; line-height:1.25; }
+        .onb-visual-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; padding-bottom:12px; }
+        .onb-visual-card{
+          display:flex; flex-direction:column; gap:10px; text-align:left;
+          background:#fff; border:1.5px solid #e6e0d2; border-radius:10px; padding:8px 8px 12px;
+          cursor:pointer; font-family:'Inter',sans-serif; transition:all .15s; overflow:hidden;
+        }
+        .onb-visual-card.selected{ border-color:#C6A567; background:#faf6ec; box-shadow:0 0 0 1px #C6A567; }
+        .onb-visual-image{ width:100%; aspect-ratio:3/4; object-fit:cover; border-radius:7px; background:#efe9da; display:block; }
+        .onb-visual-label{ font-family:'Fraunces',serif; font-size:14px; line-height:1.3; color:#0B0B0C; padding:0 4px; }
+        @media (min-width:720px){
+          .onb-visual-grid{ grid-template-columns:1fr 1fr; gap:14px; max-width:640px; }
+          .onb-visual-label{ font-size:15px; }
+        }
+        .onb-swatch-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px; }
+        .onb-swatch-card{ display:flex; flex-direction:column; align-items:center; gap:10px; background:#fff; border:1.5px solid #e6e0d2; border-radius:10px; padding:14px 10px 12px; cursor:pointer; font-family:'Inter',sans-serif; transition:all .15s; }
+        .onb-swatch-card.selected{ border-color:#C6A567; background:#faf6ec; box-shadow:0 0 0 1px #C6A567; }
+        .onb-swatch-card.avoid.selected{ border-color:#a85832; background:#fbf1ec; box-shadow:0 0 0 1px #a85832; }
+        .onb-swatch-dot{ width:56px; height:56px; border-radius:14px; border:1px solid rgba(0,0,0,0.1); box-shadow:inset 0 0 0 1px rgba(255,255,255,0.25); flex-shrink:0; }
+        .onb-swatch-label{ font-size:12px; color:#5b5748; text-align:center; line-height:1.3; font-weight:500; }
+        @media (min-width:720px){
+          .onb-swatch-grid{ grid-template-columns:1fr 1fr 1fr; gap:14px; }
+          .onb-swatch-dot{ width:64px; height:64px; border-radius:16px; }
+          .onb-swatch-label{ font-size:12.5px; }
+        }
         .onb-link{ background:none; border:none; color:#8b877a; font-size:11.5px; text-decoration:underline; cursor:pointer; font-family:'Inter',sans-serif; padding:0; margin-bottom:8px; }
         .onb-mini-label{ font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:#a85832; margin-bottom:10px; }
         .onb-sizes{ display:flex; flex-direction:column; gap:14px; }
