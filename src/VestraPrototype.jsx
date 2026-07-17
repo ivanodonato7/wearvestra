@@ -19,7 +19,15 @@ const UI = {
     createAccountEyebrow: "Create Your Account", whereReachYouLine1: "Where should we", whereReachYouLine2: "reach you?",
     emailPlaceholder: "your@email.com", continueBtn: "Continue", signupNote: "This is a prototype — no account is actually created.",
     step0Title: "Let's get you dressed properly.", step0Prompt: "How would you describe your day-to-day?",
-    step1Title: "Which of these feels most like you?", step1Prompt: "Pick the look that pulls you in first.",
+    step1Title: "Which of these feels most like you?", step1Prompt: "Not sure of the name? Pick the photo that feels most like you.",
+    archQuietDesc: "Clean lines, refined fits, nothing loud — polished without trying too hard.",
+    archRelaxedDesc: "Easy fabrics, soft structure, put-together but never stiff.",
+    archModernDesc: "Crisp silhouettes, strong shapes, contemporary and intentional.",
+    archWarmDesc: "Textures, layers, and earthy tones that feel inviting and lived-in.",
+    archClassicDesc: "Timeless pieces you’d wear for years — neat, reliable, elegant.",
+    archMinimalDesc: "Fewer pieces, quieter colors, strong proportions that do the talking.",
+    archRomanticDesc: "Soft fabrics, gentle movement, and a lighter, more delicate mood.",
+    archBoldDesc: "Statement color, presence, and outfits people remember.",
     step2Title: "How do you like things to fit?", step2Prompt: "When you get dressed, you lean toward—",
     step3Title: "Let's talk color.", step3Prompt: "Which of these do you find yourself reaching for? Pick a few.",
     step4Title: "Every stylist should respect your budget.", step4Prompt: "For a typical piece, where are you most comfortable?",
@@ -61,7 +69,15 @@ const UI = {
     createAccountEyebrow: "Crea tu cuenta", whereReachYouLine1: "¿Dónde podemos", whereReachYouLine2: "contactarte?",
     emailPlaceholder: "tu@email.com", continueBtn: "Continuar", signupNote: "Esto es un prototipo — no se crea ninguna cuenta real.",
     step0Title: "Vamos a vestirte como es debido.", step0Prompt: "¿Cómo describirías tu día a día?",
-    step1Title: "¿Cuál de estos se parece más a ti?", step1Prompt: "Elige el look que más te atrae.",
+    step1Title: "¿Cuál de estos se parece más a ti?", step1Prompt: "Si no sabes el nombre, elige la foto que más te represente.",
+    archQuietDesc: "Líneas limpias, cortes refinados, nada estridente — elegancia sin esfuerzo.",
+    archRelaxedDesc: "Tejidos cómodos, estructura suave, cuidado pero nunca rígido.",
+    archModernDesc: "Siluetas nítidas, formas fuertes, contemporáneo e intencional.",
+    archWarmDesc: "Texturas, capas y tonos tierra acogedores y naturales.",
+    archClassicDesc: "Piezas atemporales para años — limpio, fiable, elegante.",
+    archMinimalDesc: "Menos piezas, colores discretos, proporciones que hablan solas.",
+    archRomanticDesc: "Telas suaves, movimiento ligero y un aire más delicado.",
+    archBoldDesc: "Color con presencia y looks que se recuerdan.",
     step2Title: "¿Cómo te gusta que te quede la ropa?", step2Prompt: "Cuando te vistes, prefieres—",
     step3Title: "Hablemos de color.", step3Prompt: "¿Cuáles sueles elegir? Marca varios.",
     step4Title: "Tu estilista debe respetar tu presupuesto.", step4Prompt: "Para una prenda típica, ¿dónde te sientes más cómodo/a?",
@@ -103,7 +119,15 @@ const UI = {
     createAccountEyebrow: "Créez votre compte", whereReachYouLine1: "Où pouvons-nous", whereReachYouLine2: "vous joindre ?",
     emailPlaceholder: "votre@email.com", continueBtn: "Continuer", signupNote: "Ceci est un prototype — aucun compte n'est réellement créé.",
     step0Title: "Habillons-vous comme il se doit.", step0Prompt: "Comment décririez-vous votre quotidien ?",
-    step1Title: "Lequel vous ressemble le plus ?", step1Prompt: "Choisissez le style qui vous attire en premier.",
+    step1Title: "Lequel vous ressemble le plus ?", step1Prompt: "Pas sûr du nom ? Choisissez la photo qui vous parle.",
+    archQuietDesc: "Lignes nettes, coupes raffinées, rien de criard — élégance sans effort.",
+    archRelaxedDesc: "Matières souples, structure douce, soigné sans rigidité.",
+    archModernDesc: "Silhouettes précises, formes affirmées, contemporain et intentionnel.",
+    archWarmDesc: "Textures, superpositions et tons terreux accueillants.",
+    archClassicDesc: "Pièces intemporelles à garder des années — net, fiable, élégant.",
+    archMinimalDesc: "Moins de pièces, couleurs discrètes, proportions qui parlent.",
+    archRomanticDesc: "Tissus fluides, mouvement doux, une humeur plus délicate.",
+    archBoldDesc: "Couleur affirmée et tenues dont on se souvient.",
     step2Title: "Comment aimez-vous que ça tombe ?", step2Prompt: "Quand vous vous habillez, vous préférez—",
     step3Title: "Parlons couleur.", step3Prompt: "Lesquelles portez-vous le plus souvent ? Choisissez-en plusieurs.",
     step4Title: "Votre styliste doit respecter votre budget.", step4Prompt: "Pour une pièce typique, où êtes-vous le plus à l'aise ?",
@@ -388,6 +412,41 @@ function pickOutfitIndex(text) {
 // ==================== ONBOARDING DATA ====================
 const LIFESTYLE_OPTIONS = ["Office / client-facing", "Creative or flexible workplace", "Remote, mostly at home", "On the move — travel, events, varied", "Student life"];
 const ARCHETYPE_OPTIONS = ["Quiet & Tailored", "Relaxed & Considered", "Modern & Sharp", "Warm & Layered", "Classic & Polished", "Minimal & Directional", "Romantic & Soft", "Bold & Expressive"];
+
+const ARCHETYPE_META = {
+  "Quiet & Tailored": {
+    image: "/styles/style-quiet-tailored.jpg",
+    descKey: "archQuietDesc",
+  },
+  "Relaxed & Considered": {
+    image: "/styles/style-relaxed-considered.jpg",
+    descKey: "archRelaxedDesc",
+  },
+  "Modern & Sharp": {
+    image: "/styles/style-modern-sharp.jpg",
+    descKey: "archModernDesc",
+  },
+  "Warm & Layered": {
+    image: "/styles/style-warm-layered.jpg",
+    descKey: "archWarmDesc",
+  },
+  "Classic & Polished": {
+    image: "/styles/style-classic-polished.jpg",
+    descKey: "archClassicDesc",
+  },
+  "Minimal & Directional": {
+    image: "/styles/style-minimal-directional.jpg",
+    descKey: "archMinimalDesc",
+  },
+  "Romantic & Soft": {
+    image: "/styles/style-romantic-soft.jpg",
+    descKey: "archRomanticDesc",
+  },
+  "Bold & Expressive": {
+    image: "/styles/style-bold-expressive.jpg",
+    descKey: "archBoldDesc",
+  },
+};
 const FIT_OPTIONS = ["Fitted & tailored", "True to size, structured", "Relaxed, room to move", "Oversized, intentionally loose"];
 const COLOR_OPTIONS = [
   { label: "Black", hex: "#161616" },
@@ -413,7 +472,7 @@ const OCCASION_OPTIONS = ["Work", "Date nights", "Travel", "Events & celebration
 
 const STEPS = [
   { id: "lifestyle", titleKey: "step0Title", promptKey: "step0Prompt", type: "single", options: LIFESTYLE_OPTIONS },
-  { id: "archetype", titleKey: "step1Title", promptKey: "step1Prompt", type: "single", options: ARCHETYPE_OPTIONS },
+  { id: "archetype", titleKey: "step1Title", promptKey: "step1Prompt", type: "archetype", options: ARCHETYPE_OPTIONS },
   { id: "fit", titleKey: "step2Title", promptKey: "step2Prompt", type: "single", options: FIT_OPTIONS },
   { id: "palette", titleKey: "step3Title", promptKey: "step3Prompt", type: "palette", options: COLOR_OPTIONS },
   { id: "budget", titleKey: "step4Title", promptKey: "step4Prompt", type: "budget", options: BUDGET_OPTIONS },
@@ -497,7 +556,7 @@ function OnboardingScreen({ step, totalSteps, question, answers, setAnswers, onN
   const canContinue =
     question.type === "sizes"
       ? true
-      : question.type === "single" || question.type === "budget"
+      : question.type === "single" || question.type === "budget" || question.type === "archetype"
       ? !!answers[question.id]
       : (answers[question.id] || []).length > 0;
 
@@ -511,6 +570,28 @@ function OnboardingScreen({ step, totalSteps, question, answers, setAnswers, onN
       <div className="onb-body">
         <h2 className="onb-question-title">{t(question.titleKey)}</h2>
         <p className="onb-question-prompt">{t(question.promptKey)}</p>
+
+        {question.type === "archetype" && (
+          <div className="onb-style-grid">
+            {question.options.map((opt) => {
+              const meta = ARCHETYPE_META[opt] || {};
+              return (
+                <button
+                  key={opt}
+                  type="button"
+                  className={`onb-style-card ${answers[question.id] === opt ? "selected" : ""}`}
+                  onClick={() => selectSingle(opt)}
+                >
+                  <img className="onb-style-image" src={meta.image} alt={tOpt(opt)} loading="lazy" />
+                  <div className="onb-style-copy">
+                    <div className="onb-style-title">{tOpt(opt)}</div>
+                    <div className="onb-style-desc">{t(meta.descKey)}</div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
 
         {question.type === "single" && (
           <div className="onb-card-grid">
@@ -1406,6 +1487,26 @@ export default function VestraPrototype() {
         .onb-card-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
         .onb-option-card{ text-align:left; font-size:12.5px; color:#0B0B0C; background:#fff; border:1.5px solid #e6e0d2; border-radius:4px; padding:16px 12px; cursor:pointer; font-family:'Inter',sans-serif; line-height:1.35; transition:all .15s; }
         .onb-option-card.selected{ border-color:#C6A567; background:#faf6ec; }
+        .onb-style-grid{ display:grid; grid-template-columns:1fr; gap:12px; padding-bottom:12px; }
+        .onb-style-card{
+          display:flex; gap:12px; align-items:stretch; text-align:left;
+          background:#fff; border:1.5px solid #e6e0d2; border-radius:10px; padding:10px;
+          cursor:pointer; font-family:'Inter',sans-serif; transition:all .15s; color:#0B0B0C;
+        }
+        .onb-style-card.selected{ border-color:#C6A567; background:#faf6ec; box-shadow:0 0 0 1px #C6A567; }
+        .onb-style-image{ width:88px; height:118px; object-fit:cover; border-radius:6px; flex-shrink:0; background:#efe9da; }
+        .onb-style-copy{ display:flex; flex-direction:column; justify-content:center; min-width:0; padding-right:4px; }
+        .onb-style-title{ font-family:'Fraunces',serif; font-size:16px; margin-bottom:6px; line-height:1.25; }
+        .onb-style-desc{ font-size:12px; color:#5b5748; font-weight:300; line-height:1.45; }
+        @media (min-width: 768px) {
+          .onb-style-grid{ grid-template-columns:1fr 1fr; gap:14px; }
+          .onb-style-image{ width:100px; height:132px; }
+          .onb-style-title{ font-size:17px; }
+          .onb-style-desc{ font-size:12.5px; }
+        }
+        @media (min-width: 1024px) {
+          .onb-style-grid{ grid-template-columns:1fr 1fr; max-width:720px; }
+        }
         .onb-budget-list{ display:flex; flex-direction:column; gap:10px; }
         .onb-budget-card{ text-align:left; background:#fff; border:1.5px solid #e6e0d2; border-radius:4px; padding:14px 16px; cursor:pointer; font-family:'Inter',sans-serif; transition:all .15s; }
         .onb-budget-card.selected{ border-color:#C6A567; background:#faf6ec; }
