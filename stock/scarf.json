@@ -1,13 +1,13 @@
 {
   "query": "camel tan fine wool scarf",
-  "scannedAt": "2026-07-17T19:07:50.611Z",
+  "scannedAt": "2026-07-17T21:10:31.981Z",
   "source": "bing_shopping",
   "products": [
     {
-      "title": "Prada Women's Camel Wool Scarf - Natural - Scarves",
+      "title": "Prada Camel Wool Scarf - Natural - Scarves One Size",
       "price": "$1,678.00",
-      "merchant": "Lyst",
-      "url": "https://www.lyst.com/accessories/prada-camel-wool-scarf-2/?product=WPKUNXV&link_id=1199059802&_country=US&size=One+Size&show_express_checkout=true&atc_medium=cpc",
+      "merchant": "Luosophy",
+      "url": "https://www.luosophy.com/products/prada-women-camel-wool-scarf",
       "image": "https://th.bing.com/th/id/OPHS.QO0pykYs0LAOkg474C474?w=220&h=220&c=17&o=5&pid=21.1",
       "availability": "In stock"
     },
@@ -44,10 +44,10 @@
       "availability": "In stock"
     },
     {
-      "title": "Prada Camel Wool Scarf Camel Scarf New & Authentic. PRADA. Beige. Scarves & Wraps.",
+      "title": "Prada Camel Wool Scarf Camel Scarf New & Authentic. PRADA. Beige",
       "price": "$1,999.00",
       "merchant": "eBay",
-      "url": "https://www.ebay.com/itm/336604749555?_ul=US&mkevt=1&mkcid=1&mkrid=711-53200-19255-0&campid=5339114220&toolid=10001&customid=eb%3Ag%3Avms%3Aeb%3Ap%3A336604749555%3B&_trkparms=ispr%3D1&amdata=enc%3A1FUlnhD-MS0OVLFYodWW8nw5",
+      "url": "https://www.ebay.com/itm/336604749555?_ul=US&mkevt=1&mkcid=1&mkrid=711-53200-19255-0&campid=5339131321&toolid=10001&customid=eb%3Ag%3Avms%3Aeb%3Ap%3A336604749555%3B&_trkparms=ispr%3D1&amdata=enc%3A1FUlnhD-MS0OVLFYodWW8nw5",
       "image": "https://th.bing.com/th/id/OPHS.NB9GxT5JCUuihQ474C474?w=220&h=220&c=17&o=5&pid=21.1",
       "availability": "In stock"
     },

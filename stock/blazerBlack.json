@@ -1,0 +1,103 @@
+{
+  "query": "black wool tailored blazer",
+  "scannedAt": "2026-07-17T21:10:17.343Z",
+  "source": "bing_shopping",
+  "products": [
+    {
+      "title": "Canali Classic Fit Solid Wool Blazer In Black At Nordstrom, Size 50",
+      "price": "$1,850.00",
+      "merchant": "Nordstrom",
+      "url": "https://www.nordstrom.com/s/canali-classic-fit-solid-wool-blazer/3036466?color=black&size=50&utm_source=bing&utm_medium=organic&utm_campaign=seo_shopping",
+      "image": "https://th.bing.com/th?id=OPHS.A45QY24%2fa3l3sQ474C474&w=220&h=210&c=17&o=5&pid=21.1",
+      "availability": "In stock"
+    },
+    {
+      "title": "Balmain Double Breasted Wool Blazer In Black At Nordstrom, Size 36",
+      "price": "$2,695.00",
+      "merchant": "Nordstrom",
+      "url": "https://www.nordstrom.com/s/balmain-double-breasted-wool-blazer/4759000?color=black&size=36&utm_source=bing&utm_medium=organic&utm_campaign=seo_shopping",
+      "image": "https://th.bing.com/th/id/OPHS.1aWUy11MymDQjA474C474?w=220&h=210&c=17&o=5&pid=21.1",
+      "availability": "In stock"
+    },
+    {
+      "title": "Dolce & Gabbana Tailored Wool Blazer - Black - Formal Jackets Size IT 50",
+      "price": "$2,937.00",
+      "merchant": "Us",
+      "url": "https://us.thahab.com/products/wool-blazer-black-4?variant=48760939479223",
+      "image": "https://th.bing.com/th/id/OPHS.NIc9KoBYpYmnfA474C474?w=220&h=210&c=17&o=5&pid=21.1",
+      "availability": "In stock"
+    },
+    {
+      "title": "Michael Kors Nico Wool Blazer - Black - Formal Jackets Size 2",
+      "price": "$2,390.00",
+      "merchant": "Michaelkors",
+      "url": "https://www.michaelkors.com/nico-wool-blazer/JJA1240761.html?skuId=41790065",
+      "image": "https://th.bing.com/th?id=OPHS.nHNPXbCCHF8I%2bA474C474&w=220&h=210&c=17&o=5&pid=21.1",
+      "availability": "In stock"
+    },
+    {
+      "title": "The Row Single-Breasted Wool Blazer - Black - Formal Jackets Size US6",
+      "price": "$2,175.00",
+      "merchant": "Senser",
+      "url": "https://www.senser.net/products/senserads-eddaf0f7-7e2a-11ef-a273-033fd029655f/the-row-single-breasted-wool-blazer-409387762578688",
+      "image": "https://th.bing.com/th/id/OPHS.y7PijR9pXas38g474C474?w=220&h=210&c=17&o=5&pid=21.1",
+      "availability": "In stock"
+    },
+    {
+      "title": "Boss Single-Breasted Virgin Wool Blazer - Black - Formal Jackets Size 50",
+      "price": "$645.00",
+      "merchant": "Farfetch",
+      "url": "https://www.farfetch.com/shopping/men/boss-single-breasted-virgin-wool-blazer-item-18014544.aspx?lang=en-US&fsb=1&size=12",
+      "image": "https://th.bing.com/th/id/OPHS.XuEBxxP7spCpLQ474C474?w=220&h=210&c=17&o=5&pid=21.1",
+      "availability": "In stock"
+    },
+    {
+      "title": "Gucci Wool Blazer Tailored Cut Button Detailing - Black - Formal Jackets Size 42",
+      "price": "$2,210.00",
+      "merchant": "The Fashion Square",
+      "url": "https://the-fashion-square.com/us/en/women/clothing/p/1nxnuv3s/gucci-wool-blazer-tailored-cut-button-detailing?s=it40",
+      "image": "https://th.bing.com/th/id/OPHS.pi0jjT4EZVs1mA474C474?w=220&h=210&c=17&o=5&pid=21.1",
+      "availability": "In stock"
+    },
+    {
+      "title": "Quince Italian Wool Tailored Blazer - Black - Formal Jackets Size Small",
+      "price": "$120.00",
+      "merchant": "Quince",
+      "url": "https://www.quince.com/women/italian-wool-tailored-blazer?color=black",
+      "image": "https://th.bing.com/th?id=OPHS.1NsgsuIPq1M2%2bg474C474&w=220&h=210&c=17&o=5&pid=21.1",
+      "availability": "In stock"
+    },
+    {
+      "title": "Dolce & Gabbana Wool Cady Tailored Blazer - Black - Formal Jackets Size 44",
+      "price": "$3,895.00",
+      "merchant": "Farfetch",
+      "url": "https://www.farfetch.com/shopping/women/dolce-gabbana-gabardine-cropped-jacket-item-23602203.aspx?lang=en-US&fsb=1&size=3",
+      "image": "https://th.bing.com/th/id/OPHS.IPSNFs5hMuTt3A474C474?w=220&h=210&c=17&o=5&pid=21.1",
+      "availability": "In stock"
+    },
+    {
+      "title": "Dries Van Noten - Men - Fitted Wool Blazer - Black - 46",
+      "price": "$1,062.00",
+      "merchant": "Driesvannoten",
+      "url": "https://www.driesvannoten.com/en-us/products/261-020432-3055/?variant=56073036333434&utm_source=bing&utm_medium=organic_shopping_fashion",
+      "image": "https://th.bing.com/th/id/OPHS.6XolxJBDBybwxg474C474?w=220&h=210&c=17&o=5&pid=21.1",
+      "availability": "In stock"
+    },
+    {
+      "title": "Tailored Wool Blazer - Men - Wool - 50 - Black",
+      "price": "$1,290.00",
+      "merchant": "Stylight",
+      "url": "https://www.stylight.com/redirect.action?productUuid=802d5802-22c2-5056-91c4-8ae738edeca6",
+      "image": "https://th.bing.com/th/id/OPHS.0ofV0N9Pn5Um2Q474C474?w=220&h=210&c=17&o=5&pid=21.1",
+      "availability": "In stock"
+    },
+    {
+      "title": "Quince Italian Wool Tailored Blazer - Black - Formal Jackets Size Large",
+      "price": "$120.00",
+      "merchant": "Quince",
+      "url": "https://www.quince.com/women/italian-wool-tailored-blazer?color=black",
+      "image": "https://th.bing.com/th?id=OPHS.1NsgsuIPq1M2%2bg474C474&w=220&h=210&c=17&o=5&pid=21.1",
+      "availability": "In stock"
+    }
+  ]
+}

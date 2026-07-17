@@ -1,13 +1,13 @@
 {
   "query": "charcoal fine merino turtleneck sweater",
-  "scannedAt": "2026-07-17T19:07:43.362Z",
+  "scannedAt": "2026-07-17T21:10:20.281Z",
   "source": "bing_shopping",
   "products": [
     {
-      "title": "TOM FORD Ultrafine Merino Wool Turtleneck Sweater In Tcq Charcoal At Nordstrom, Size 56",
+      "title": "TOM FORD Ultrafine Merino Wool Turtleneck Sweater In Tcq Charcoal At Nordstrom, Size 50",
       "price": "$1,590.00",
       "merchant": "Nordstrom",
-      "url": "https://www.nordstrom.com/s/ultrafine-merino-wool-turtleneck-sweater/8972671?color=tcq+charcoal&size=56&utm_source=bing&utm_medium=organic&utm_campaign=seo_shopping",
+      "url": "https://www.nordstrom.com/s/ultrafine-merino-wool-turtleneck-sweater/8972671?color=tcq+charcoal&size=50&utm_source=bing&utm_medium=organic&utm_campaign=seo_shopping",
       "image": "https://th.bing.com/th?id=OPHS.%2bmghgjFrAvmFQA474C474&w=220&h=210&c=17&o=5&pid=21.1",
       "availability": "In stock"
     },
@@ -60,6 +60,14 @@
       "availability": "In stock"
     },
     {
+      "title": "Man Turtleneck Charcoal Size 38 Merino Wool In Blue",
+      "price": "$70.00",
+      "merchant": "Modesens",
+      "url": "https://modesens.com/product/alpha-studio-man-turtleneck-charcoal-size-38-merino-wool-blue-132189881/?country=us&language=en&refinfo=gSH_ggfAlphaStudimc-ApAcCl132189881",
+      "image": "https://th.bing.com/th?id=OPHS.3qCwuZ%2fn5JfMVA474C474&w=220&h=210&c=17&o=5&pid=21.1",
+      "availability": "In stock"
+    },
+    {
       "title": "Nordstrom 100% Extra Fine Merino Wool Turtleneck Sweater Charcoal Womens M",
       "price": "$36.99",
       "merchant": "eBay",
@@ -89,14 +97,6 @@
       "merchant": "Lyst",
       "url": "https://www.lyst.com/clothing/alpha-studio-charcoal-turtleneck-merino-wool/?product=LGUCSCB&link_id=1213972999&_country=US&size=40&show_express_checkout=true&atc_medium=cpc",
       "image": "https://th.bing.com/th?id=OPHS.iwgkTvX%2bLc%2fiuQ474C474&w=220&h=210&c=17&o=5&pid=21.1",
-      "availability": "In stock"
-    },
-    {
-      "title": "Zadig&Voltaire Woman Turtleneck Charcoal Size L Merino Wool",
-      "price": "$297.00",
-      "merchant": "Yoox",
-      "url": "https://www.yoox.com/us/14492381MO/item",
-      "image": "https://th.bing.com/th?id=OPHS.HAUkqCp%2bXi6BsQ474C474&w=220&h=210&c=17&o=5&pid=21.1",
       "availability": "In stock"
     }
   ]

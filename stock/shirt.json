@@ -1,6 +1,6 @@
 {
   "query": "ivory crisp cotton dress shirt",
-  "scannedAt": "2026-07-17T19:07:41.996Z",
+  "scannedAt": "2026-07-17T21:10:18.831Z",
   "source": "bing_shopping",
   "products": [
     {
@@ -36,11 +36,19 @@
       "availability": "In stock"
     },
     {
-      "title": "Paul Fredrick Slim Fit Non-Iron Cotton Pinpoint Solid Button Down Collar Dress Shirt In Ecru At Nord",
+      "title": "Ralph Lauren Yarmouth Ivory 100% Cotton Men's Dress Shirt 16.5 34/35",
+      "price": "$19.99",
+      "merchant": "eBay",
+      "url": "https://www.ebay.com/itm/178116972237?chn=ps",
+      "image": "https://th.bing.com/th?id=OPHS.%2fbnk05RjC35V0A474C474&w=220&h=210&c=17&o=5&pid=21.1",
+      "availability": "In stock"
+    },
+    {
+      "title": "Paul Fredrick Slim Fit Non-Iron Cotton Pinpoint Solid Point Collar Dress Shirt In Ecru At Nordstrom,",
       "price": "$119.00",
       "merchant": "Nordstrom",
-      "url": "https://www.nordstrom.com/s/slim-fit-non-iron-cotton-pinpoint-solid-button-down-collar-dress-shirt/8773007?color=ecru&size=15.5&utm_source=bing&utm_medium=organic&utm_campaign=seo_shopping",
-      "image": "https://th.bing.com/th/id/OPHS.pKlcRTmDTnobOA474C474?w=220&h=210&c=17&o=5&pid=21.1",
+      "url": "https://www.nordstrom.com/s/slim-fit-non-iron-cotton-pinpoint-solid-point-collar-dress-shirt/8770984?color=ecru&size=17.5&utm_source=bing&utm_medium=organic&utm_campaign=seo_shopping",
+      "image": "https://th.bing.com/th/id/OPHS.uYINd8Eb8XgJYA474C474?w=220&h=210&c=17&o=5&pid=21.1",
       "availability": "In stock"
     },
     {
@@ -60,19 +68,19 @@
       "availability": "In stock"
     },
     {
-      "title": "Paul Fredrick Non-Iron Cotton Pinpoint Solid Point Collar Dress Shirt - Ecru, Classic Fit / 17 / 33",
-      "price": "$119.00",
-      "merchant": "Shop",
-      "url": "https://shop.app/products/8088851808426?variantId=46570506879146",
-      "image": "https://th.bing.com/th/id/OPHS.DMe6izk8xFZXvA474C474?w=220&h=210&c=17&o=5&pid=21.1",
-      "availability": "In stock"
-    },
-    {
       "title": "Nordstrom 16.5 35 Imported Broadcloth Dress Shirt Ivory Long Staple Cotton. Nordstrom. Ivory. Dress ",
       "price": "$19.99",
       "merchant": "eBay",
       "url": "https://www.ebay.com/itm/177888275535?_ul=US&mkevt=1&mkcid=1&mkrid=711-53200-19255-0&campid=5339114220&toolid=10001&customid=eb%3Ag%3Avms%3Aeb%3Ap%3A177888275535%3B&_trkparms=ispr%3D1&amdata=enc%3A1BFrxelOxQbeOSa9Zn-xUTQ8",
       "image": "https://th.bing.com/th/id/OPHS.bq9pS17vhlm55A474C474?w=220&h=210&c=17&o=5&pid=21.1",
+      "availability": "In stock"
+    },
+    {
+      "title": "Paul Fredrick Non-Iron Cotton Pinpoint Solid Button Down Collar Dress Shirt - Ecru, Tailored Fit / 1",
+      "price": "$119.00",
+      "merchant": "Shop",
+      "url": "https://shop.app/products/8088851644586?variantId=46570504978602",
+      "image": "https://th.bing.com/th/id/OPHS.KKVOXB53iyUYlA474C474?w=220&h=210&c=17&o=5&pid=21.1",
       "availability": "In stock"
     },
     {
@@ -89,14 +97,6 @@
       "merchant": "Upscalemensfashion",
       "url": "https://upscalemensfashion.com/products/mens-basic-dress-shirt-with-convertible-cuff-color-ivory?variant=38003753582768&utm_medium=cpc&utm_source=bing&utm_campaign=Bing%20Shopping&country=US",
       "image": "https://th.bing.com/th?id=OPHS.fAkX%2bhs%2bBaalyg474C474&w=220&h=210&c=17&o=5&pid=21.1",
-      "availability": "In stock"
-    },
-    {
-      "title": "Men's Basic Solid Color Button Up Dress Shirt (Ivory), Ivory / Medium/15-15.5 Neck/32-33 Sleeve",
-      "price": "$24.95",
-      "merchant": "Gstyleusa",
-      "url": "https://gstyleusa.com/products/mens-basic-solid-color-button-up-dress-shirt-ivory?variant=20905774209&utm_medium=cpc&utm_source=Facebook&utm_campaign=FB%20Dynamic%20Re-marketing",
-      "image": "https://th.bing.com/th/id/OPHS.ASjgcf7TjsiGJw474C474?w=220&h=210&c=17&o=5&pid=21.1",
       "availability": "In stock"
     }
   ]

@@ -1,6 +1,6 @@
 {
   "query": "olive green wool tailored blazer",
-  "scannedAt": "2026-07-17T19:07:39.075Z",
+  "scannedAt": "2026-07-17T21:10:12.865Z",
   "source": "bing_shopping",
   "products": [
     {
@@ -25,14 +25,6 @@
       "merchant": "Nordstrom",
       "url": "https://www.nordstrom.com/s/estelle-double-breasted-wool-silk-blazer/8972164?color=olive&size=8&utm_source=bing&utm_medium=organic&utm_campaign=seo_shopping",
       "image": "https://th.bing.com/th/id/OPHS.rh1G1FPSBCYsVQ474C474?w=220&h=210&c=17&o=5&pid=21.1",
-      "availability": "In stock"
-    },
-    {
-      "title": "ARKET Pure Wool Blazer In Olive Green - Green (Size: 34)",
-      "price": "$260.10",
-      "merchant": "ASOS",
-      "url": "https://www.asos.com/us/arket/arket-pure-wool-blazer-in-olive-green/prd/209338824?browseCountry=US&browseCurrency=USD",
-      "image": "https://th.bing.com/th?id=OPHS.1aT%2fh9PjgAxZvw474C474&w=220&h=210&c=17&o=5&pid=21.1",
       "availability": "In stock"
     },
     {
@@ -81,6 +73,14 @@
       "merchant": "eBay",
       "url": "https://www.ebay.com/itm/167291007514?campid=5338981175&mkevt=1&mkcid=1&toolid=10050&mkrid=711-53200-19255-0&loc_physical_ms=&loc_interest_ms=",
       "image": "https://th.bing.com/th/id/OPHS.EKqFmt3N4A1kMw474C474?w=220&h=210&c=17&o=5&pid=21.1",
+      "availability": "In stock"
+    },
+    {
+      "title": "Wool Blazer In Forest Green",
+      "price": "$294.00",
+      "merchant": "Modesens",
+      "url": "https://modesens.com/product/victoria-beckham-wool-blazer-forest-green-21953618/?country=us&language=en&refinfo=gSH_ggfVictoBeckhfc-ApAcClOuCoJa21953618",
+      "image": "https://th.bing.com/th?id=OPHS.Y4lV%2fRPgpseLvA474C474&w=220&h=210&c=17&o=5&pid=21.1",
       "availability": "In stock"
     },
     {

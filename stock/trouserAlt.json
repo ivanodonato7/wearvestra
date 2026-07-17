@@ -1,6 +1,6 @@
 {
   "query": "grey wide leg wool trousers",
-  "scannedAt": "2026-07-17T19:07:46.361Z",
+  "scannedAt": "2026-07-17T21:10:23.116Z",
   "source": "bing_shopping",
   "products": [
     {
@@ -92,11 +92,11 @@
       "availability": "In stock"
     },
     {
-      "title": "DARKPARK Women's Wool Pants - Gray - Wide-Leg Pants",
-      "price": "$1,163.00",
-      "merchant": "Lyst",
-      "url": "https://www.lyst.com/clothing/darkpark-wool-trousers/?product=WUGQQLH&link_id=1152549698&_country=US&size=40&show_express_checkout=true&atc_medium=cpc",
-      "image": "https://th.bing.com/th/id/OPHS.opbltIYH8lagCg474C474?w=220&h=210&c=17&o=5&pid=21.1",
+      "title": "Tiglio Luxe Gray Wide Leg, Pure Wool Dress Pants 2576 TIG1008 52",
+      "price": "$109.00",
+      "merchant": "Alligatorwarehouse",
+      "url": "https://alligatorwarehouse.com/products/tiglio-luxe-gray-wide-leg-pure-wool-dress-pants-2576-tig1008?variant=47362322727166&country=US&currency=USD&utm_medium=product_sync&utm_source=Bing&utm_content=sag_organic&utm_campaign=sag_organic",
+      "image": "https://th.bing.com/th/id/OPHS.zaumHmE3429YNg474C474?w=220&h=210&c=17&o=5&pid=21.1",
       "availability": "In stock"
     }
   ]
