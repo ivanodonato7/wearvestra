@@ -50,6 +50,10 @@ const UI = {
     shopAcross: "Shop across stores", shopAcrossSub: "Search this piece from budget to luxury",
     shopClose: "Close", shopTierBudget: "Budget", shopTierHighStreet: "High street", shopTierPremium: "Premium", shopTierLuxury: "Luxury",
     shopOpenAll: "Open Google Shopping",
+    favoriteStoresLabel: "Favorite stores",
+    favoriteStoresHint: "Tap to add or remove stores you shop from most.",
+    favoriteStoresEmpty: "No favorites yet — pick a few below.",
+    shopYourFavorites: "Your favorites",
   },
   es: {
     welcomeEyebrow: "Vestra", welcomeTitleLine1: "Vamos a vestirte", welcomeTitleLine2: "como es debido.",
@@ -88,6 +92,10 @@ const UI = {
     shopAcross: "Buscar en tiendas", shopAcrossSub: "Desde low-cost hasta lujo",
     shopClose: "Cerrar", shopTierBudget: "Económico", shopTierHighStreet: "High street", shopTierPremium: "Premium", shopTierLuxury: "Lujo",
     shopOpenAll: "Abrir Google Shopping",
+    favoriteStoresLabel: "Tiendas favoritas",
+    favoriteStoresHint: "Toca para añadir o quitar las tiendas donde más compras.",
+    favoriteStoresEmpty: "Aún no hay favoritas — elige algunas abajo.",
+    shopYourFavorites: "Tus favoritas",
   },
   fr: {
     welcomeEyebrow: "Vestra", welcomeTitleLine1: "Habillons-vous", welcomeTitleLine2: "comme il se doit.",
@@ -126,6 +134,10 @@ const UI = {
     shopAcross: "Chercher en boutiques", shopAcrossSub: "Du abordable au luxe",
     shopClose: "Fermer", shopTierBudget: "Budget", shopTierHighStreet: "High street", shopTierPremium: "Premium", shopTierLuxury: "Luxe",
     shopOpenAll: "Ouvrir Google Shopping",
+    favoriteStoresLabel: "Boutiques préférées",
+    favoriteStoresHint: "Touchez pour ajouter ou retirer vos boutiques habituelles.",
+    favoriteStoresEmpty: "Aucune favorite — choisissez-en quelques-unes ci-dessous.",
+    shopYourFavorites: "Vos favorites",
   },
 };
 
@@ -416,6 +428,7 @@ const DEFAULT_PROFILE = {
   budget: "balanced",
   occasions: ["Work", "Events & celebrations"],
   modelGender: "woman",
+  favoriteStores: ["zara", "uniqlo", "nordstrom", "suitsupply"],
 };
 
 // ==================== ONBOARDING SCREENS ====================
@@ -656,11 +669,13 @@ function ModelHero({ itemKeys, gender }) {
 }
 
 // ==================== SHOP ACROSS STORES ====================
-function ShopSheet({ item, onClose }) {
+function ShopSheet({ item, onClose, favoriteStores = [] }) {
   const { t, tName } = useLang();
   if (!item) return null;
   const links = storeLinksForItem(item);
   const shoppingUrl = googleShoppingUrl(item.searchQuery || item.name);
+  const favSet = new Set(favoriteStores);
+  const favoriteLinks = links.filter((s) => favSet.has(s.id));
 
   return (
     <div className="shop-overlay" onClick={onClose} role="presentation">
@@ -679,6 +694,25 @@ function ShopSheet({ item, onClose }) {
         <a className="shop-google" href={shoppingUrl} target="_blank" rel="noopener noreferrer">
           {t("shopOpenAll")} <ExternalLink size={13} />
         </a>
+        {favoriteLinks.length > 0 && (
+          <div className="shop-tier">
+            <div className="shop-tier-label">{t("shopYourFavorites")}</div>
+            <div className="shop-store-grid">
+              {favoriteLinks.map((store) => (
+                <a
+                  key={`fav-${store.id}`}
+                  className="shop-store-link shop-store-link-fav"
+                  href={store.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <span>{store.name}</span>
+                  <ExternalLink size={12} />
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
         <div className="shop-tiers">
           {STORE_TIERS.map((tier) => {
             const stores = links.filter((s) => s.tier === tier.id);
@@ -690,7 +724,7 @@ function ShopSheet({ item, onClose }) {
                   {stores.map((store) => (
                     <a
                       key={store.id}
-                      className="shop-store-link"
+                      className={`shop-store-link ${favSet.has(store.id) ? "shop-store-link-fav" : ""}`}
                       href={store.href}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -710,7 +744,7 @@ function ShopSheet({ item, onClose }) {
 }
 
 // ==================== OUTFIT CARD ====================
-function OutfitCard({ outfit, onSwap, onSave, saved, modelGender, onModelGenderChange }) {
+function OutfitCard({ outfit, onSwap, onSave, saved, modelGender, onModelGenderChange, favoriteStores }) {
   const { t, tName } = useLang();
   const [shopItem, setShopItem] = useState(null);
   return (
@@ -775,7 +809,13 @@ function OutfitCard({ outfit, onSwap, onSave, saved, modelGender, onModelGenderC
       <button className="save-btn" onClick={onSave} disabled={saved}>
         {saved ? <><Check size={12} /> {t("savedLabel")}</> : t("saveOutfit")}
       </button>
-      {shopItem && <ShopSheet item={shopItem} onClose={() => setShopItem(null)} />}
+      {shopItem && (
+        <ShopSheet
+          item={shopItem}
+          onClose={() => setShopItem(null)}
+          favoriteStores={favoriteStores}
+        />
+      )}
     </div>
   );
 }
@@ -812,7 +852,7 @@ function HomeScreen({ profile, onPrompt, homeInput, setHomeInput }) {
   );
 }
 
-function ChatScreen({ messages, onSend, input, setInput, onSwap, onSave, savedIds, pending, modelGender, onModelGenderChange }) {
+function ChatScreen({ messages, onSend, input, setInput, onSwap, onSave, savedIds, pending, modelGender, onModelGenderChange, favoriteStores }) {
   const { t } = useLang();
   const endRef = useRef(null);
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, pending]);
@@ -834,6 +874,7 @@ function ChatScreen({ messages, onSend, input, setInput, onSwap, onSave, savedId
                   saved={savedIds.has(i)}
                   modelGender={modelGender}
                   onModelGenderChange={onModelGenderChange}
+                  favoriteStores={favoriteStores}
                 />
               </div>
             );
@@ -851,7 +892,7 @@ function ChatScreen({ messages, onSend, input, setInput, onSwap, onSave, savedId
   );
 }
 
-function WardrobeScreen({ savedOutfits, modelGender, onModelGenderChange }) {
+function WardrobeScreen({ savedOutfits, modelGender, onModelGenderChange, favoriteStores }) {
   const { t } = useLang();
   return (
     <div className="screen">
@@ -869,6 +910,7 @@ function WardrobeScreen({ savedOutfits, modelGender, onModelGenderChange }) {
               saved
               modelGender={modelGender}
               onModelGenderChange={onModelGenderChange}
+              favoriteStores={favoriteStores}
             />
           ))}
         </div>
@@ -877,7 +919,7 @@ function WardrobeScreen({ savedOutfits, modelGender, onModelGenderChange }) {
   );
 }
 
-function BagScreen({ savedOutfits }) {
+function BagScreen({ savedOutfits, favoriteStores }) {
   const { t, tName } = useLang();
   const [shopItem, setShopItem] = useState(null);
   const allItems = savedOutfits.flatMap((o) => o.items.map((k) => CATALOG[k]));
@@ -915,13 +957,21 @@ function BagScreen({ savedOutfits }) {
           </div>
         ))
       )}
-      {shopItem && <ShopSheet item={shopItem} onClose={() => setShopItem(null)} />}
+      {shopItem && (
+        <ShopSheet
+          item={shopItem}
+          onClose={() => setShopItem(null)}
+          favoriteStores={favoriteStores}
+        />
+      )}
     </div>
   );
 }
 
-function ProfileScreen({ profile }) {
+function ProfileScreen({ profile, onToggleFavoriteStore }) {
   const { t, tOpt } = useLang();
+  const favorites = profile.favoriteStores || [];
+  const favSet = new Set(favorites);
   const budgetLabel = tOpt((BUDGET_OPTIONS.find((b) => b.key === profile.budget) || {}).label || "Balanced");
   const rows = [
     [t("styleArchetypeLabel"), tOpt(profile.archetype)],
@@ -930,6 +980,8 @@ function ProfileScreen({ profile }) {
     [t("budgetLabel"), budgetLabel],
     [t("dressesForLabel"), (profile.occasions || []).map(tOpt).join(", ") || "—"],
   ];
+  const favoriteNames = STORE_DIRECTORY.filter((s) => favSet.has(s.id)).map((s) => s.name);
+
   return (
     <div className="screen">
       <h2 className="screen-title">{t("profileTitle")}</h2>
@@ -938,6 +990,44 @@ function ProfileScreen({ profile }) {
           <div key={label} className="profile-row"><span className="muted">{label}</span><span>{val}</span></div>
         ))}
       </div>
+
+      <div className="fav-stores-block">
+        <div className="section-label">{t("favoriteStoresLabel")}</div>
+        <p className="fav-stores-hint">{t("favoriteStoresHint")}</p>
+        {favoriteNames.length === 0 ? (
+          <p className="empty-note" style={{ marginBottom: 12 }}>{t("favoriteStoresEmpty")}</p>
+        ) : (
+          <div className="fav-stores-summary">
+            {favoriteNames.map((name) => (
+              <span key={name} className="fav-store-chip active">{name}</span>
+            ))}
+          </div>
+        )}
+        {STORE_TIERS.map((tier) => {
+          const stores = STORE_DIRECTORY.filter((s) => s.tier === tier.id);
+          return (
+            <div key={tier.id} className="fav-store-tier">
+              <div className="fav-store-tier-label">{t(tier.labelKey)}</div>
+              <div className="fav-store-grid">
+                {stores.map((store) => {
+                  const selected = favSet.has(store.id);
+                  return (
+                    <button
+                      key={store.id}
+                      type="button"
+                      className={`fav-store-chip ${selected ? "active" : ""}`}
+                      onClick={() => onToggleFavoriteStore?.(store.id)}
+                    >
+                      {store.name}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
       <div className="profile-lang-row">
         <span className="muted">{t("languageLabel")}</span>
         <LanguageSwitcher />
@@ -1015,6 +1105,7 @@ export default function VestraPrototype() {
       budget: answers.budget,
       occasions: answers.occasions,
       modelGender: profile.modelGender || DEFAULT_PROFILE.modelGender,
+      favoriteStores: profile.favoriteStores || DEFAULT_PROFILE.favoriteStores,
     };
     setProfile(built);
     const translatedArchetype = tOpt(archetypeShortEn);
@@ -1269,6 +1360,18 @@ export default function VestraPrototype() {
         .profile-row:last-child{ border-bottom:none; }
         .profile-lang-row{ display:flex; align-items:center; justify-content:space-between; margin-top:16px; font-size:12.5px; }
         .muted{ color:#8b877a; }
+        .fav-stores-block{ margin-top:28px; }
+        .fav-stores-hint{ font-size:12.5px; color:#5b5748; font-weight:300; margin:0 0 14px; }
+        .fav-stores-summary{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px; }
+        .fav-store-tier{ margin-bottom:16px; }
+        .fav-store-tier-label{ font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:#8b877a; margin-bottom:8px; }
+        .fav-store-grid{ display:flex; flex-wrap:wrap; gap:8px; }
+        .fav-store-chip{
+          font-size:12px; padding:9px 12px; border-radius:999px; border:1px solid #e6e0d2;
+          background:#fff; color:#5b5748; cursor:pointer; font-family:'Inter',sans-serif; transition:all .15s;
+        }
+        .fav-store-chip.active{ background:#0B0B0C; color:#C6A567; border-color:#0B0B0C; }
+        .shop-store-link-fav{ border-color:#C6A567; background:#faf6ec; }
 
         .tabbar{ border-top:1px solid #e6e0d2; background:#F6F1E7; display:flex; justify-content:space-around; align-items:center; padding:10px 8px; }
         .tab-btn{ display:flex; flex-direction:column; align-items:center; gap:4px; background:none; border:none; cursor:pointer; padding:0 8px; }
@@ -1379,6 +1482,7 @@ export default function VestraPrototype() {
                   pending={pending}
                   modelGender={profile.modelGender || "woman"}
                   onModelGenderChange={(g) => setProfile((p) => ({ ...p, modelGender: g }))}
+                  favoriteStores={profile.favoriteStores || []}
                 />
               )}
               {tab === "wardrobe" && (
@@ -1386,10 +1490,29 @@ export default function VestraPrototype() {
                   savedOutfits={savedOutfits}
                   modelGender={profile.modelGender || "woman"}
                   onModelGenderChange={(g) => setProfile((p) => ({ ...p, modelGender: g }))}
+                  favoriteStores={profile.favoriteStores || []}
                 />
               )}
-              {tab === "bag" && <BagScreen savedOutfits={savedOutfits} />}
-              {tab === "profile" && <ProfileScreen profile={profile} />}
+              {tab === "bag" && (
+                <BagScreen
+                  savedOutfits={savedOutfits}
+                  favoriteStores={profile.favoriteStores || []}
+                />
+              )}
+              {tab === "profile" && (
+                <ProfileScreen
+                  profile={profile}
+                  onToggleFavoriteStore={(storeId) => {
+                    setProfile((p) => {
+                      const current = p.favoriteStores || [];
+                      const next = current.includes(storeId)
+                        ? current.filter((id) => id !== storeId)
+                        : [...current, storeId];
+                      return { ...p, favoriteStores: next };
+                    });
+                  }}
+                />
+              )}
             </>
           )}
         </div>
