@@ -308,7 +308,7 @@ function LanguageSwitcher({ corner }) {
 }
 
 // ---------- Product catalog (mirrors the seed data in the real backend) ----------
-const ASSET_V = "3";
+const ASSET_V = "4";
 const assetUrl = (path) => `${path}?v=${ASSET_V}`;
 
 const CATALOG = {
@@ -453,56 +453,103 @@ const AUDIENCE_META = {
   Gentlemen: { image: assetUrl("/onboarding/audience-gentlemen.jpg"), modelGender: "man" },
   "Gender neutral": { image: assetUrl("/onboarding/audience-neutral.jpg"), modelGender: "woman" },
 };
+
+/** Pick woman/man photo from option meta based on audience choice. */
+function resolveAudienceImage(meta, audience, optionIndex = 0) {
+  if (!meta) return "";
+  if (meta.image) return meta.image; // audience step itself
+  if (audience === "Gentlemen") return meta.man || meta.woman || "";
+  if (audience === "Ladies") return meta.woman || meta.man || "";
+  // Gender neutral: alternate so both presentations appear
+  const pair = optionIndex % 2 === 0 ? meta.woman : meta.man;
+  return pair || meta.woman || meta.man || "";
+}
+
 const LIFESTYLE_OPTIONS = ["Office / client-facing", "Creative or flexible workplace", "Remote, mostly at home", "On the move — travel, events, varied", "Student life"];
 const LIFESTYLE_META = {
-  "Office / client-facing": { image: assetUrl("/onboarding/life-office.jpg") },
-  "Creative or flexible workplace": { image: assetUrl("/onboarding/life-creative.jpg") },
-  "Remote, mostly at home": { image: assetUrl("/onboarding/life-remote.jpg") },
-  "On the move — travel, events, varied": { image: assetUrl("/onboarding/life-travel.jpg") },
-  "Student life": { image: assetUrl("/onboarding/life-student.jpg") },
+  "Office / client-facing": {
+    woman: assetUrl("/onboarding/life-office.jpg"),
+    man: assetUrl("/onboarding/life-office-man.jpg"),
+  },
+  "Creative or flexible workplace": {
+    woman: assetUrl("/onboarding/life-creative.jpg"),
+    man: assetUrl("/onboarding/life-creative-man.jpg"),
+  },
+  "Remote, mostly at home": {
+    woman: assetUrl("/onboarding/life-remote.jpg"),
+    man: assetUrl("/onboarding/life-remote-man.jpg"),
+  },
+  "On the move — travel, events, varied": {
+    woman: assetUrl("/onboarding/life-travel.jpg"),
+    man: assetUrl("/onboarding/life-travel-man.jpg"),
+  },
+  "Student life": {
+    woman: assetUrl("/onboarding/life-student.jpg"),
+    man: assetUrl("/onboarding/life-student-man.jpg"),
+  },
 };
 const ARCHETYPE_OPTIONS = ["Quiet & Tailored", "Relaxed & Considered", "Modern & Sharp", "Warm & Layered", "Classic & Polished", "Minimal & Directional", "Romantic & Soft", "Bold & Expressive"];
 
 const ARCHETYPE_META = {
   "Quiet & Tailored": {
-    image: assetUrl("/styles/style-quiet-tailored.jpg"),
+    woman: assetUrl("/styles/style-quiet-tailored.jpg"),
+    man: assetUrl("/styles/style-quiet-tailored-man.jpg"),
     descKey: "archQuietDesc",
   },
   "Relaxed & Considered": {
-    image: assetUrl("/styles/style-relaxed-considered.jpg"),
+    woman: assetUrl("/styles/style-relaxed-considered.jpg"),
+    man: assetUrl("/styles/style-relaxed-considered-man.jpg"),
     descKey: "archRelaxedDesc",
   },
   "Modern & Sharp": {
-    image: assetUrl("/styles/style-modern-sharp.jpg"),
+    woman: assetUrl("/styles/style-modern-sharp.jpg"),
+    man: assetUrl("/styles/style-modern-sharp-man.jpg"),
     descKey: "archModernDesc",
   },
   "Warm & Layered": {
-    image: assetUrl("/styles/style-warm-layered.jpg"),
+    woman: assetUrl("/styles/style-warm-layered.jpg"),
+    man: assetUrl("/styles/style-warm-layered-man.jpg"),
     descKey: "archWarmDesc",
   },
   "Classic & Polished": {
-    image: assetUrl("/styles/style-classic-polished.jpg"),
+    woman: assetUrl("/styles/style-classic-polished.jpg"),
+    man: assetUrl("/styles/style-classic-polished-man.jpg"),
     descKey: "archClassicDesc",
   },
   "Minimal & Directional": {
-    image: assetUrl("/styles/style-minimal-directional.jpg"),
+    woman: assetUrl("/styles/style-minimal-directional.jpg"),
+    man: assetUrl("/styles/style-minimal-directional-man.jpg"),
     descKey: "archMinimalDesc",
   },
   "Romantic & Soft": {
-    image: assetUrl("/styles/style-romantic-soft.jpg"),
+    woman: assetUrl("/styles/style-romantic-soft.jpg"),
+    man: assetUrl("/styles/style-romantic-soft-man.jpg"),
     descKey: "archRomanticDesc",
   },
   "Bold & Expressive": {
-    image: assetUrl("/styles/style-bold-expressive.jpg"),
+    woman: assetUrl("/styles/style-bold-expressive.jpg"),
+    man: assetUrl("/styles/style-bold-expressive-man.jpg"),
     descKey: "archBoldDesc",
   },
 };
 const FIT_OPTIONS = ["Fitted & tailored", "True to size, structured", "Relaxed, room to move", "Oversized, intentionally loose"];
 const FIT_META = {
-  "Fitted & tailored": { image: assetUrl("/onboarding/fit-fitted.jpg") },
-  "True to size, structured": { image: assetUrl("/onboarding/fit-structured.jpg") },
-  "Relaxed, room to move": { image: assetUrl("/onboarding/fit-relaxed.jpg") },
-  "Oversized, intentionally loose": { image: assetUrl("/onboarding/fit-oversized.jpg") },
+  "Fitted & tailored": {
+    woman: assetUrl("/onboarding/fit-fitted.jpg"),
+    man: assetUrl("/onboarding/fit-fitted-man.jpg"),
+  },
+  "True to size, structured": {
+    woman: assetUrl("/onboarding/fit-structured.jpg"),
+    man: assetUrl("/onboarding/fit-structured-man.jpg"),
+  },
+  "Relaxed, room to move": {
+    woman: assetUrl("/onboarding/fit-relaxed.jpg"),
+    man: assetUrl("/onboarding/fit-relaxed-man.jpg"),
+  },
+  "Oversized, intentionally loose": {
+    woman: assetUrl("/onboarding/fit-oversized.jpg"),
+    man: assetUrl("/onboarding/fit-oversized-man.jpg"),
+  },
 };
 const COLOR_OPTIONS = [
   { label: "Black", hex: "#161616" },
@@ -589,6 +636,7 @@ function SignupScreen({ onContinue, onBack }) {
 function OnboardingScreen({ step, totalSteps, question, answers, setAnswers, onNext, onBack }) {
   const { t, tOpt } = useLang();
   const [showAvoid, setShowAvoid] = useState(false);
+  const audience = answers.audience || "Ladies";
 
   function selectSingle(value) {
     setAnswers((a) => ({ ...a, [question.id]: value }));
@@ -631,8 +679,9 @@ function OnboardingScreen({ step, totalSteps, question, answers, setAnswers, onN
 
         {question.type === "archetype" && (
           <div className="onb-style-grid">
-            {question.options.map((opt) => {
+            {question.options.map((opt, idx) => {
               const meta = ARCHETYPE_META[opt] || {};
+              const image = resolveAudienceImage(meta, audience, idx);
               return (
                 <button
                   key={opt}
@@ -640,7 +689,7 @@ function OnboardingScreen({ step, totalSteps, question, answers, setAnswers, onN
                   className={`onb-style-card ${answers[question.id] === opt ? "selected" : ""}`}
                   onClick={() => selectSingle(opt)}
                 >
-                  <img className="onb-style-image" src={meta.image} alt={tOpt(opt)} loading="lazy" />
+                  <img className="onb-style-image" src={image} alt={tOpt(opt)} loading="lazy" />
                   <div className="onb-style-copy">
                     <div className="onb-style-title">{tOpt(opt)}</div>
                     <div className="onb-style-desc">{t(meta.descKey)}</div>
@@ -653,8 +702,9 @@ function OnboardingScreen({ step, totalSteps, question, answers, setAnswers, onN
 
         {question.type === "visual" && (
           <div className={`onb-visual-grid ${question.options.length === 3 ? "onb-visual-grid-3" : ""}`}>
-            {question.options.map((opt) => {
+            {question.options.map((opt, idx) => {
               const meta = (question.meta && question.meta[opt]) || {};
+              const image = resolveAudienceImage(meta, audience, idx);
               return (
                 <button
                   key={opt}
@@ -662,7 +712,7 @@ function OnboardingScreen({ step, totalSteps, question, answers, setAnswers, onN
                   className={`onb-visual-card ${answers[question.id] === opt ? "selected" : ""}`}
                   onClick={() => selectSingle(opt)}
                 >
-                  <img className="onb-visual-image" src={meta.image} alt={tOpt(opt)} loading="lazy" />
+                  <img className="onb-visual-image" src={image} alt={tOpt(opt)} loading="lazy" />
                   <span className="onb-visual-label">{tOpt(opt)}</span>
                 </button>
               );
