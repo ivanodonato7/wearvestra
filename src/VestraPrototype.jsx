@@ -994,16 +994,16 @@ export default function VestraPrototype() {
     <div className="app-outer">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@300;400;500;600&display=swap');
-        .app-outer{ min-height:100vh; min-height:100dvh; background:#e9e4d6; display:flex; align-items:center; justify-content:center; padding:24px; font-family:'Inter',sans-serif; }
-        .phone{ width:100%; max-width:420px; height:min(860px, calc(100dvh - 48px)); background:#F6F1E7; border-radius:1.4rem; border:1px solid #d9d2c2; box-shadow:0 18px 48px rgba(0,0,0,0.12); overflow:hidden; position:relative; display:flex; flex-direction:column; }
+        .app-outer{ min-height:100vh; min-height:100dvh; background:#e9e4d6; display:flex; align-items:stretch; justify-content:center; padding:0; font-family:'Inter',sans-serif; }
+        .phone{ width:100%; max-width:100%; height:100dvh; background:#F6F1E7; border-radius:0; border:none; box-shadow:none; overflow:hidden; position:relative; display:flex; flex-direction:column; }
         .notch{ display:none; }
-        .phone-body{ flex:1; overflow:hidden; padding-top:0; min-height:0; }
+        .phone-body{ flex:1; overflow:hidden; padding-top:0; min-height:0; display:flex; flex-direction:column; }
+        .desktop-sidebar{ display:none; }
         .screen{ padding:24px 20px 90px; height:100%; overflow-y:auto; box-sizing:border-box; -webkit-overflow-scrolling:touch; }
 
         /* Phone */
         @media (max-width: 767px) {
-          .app-outer{ padding:0; background:#F6F1E7; align-items:stretch; }
-          .phone{ max-width:none; height:100dvh; border:none; border-radius:0; box-shadow:none; }
+          .app-outer{ background:#F6F1E7; }
           .phone-body{ padding-top: env(safe-area-inset-top, 0px); }
           .tabbar{ padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px)); }
           .lang-switcher-corner{ top: calc(12px + env(safe-area-inset-top, 0px)); }
@@ -1015,49 +1015,99 @@ export default function VestraPrototype() {
 
         /* Tablet */
         @media (min-width: 768px) and (max-width: 1023px) {
-          .app-outer{ padding:20px; align-items:stretch; }
-          .phone{ max-width:760px; height:calc(100dvh - 40px); margin:0 auto; border-radius:1.2rem; }
+          .app-outer{ padding:0; }
+          .phone{ height:100dvh; }
           .outfit-visual{ gap:16px; }
-          .model-wrap{ width:42%; max-width:280px; }
+          .model-wrap{ width:42%; max-width:300px; }
           .bubble-assistant{ max-width:100%; }
-          .screen{ padding:28px 28px 100px; max-width:720px; margin:0 auto; }
-          .chat-body{ padding:20px 24px; }
+          .screen{ padding:28px 32px 100px; max-width:820px; width:100%; margin:0 auto; }
+          .chat-body{ padding:20px 28px; }
           .home-name{ font-size:32px; }
+          .onb-screen{ max-width:560px; margin:0 auto; }
         }
 
-        /* Desktop / PC */
+        /* Desktop / PC — real website layout */
         @media (min-width: 1024px) {
           .app-outer{
-            padding:32px;
+            padding:0;
             background:
-              radial-gradient(ellipse at 20% 10%, rgba(198,165,103,0.18), transparent 45%),
-              radial-gradient(ellipse at 80% 90%, rgba(62,66,40,0.10), transparent 40%),
-              #e9e4d6;
+              radial-gradient(ellipse at 12% 0%, rgba(198,165,103,0.16), transparent 42%),
+              radial-gradient(ellipse at 90% 100%, rgba(62,66,40,0.08), transparent 38%),
+              #efe9da;
           }
           .phone{
-            max-width:1080px;
-            width:min(1080px, calc(100vw - 64px));
-            height:min(900px, calc(100dvh - 64px));
-            border-radius:1.25rem;
-            border:1px solid #d4cdb8;
-            box-shadow:0 28px 70px rgba(0,0,0,0.14);
+            max-width:none;
+            width:100%;
+            height:100dvh;
+            background:transparent;
+            display:flex;
+            flex-direction:row;
+            align-items:stretch;
           }
-          .screen{ padding:32px 40px 110px; max-width:920px; margin:0 auto; }
-          .chat-header{ padding:18px 32px; }
-          .chat-body{ padding:24px 32px; gap:16px; }
-          .chat-input-row{ padding:16px 32px; }
-          .bubble-assistant{ max-width:720px; }
-          .bubble-user{ max-width:60%; font-size:14px; }
-          .home-name{ font-size:36px; }
-          .dna-card{ padding:22px; }
-          .outfit-visual{ gap:22px; align-items:stretch; }
-          .model-wrap{ width:46%; max-width:340px; min-height:420px; }
-          .item-row{ padding:10px 12px; }
-          .item-row-name{ font-size:12.5px; }
-          .item-row-meta{ font-size:11px; }
-          .rationale{ font-size:14px; }
-          .tabbar{ padding:12px 24px; }
-          .card{ padding:20px; }
+          .desktop-sidebar{
+            display:flex;
+            flex-direction:column;
+            width:232px;
+            flex-shrink:0;
+            background:#0B0B0C;
+            color:#F6F1E7;
+            padding:28px 18px;
+            box-sizing:border-box;
+          }
+          .desktop-brand{
+            font-family:'Fraunces',serif;
+            font-size:28px;
+            color:#C6A567;
+            margin:0 0 8px;
+            font-weight:400;
+            letter-spacing:0.02em;
+          }
+          .desktop-brand-sub{
+            font-size:11px;
+            color:#8b877a;
+            letter-spacing:0.12em;
+            text-transform:uppercase;
+            margin-bottom:36px;
+          }
+          .desktop-nav{ display:flex; flex-direction:column; gap:6px; flex:1; }
+          .desktop-nav-btn{
+            display:flex; align-items:center; gap:12px;
+            background:transparent; border:none; color:#bdb7a8;
+            padding:12px 14px; border-radius:6px; cursor:pointer;
+            font-family:'Inter',sans-serif; font-size:13.5px; text-align:left;
+            transition:background .15s, color .15s;
+          }
+          .desktop-nav-btn:hover{ background:rgba(246,241,231,0.06); color:#F6F1E7; }
+          .desktop-nav-btn.active{ background:rgba(198,165,103,0.14); color:#C6A567; }
+          .phone-body{
+            flex:1;
+            background:#F6F1E7;
+            min-width:0;
+          }
+          .tabbar{ display:none !important; }
+          .screen{ padding:40px 56px 48px; max-width:1100px; width:100%; margin:0 auto; box-sizing:border-box; }
+          .chat-wrap{ height:100%; }
+          .chat-header{ padding:22px 56px; max-width:1100px; width:100%; margin:0 auto; box-sizing:border-box; }
+          .chat-body{ padding:28px 56px; max-width:1100px; width:100%; margin:0 auto; box-sizing:border-box; gap:18px; }
+          .chat-input-row{ padding:18px 56px; max-width:1100px; width:100%; margin:0 auto; box-sizing:border-box; }
+          .bubble-assistant{ max-width:900px; }
+          .bubble-user{ max-width:50%; font-size:14px; }
+          .home-name{ font-size:42px; }
+          .dna-card{ padding:24px; max-width:640px; }
+          .outfit-visual{ gap:28px; }
+          .model-wrap{ width:48%; max-width:380px; min-height:480px; }
+          .item-row{ padding:12px 14px; }
+          .item-row-name{ font-size:13px; white-space:normal; }
+          .item-row-meta{ font-size:12px; }
+          .rationale{ font-size:15px; max-width:56ch; }
+          .card{ padding:24px; }
+          .onb-screen{ max-width:640px; margin:0 auto; padding:48px 40px; }
+          .onb-hero-title{ font-size:48px; }
+          .onb-primary-btn{ max-width:320px; }
+          .onb-card-grid{ grid-template-columns:1fr 1fr; gap:14px; }
+          /* When onboarding (no sidebar), center the welcome experience */
+          .phone.onboarding-mode{ justify-content:center; }
+          .phone.onboarding-mode .phone-body{ max-width:720px; margin:24px auto; border-radius:16px; border:1px solid #d9d2c2; box-shadow:0 20px 50px rgba(0,0,0,0.08); height:calc(100dvh - 48px); }
         }
         .eyebrow{ font-size:10px; letter-spacing:0.18em; text-transform:uppercase; font-weight:600; margin-bottom:4px; }
         .eyebrow.muted{ color:#A8895C; }
@@ -1195,8 +1245,27 @@ export default function VestraPrototype() {
         .reveal-summary{ font-size:13.5px; color:#5b5748; font-weight:300; line-height:1.6; max-width:280px; margin-bottom:32px; }
       `}</style>
 
-      <div className="phone">
+      <div className={`phone ${stage !== "app" ? "onboarding-mode" : ""}`}>
         <div className="notch" />
+        {stage === "app" && (
+          <aside className="desktop-sidebar" aria-label="Main navigation">
+            <div className="desktop-brand">Vestra</div>
+            <div className="desktop-brand-sub">AI Stylist</div>
+            <nav className="desktop-nav">
+              {tabs.map(({ id, labelKey, icon: Icon }) => (
+                <button
+                  key={id}
+                  type="button"
+                  className={`desktop-nav-btn ${tab === id ? "active" : ""}`}
+                  onClick={() => setTab(id)}
+                >
+                  <Icon size={18} color={tab === id ? "#C6A567" : "#8b877a"} strokeWidth={tab === id ? 2.2 : 1.6} />
+                  <span>{t(labelKey)}</span>
+                </button>
+              ))}
+            </nav>
+          </aside>
+        )}
         <div className="phone-body">
           {stage === "welcome" && <WelcomeScreen onStart={() => setStage("signup")} onSkip={skipToApp} />}
           {stage === "signup" && <SignupScreen onContinue={() => setStage("onboarding")} onBack={() => setStage("welcome")} />}
