@@ -76,12 +76,14 @@ const UI = {
     favoriteStoresEmpty: "No favorites yet — pick a few below.",
     shopYourFavorites: "Your favorites",
     shopInStock: "In stock now",
-    shopInStockSub: "Live listings scanned across retailers",
+    shopInStockSub: "Listings matched to your palette",
     shopInStockBadge: "In stock",
     shopBuyAt: "Buy",
     shopScanning: "Scanning stores for availability…",
-    shopNoStock: "No live listings found — try Google Shopping or a store below.",
+    shopNoStock: "No in-palette listings yet — search Google or a store with your colors below.",
     shopMoreStores: "Search more stores",
+    shopPaletteFilter: "Colors: {colors}",
+    shopSearchingAs: "Searching as: {query}",
   },
   es: {
     welcomeEyebrow: "Vestra", welcomeTitleLine1: "Vamos a vestirte", welcomeTitleLine2: "como es debido.",
@@ -146,12 +148,14 @@ const UI = {
     favoriteStoresEmpty: "Aún no hay favoritas — elige algunas abajo.",
     shopYourFavorites: "Tus favoritas",
     shopInStock: "Disponible ahora",
-    shopInStockSub: "Listados en stock en varias tiendas",
+    shopInStockSub: "Listados alineados con tu paleta",
     shopInStockBadge: "En stock",
     shopBuyAt: "Comprar",
     shopScanning: "Buscando disponibilidad en tiendas…",
-    shopNoStock: "Sin listados en vivo — prueba Google Shopping o una tienda abajo.",
+    shopNoStock: "Sin listados en tu paleta — busca en Google o en una tienda con tus colores.",
     shopMoreStores: "Buscar en más tiendas",
+    shopPaletteFilter: "Colores: {colors}",
+    shopSearchingAs: "Buscando: {query}",
   },
   fr: {
     welcomeEyebrow: "Vestra", welcomeTitleLine1: "Habillons-vous", welcomeTitleLine2: "comme il se doit.",
@@ -216,12 +220,14 @@ const UI = {
     favoriteStoresEmpty: "Aucune favorite — choisissez-en quelques-unes ci-dessous.",
     shopYourFavorites: "Vos favorites",
     shopInStock: "En stock maintenant",
-    shopInStockSub: "Offres disponibles chez plusieurs enseignes",
+    shopInStockSub: "Offres alignées sur votre palette",
     shopInStockBadge: "En stock",
     shopBuyAt: "Acheter",
     shopScanning: "Recherche de disponibilité…",
-    shopNoStock: "Aucune offre trouvée — essayez Google Shopping ou une boutique ci-dessous.",
+    shopNoStock: "Aucune offre dans votre palette — cherchez sur Google ou en boutique avec vos couleurs.",
     shopMoreStores: "Chercher d'autres boutiques",
+    shopPaletteFilter: "Couleurs : {colors}",
+    shopSearchingAs: "Recherche : {query}",
   },
 };
 
@@ -345,25 +351,137 @@ function LanguageSwitcher({ corner }) {
 }
 
 // ---------- Product catalog (mirrors the seed data in the real backend) ----------
-const ASSET_V = "7";
+const ASSET_V = "8";
 const assetUrl = (path) => `${path}?v=${ASSET_V}`;
 
 const CATALOG = {
-  blazer: { key: "blazer", id: "p1", name: "Wool-Blend Tailored Blazer", price: 320, retailer: "Considered Studio", type: "blazer", color: "#3E4228", image: assetUrl("/products/blazer.jpg"), searchQuery: "olive green wool tailored blazer men women" },
-  blazerAlt: { key: "blazerAlt", id: "p1b", name: "Unstructured Linen Blazer", price: 265, retailer: "North & Field", type: "blazer", color: "#cbb994", image: assetUrl("/products/blazer-alt.jpg"), searchQuery: "sand beige unstructured linen blazer" },
-  shirt: { key: "shirt", id: "p2", name: "Crisp Cotton Shirt", price: 95, retailer: "Considered Studio", type: "shirt", color: "#F5F2E9", image: assetUrl("/products/shirt.jpg"), searchQuery: "ivory crisp cotton dress shirt" },
-  shirtAlt: { key: "shirtAlt", id: "p2b", name: "Fine Merino Turtleneck", price: 110, retailer: "North & Field", type: "shirt", color: "#4a4a48", image: assetUrl("/products/shirt-alt.jpg"), searchQuery: "charcoal fine merino turtleneck sweater" },
-  trouser: { key: "trouser", id: "p3", name: "Tailored Straight Trouser", price: 140, retailer: "Considered Studio", type: "trouser", color: "#3E4228", image: assetUrl("/products/trouser.jpg"), searchQuery: "olive tailored straight leg trousers" },
-  trouserAlt: { key: "trouserAlt", id: "p3b", name: "Wide-Leg Wool Trouser", price: 165, retailer: "Considered Studio", type: "trouser", color: "#6b6b63", image: assetUrl("/products/trouser-alt.jpg"), searchQuery: "grey wide leg wool trousers" },
-  shoe: { key: "shoe", id: "p4", name: "Leather Derby Shoe", price: 210, retailer: "Aldern & Co.", type: "shoe", color: "#6b3f22", image: assetUrl("/products/shoe.jpg"), searchQuery: "brown leather derby dress shoes" },
-  shoeAlt: { key: "shoeAlt", id: "p4b", name: "Suede Chelsea Boot", price: 245, retailer: "Aldern & Co.", type: "shoe", color: "#4a3527", image: assetUrl("/products/shoe-alt.jpg"), searchQuery: "dark brown suede chelsea boots" },
-  scarf: { key: "scarf", id: "p5", name: "Fine Wool Scarf", price: 85, retailer: "North & Field", type: "accessory", color: "#b08a5c", image: assetUrl("/products/scarf.jpg"), searchQuery: "camel tan fine wool scarf" },
-  scarfAlt: { key: "scarfAlt", id: "p5b", name: "Cashmere Pocket Square", price: 65, retailer: "Aldern & Co.", type: "accessory", color: "#C6A567", image: assetUrl("/products/scarf-alt.jpg"), searchQuery: "gold cashmere pocket square" },
-  belt: { key: "belt", id: "p6", name: "Leather Belt", price: 95, retailer: "Aldern & Co.", type: "accessory", color: "#6b3f22", image: assetUrl("/products/belt.jpg"), searchQuery: "brown leather dress belt men women" },
-  beltAlt: { key: "beltAlt", id: "p6b", name: "Black Leather Belt", price: 90, retailer: "Aldern & Co.", type: "accessory", color: "#161616", image: assetUrl("/products/belt-alt.jpg"), searchQuery: "black leather dress belt" },
-  sunglasses: { key: "sunglasses", id: "p7", name: "Acetate Sunglasses", price: 145, retailer: "North & Field", type: "accessory", color: "#8B5A2B", image: assetUrl("/products/sunglasses.jpg"), searchQuery: "tortoise acetate sunglasses" },
-  sunglassesAlt: { key: "sunglassesAlt", id: "p7b", name: "Black Acetate Sunglasses", price: 135, retailer: "North & Field", type: "accessory", color: "#0B0B0C", image: assetUrl("/products/sunglasses-alt.jpg"), searchQuery: "black acetate sunglasses gold accents" },
+  blazer: { key: "blazer", id: "p1", name: "Wool-Blend Tailored Blazer", price: 320, retailer: "Considered Studio", type: "blazer", color: "#3E4228", paletteTags: ["Olive", "Forest Green"], image: assetUrl("/products/blazer.jpg"), searchQuery: "olive green wool tailored blazer", searchNoun: "wool tailored blazer" },
+  blazerAlt: { key: "blazerAlt", id: "p1b", name: "Unstructured Linen Blazer", price: 265, retailer: "North & Field", type: "blazer", color: "#cbb994", paletteTags: ["Sand / Beige", "Camel / Tan", "Ivory / Cream"], image: assetUrl("/products/blazer-alt.jpg"), searchQuery: "sand beige unstructured linen blazer", searchNoun: "unstructured linen blazer" },
+  shirt: { key: "shirt", id: "p2", name: "Crisp Cotton Shirt", price: 95, retailer: "Considered Studio", type: "shirt", color: "#F5F2E9", paletteTags: ["Ivory / Cream", "White"], image: assetUrl("/products/shirt.jpg"), searchQuery: "ivory crisp cotton dress shirt", searchNoun: "crisp cotton dress shirt" },
+  shirtAlt: { key: "shirtAlt", id: "p2b", name: "Fine Merino Turtleneck", price: 110, retailer: "North & Field", type: "shirt", color: "#4a4a48", paletteTags: ["Grey / Charcoal", "Black"], image: assetUrl("/products/shirt-alt.jpg"), searchQuery: "charcoal fine merino turtleneck sweater", searchNoun: "fine merino turtleneck sweater" },
+  trouser: { key: "trouser", id: "p3", name: "Tailored Straight Trouser", price: 140, retailer: "Considered Studio", type: "trouser", color: "#3E4228", paletteTags: ["Olive", "Forest Green"], image: assetUrl("/products/trouser.jpg"), searchQuery: "olive tailored straight leg trousers", searchNoun: "tailored straight leg trousers" },
+  trouserAlt: { key: "trouserAlt", id: "p3b", name: "Wide-Leg Wool Trouser", price: 165, retailer: "Considered Studio", type: "trouser", color: "#6b6b63", paletteTags: ["Grey / Charcoal"], image: assetUrl("/products/trouser-alt.jpg"), searchQuery: "grey wide leg wool trousers", searchNoun: "wide leg wool trousers" },
+  shoe: { key: "shoe", id: "p4", name: "Leather Derby Shoe", price: 210, retailer: "Aldern & Co.", type: "shoe", color: "#6b3f22", paletteTags: ["Camel / Tan", "Rust / Terracotta"], image: assetUrl("/products/shoe.jpg"), searchQuery: "brown leather derby dress shoes", searchNoun: "leather derby dress shoes" },
+  shoeAlt: { key: "shoeAlt", id: "p4b", name: "Suede Chelsea Boot", price: 245, retailer: "Aldern & Co.", type: "shoe", color: "#4a3527", paletteTags: ["Camel / Tan", "Black"], image: assetUrl("/products/shoe-alt.jpg"), searchQuery: "dark brown suede chelsea boots", searchNoun: "suede chelsea boots" },
+  scarf: { key: "scarf", id: "p5", name: "Fine Wool Scarf", price: 85, retailer: "North & Field", type: "accessory", color: "#b08a5c", paletteTags: ["Camel / Tan"], image: assetUrl("/products/scarf.jpg"), searchQuery: "camel tan fine wool scarf", searchNoun: "fine wool scarf" },
+  scarfAlt: { key: "scarfAlt", id: "p5b", name: "Cashmere Pocket Square", price: 65, retailer: "Aldern & Co.", type: "accessory", color: "#C6A567", paletteTags: ["Bold Color", "Camel / Tan"], image: assetUrl("/products/scarf-alt.jpg"), searchQuery: "gold cashmere pocket square", searchNoun: "cashmere pocket square" },
+  belt: { key: "belt", id: "p6", name: "Leather Belt", price: 95, retailer: "Aldern & Co.", type: "accessory", color: "#6b3f22", paletteTags: ["Camel / Tan", "Rust / Terracotta"], image: assetUrl("/products/belt.jpg"), searchQuery: "brown leather dress belt", searchNoun: "leather dress belt" },
+  beltAlt: { key: "beltAlt", id: "p6b", name: "Black Leather Belt", price: 90, retailer: "Aldern & Co.", type: "accessory", color: "#161616", paletteTags: ["Black"], image: assetUrl("/products/belt-alt.jpg"), searchQuery: "black leather dress belt", searchNoun: "leather dress belt" },
+  sunglasses: { key: "sunglasses", id: "p7", name: "Acetate Sunglasses", price: 145, retailer: "North & Field", type: "accessory", color: "#8B5A2B", paletteTags: ["Camel / Tan", "Rust / Terracotta"], image: assetUrl("/products/sunglasses.jpg"), searchQuery: "tortoise acetate sunglasses", searchNoun: "acetate sunglasses" },
+  sunglassesAlt: { key: "sunglassesAlt", id: "p7b", name: "Black Acetate Sunglasses", price: 135, retailer: "North & Field", type: "accessory", color: "#0B0B0C", paletteTags: ["Black"], image: assetUrl("/products/sunglasses-alt.jpg"), searchQuery: "black acetate sunglasses", searchNoun: "acetate sunglasses" },
 };
+
+/** Search phrases for each palette swatch — used to make shopping precise. */
+const COLOR_SEARCH_TERMS = {
+  Black: ["black"],
+  "Ivory / Cream": ["ivory", "cream", "off-white"],
+  "Grey / Charcoal": ["charcoal", "grey", "gray"],
+  "Camel / Tan": ["camel", "tan", "cognac", "brown"],
+  Olive: ["olive", "olive green"],
+  Navy: ["navy", "navy blue"],
+  Burgundy: ["burgundy", "wine"],
+  "Forest Green": ["forest green", "dark green"],
+  "Sand / Beige": ["beige", "sand", "khaki"],
+  "Rust / Terracotta": ["rust", "terracotta"],
+  "Blush / Dusty Pink": ["blush", "dusty pink"],
+  "Bold Color": ["bold", "statement color"],
+};
+
+function colorTermsForLabels(labels = []) {
+  return labels.flatMap((l) => COLOR_SEARCH_TERMS[l] || [String(l).toLowerCase()]);
+}
+
+function itemPaletteScore(itemKey, palette = [], avoid = []) {
+  const item = CATALOG[itemKey];
+  if (!item) return 0;
+  const tags = item.paletteTags || [];
+  let score = 0;
+  for (const tag of tags) {
+    if (avoid.includes(tag)) score -= 20;
+    if (palette.includes(tag)) score += 14;
+  }
+  // Soft bonus if no direct tag match but item is a neutral that works with most palettes
+  if (score === 0 && tags.some((t) => t === "Ivory / Cream" || t === "Black" || t === "Grey / Charcoal")) {
+    score += 2;
+  }
+  return score;
+}
+
+function outfitPaletteScore(itemKeys, palette = [], avoid = []) {
+  if (!palette.length) return 0;
+  return itemKeys.reduce((sum, k) => sum + itemPaletteScore(k, palette, avoid), 0);
+}
+
+/** Prefer the alt/base variant that best matches the user's palette. */
+function bestVariantForPalette(baseKey, palette = [], avoid = []) {
+  const alt = ALT_MAP[baseKey] || ALT_MAP_REV[baseKey];
+  if (!alt) return baseKey;
+  const a = itemPaletteScore(baseKey, palette, avoid);
+  const b = itemPaletteScore(alt, palette, avoid);
+  return b > a ? alt : baseKey;
+}
+
+function tuneItemsToPalette(itemKeys, palette = [], avoid = []) {
+  return itemKeys.map((key) => {
+    const base = ALT_MAP_REV[key] || key;
+    // Keep accessory family, but pick best color variant
+    if (ACCESSORY_KEYS.has(key) || ACCESSORY_KEYS.has(base)) {
+      return bestVariantForPalette(ALT_MAP[base] ? base : key, palette, avoid);
+    }
+    return bestVariantForPalette(base, palette, avoid);
+  });
+}
+
+/** Build a shopping query that forces the user's palette colors. */
+function buildItemSearchQuery(item, palette = [], avoid = []) {
+  if (!item) return "";
+  const preferred = (palette || []).filter((p) => !(avoid || []).includes(p));
+  const tags = item.paletteTags || [];
+  let colorLabel = preferred.find((p) => tags.includes(p));
+  if (!colorLabel && preferred.length) {
+    // Map garment type to a sensible palette pick when catalog photo color differs
+    if (item.type === "shirt") {
+      colorLabel = preferred.find((p) => ["Ivory / Cream", "White", "Black", "Grey / Charcoal", "Navy", "Blush / Dusty Pink"].includes(p)) || preferred[0];
+    } else if (item.type === "shoe" || item.key?.includes("belt") || item.key?.includes("Belt")) {
+      colorLabel = preferred.find((p) => ["Black", "Camel / Tan", "Rust / Terracotta", "Burgundy", "Navy"].includes(p)) || preferred[0];
+    } else if (item.key?.includes("sunglasses")) {
+      colorLabel = preferred.find((p) => ["Black", "Camel / Tan", "Ivory / Cream"].includes(p)) || preferred[0];
+    } else {
+      // Outer/trouser/scarf — prefer non-basics first so navy/olive/burgundy win over black
+      colorLabel = preferred.find((p) => !["Black", "Ivory / Cream", "White"].includes(p)) || preferred[0];
+    }
+  }
+  // If still no palette, fall back to the garment's own tagged color
+  if (!colorLabel && tags.length) colorLabel = tags[0];
+  const colorPhrase = colorLabel ? (COLOR_SEARCH_TERMS[colorLabel] || [colorLabel.toLowerCase()])[0] : null;
+  const noun = item.searchNoun || item.name;
+  if (colorPhrase) return `${colorPhrase} ${noun}`.replace(/\s+/g, " ").trim();
+  return item.searchQuery || item.name;
+}
+
+function productMatchesPalette(product, palette = [], avoid = []) {
+  const title = `${product.title || ""} ${product.merchant || ""}`.toLowerCase();
+  const avoidTerms = colorTermsForLabels(avoid);
+  if (avoidTerms.some((t) => t.length > 2 && title.includes(t))) return false;
+  if (!palette.length) return true;
+  const want = colorTermsForLabels(palette);
+  if (want.some((t) => t.length > 2 && title.includes(t))) return true;
+  // Has a recognizable fashion color that is NOT in the palette → reject for precision
+  const knownColors = ["white", "ivory", "cream", "off-white", "black", "navy", "grey", "gray", "charcoal", "beige", "sand", "khaki", "olive", "camel", "tan", "cognac", "brown", "burgundy", "wine", "rust", "terracotta", "blush", "pink", "forest", "green", "blue"];
+  if (knownColors.some((c) => new RegExp(`\\b${c}\\b`).test(title))) return false;
+  // No color word — keep as a soft candidate (ranked lower)
+  return true;
+}
+
+function productPaletteRank(product, palette = []) {
+  const title = (product.title || "").toLowerCase();
+  const want = colorTermsForLabels(palette);
+  let score = 0;
+  for (const t of want) {
+    if (t.length > 2 && title.includes(t)) score += 3;
+  }
+  return score;
+}
 
 function catalogKeyForItem(item) {
   if (item?.key && CATALOG[item.key]) return item.key;
@@ -403,8 +521,8 @@ function googleShoppingUrl(query) {
   return `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(query)}`;
 }
 
-function storeLinksForItem(item) {
-  const q = item.searchQuery || item.name;
+function storeLinksForItem(item, palette = [], avoid = []) {
+  const q = buildItemSearchQuery(item, palette, avoid);
   return STORE_DIRECTORY.map((store) => ({
     ...store,
     href: store.url(q),
@@ -493,52 +611,52 @@ function hashSeed(str) {
   return Math.abs(h);
 }
 
-function buildRationale(recipe, occasionIds, lang) {
+function buildRationale(recipe, occasionIds, lang, palette = []) {
   const hasBlazer = !!recipe.outer;
   const acc = recipe.acc;
   const primary = occasionIds[0] || "everyday";
+  const colorHint = (palette || []).slice(0, 2).join(", ");
   const en = {
     wedding: hasBlazer
-      ? "A tailored outer layer keeps this occasion-ready without feeling stiff — clean shirt, grounded trousers, and a belt to finish the proportions."
-      : "Polished pieces with soft structure for a formal moment — nothing costume-y, just considered.",
+      ? `A tailored outer layer keeps this occasion-ready without feeling stiff — kept in your ${colorHint || "chosen"} palette, with clean shirt, grounded trousers, and a belt to finish.`
+      : `Polished pieces in your ${colorHint || "chosen"} colors for a formal moment — nothing costume-y, just considered.`,
     dinner: acc === "scarf"
-      ? "Smart, not stiff — a crisp top and tailored trouser for dinner, with a scarf if the room runs cool."
-      : "Evening-ready with clean lines — elevated enough for dinner, easy enough to actually wear.",
+      ? `Smart, not stiff — a crisp top and tailored trouser for dinner in your ${colorHint || "palette"} tones, with a scarf if the room runs cool.`
+      : `Evening-ready with clean lines in your ${colorHint || "chosen"} colors — elevated enough for dinner, easy enough to wear.`,
     work: hasBlazer
-      ? "Client-ready tailoring: structured outer layer, crisp top, and trousers that hold a sharp line through the day."
-      : "Desk-to-dinner ease — polished basics that read intentional in meetings without overdoing it.",
-    travel: "Travel-smart layering — pieces that move, pack, and still look put together when you land. Sunglasses for the glare."
-      ,
-    weekend: "Weekend ease with intention — relaxed proportions and a finishing accessory so it never looks unfinished.",
-    event: "Celebration-ready polish — a clear silhouette and one strong finishing piece so you look dressed, not costumed.",
-    everyday: "A quiet everyday edit around your palette — clean lines, nothing shouting, easy to live in.",
-    formal: "Formal without the stiffness — tailored pieces and a refined finish for the room.",
-    evening: "Evening polish with soft structure — elevated, wearable, and ready for low light.",
-    casual: "Casual with a point of view — easy pieces finished so you still look considered.",
+      ? `Client-ready tailoring in your ${colorHint || "palette"}: structured outer layer, crisp top, and trousers that hold a sharp line.`
+      : `Desk-to-dinner ease in your ${colorHint || "chosen"} colors — polished basics that read intentional.`,
+    travel: `Travel-smart layering in your ${colorHint || "palette"} — pieces that move and still look put together. Sunglasses for the glare.`,
+    weekend: `Weekend ease with intention — relaxed proportions in your ${colorHint || "chosen"} colors, finished so it never looks unfinished.`,
+    event: `Celebration-ready polish in your ${colorHint || "palette"} — a clear silhouette and one strong finishing piece.`,
+    everyday: `A quiet everyday edit built around ${colorHint || "your palette"} — clean lines, nothing shouting, easy to live in.`,
+    formal: `Formal without the stiffness — tailored pieces in your ${colorHint || "chosen"} colors with a refined finish.`,
+    evening: `Evening polish in your ${colorHint || "palette"} — elevated, wearable, and ready for low light.`,
+    casual: `Casual with a point of view — easy pieces in your ${colorHint || "chosen"} colors, finished so you look considered.`,
   };
   const es = {
-    wedding: "Una capa sastre lo deja listo para la ocasión sin rigidez — camisa limpia, pantalón firme y cinturón para cerrar las proporciones.",
-    dinner: "Elegante, sin rigidez — top impecable y pantalón sastre para cenar, con bufanda si refresca.",
-    work: "Sastrería lista para cliente: capa estructurada, top limpio y pantalón con línea nítida.",
-    travel: "Capas para viajar — piezas que se mueven, se pliegan y siguen viéndose cuidadas. Gafas para el sol.",
-    weekend: "Fin de semana con intención — proporciones relajadas y un accesorio que lo remata.",
-    event: "Brillo de celebración — silueta clara y un remate fuerte para verte vestido, no disfrazado.",
-    everyday: "Un edit diario discreto alrededor de tu paleta — líneas limpias, fácil de vivir.",
-    formal: "Formal sin rigidez — piezas sastre y un remate refinado.",
-    evening: "Brillo de noche con estructura suave — elevado y llevadero.",
-    casual: "Casual con criterio — piezas fáciles rematadas para que se vea cuidado.",
+    wedding: `Una capa sastre en tu paleta (${colorHint || "elegida"}) lo deja listo para la ocasión sin rigidez.`,
+    dinner: `Elegante, sin rigidez — tonos de tu paleta (${colorHint || "elegida"}) para cenar.`,
+    work: `Sastrería lista para cliente en tu paleta (${colorHint || "elegida"}).`,
+    travel: `Capas para viajar en tu paleta (${colorHint || "elegida"}).`,
+    weekend: `Fin de semana con intención en tus colores (${colorHint || "elegidos"}).`,
+    event: `Brillo de celebración en tu paleta (${colorHint || "elegida"}).`,
+    everyday: `Un edit diario alrededor de ${colorHint || "tu paleta"}.`,
+    formal: `Formal sin rigidez en tus colores (${colorHint || "elegidos"}).`,
+    evening: `Brillo de noche en tu paleta (${colorHint || "elegida"}).`,
+    casual: `Casual con criterio en tus colores (${colorHint || "elegidos"}).`,
   };
   const fr = {
-    wedding: "Une couche tailleur pour l'occasion, sans rigidité — chemise nette, pantalon ancré, ceinture pour les proportions.",
-    dinner: "Chic, sans raideur — haut impeccable et pantalon tailleur pour dîner, écharpe s'il fraîchit.",
-    work: "Tailleur prêt pour le client : couche structurée, haut net, pantalon à la ligne précise.",
-    travel: "Superpositions voyage — des pièces qui bougent et restent soignées à l'arrivée. Lunettes pour le soleil.",
-    weekend: "Week-end intentionnel — proportions souples et un accessoire qui termine la tenue.",
-    event: "Éclat de célébration — silhouette claire et une pièce finale forte.",
-    everyday: "Un edit quotidien discret autour de votre palette — lignes nettes, facile à vivre.",
-    formal: "Formel sans rigidité — pièces tailleur et finition raffinée.",
-    evening: "Éclat du soir, structure douce — élevé et portable.",
-    casual: "Casual avec un point de vue — pièces faciles, bien terminées.",
+    wedding: `Une couche tailleur dans votre palette (${colorHint || "choisie"}) pour l'occasion, sans rigidité.`,
+    dinner: `Chic, sans raideur — vos tons (${colorHint || "choisis"}) pour dîner.`,
+    work: `Tailleur prêt pour le client dans votre palette (${colorHint || "choisie"}).`,
+    travel: `Superpositions voyage dans votre palette (${colorHint || "choisie"}).`,
+    weekend: `Week-end intentionnel dans vos couleurs (${colorHint || "choisies"}).`,
+    event: `Éclat de célébration dans votre palette (${colorHint || "choisie"}).`,
+    everyday: `Un edit quotidien autour de ${colorHint || "votre palette"}.`,
+    formal: `Formel sans rigidité dans vos couleurs (${colorHint || "choisies"}).`,
+    evening: `Éclat du soir dans votre palette (${colorHint || "choisie"}).`,
+    casual: `Casual avec un point de vue dans vos couleurs (${colorHint || "choisies"}).`,
   };
   const table = lang === "es" ? es : lang === "fr" ? fr : en;
   return table[primary] || table.everyday;
@@ -553,10 +671,14 @@ function composeOutfits(prompt, profile, lang = "en", count = 3) {
   const occasions = [...new Set([...promptOccasions, ...profileOccasions])];
   if (!occasions.length) occasions.push("everyday");
   const vibes = archetypeVibes(profile?.archetype);
-  const seed = hashSeed(`${prompt}|${profile?.archetype}|${stylistTurn}`);
+  const palette = profile?.palette || [];
+  const avoid = profile?.avoid || [];
+  const seed = hashSeed(`${prompt}|${profile?.archetype}|${palette.join(",")}|${stylistTurn}`);
 
   const scored = OUTFIT_RECIPES.map((recipe, i) => {
-    let score = (seed + i * 17) % 7; // light shuffle so repeats don't feel identical
+    let items = recipeItems(recipe);
+    items = tuneItemsToPalette(items, palette, avoid);
+    let score = (seed + i * 17) % 5; // light shuffle
     for (const o of recipe.occasions) {
       if (promptOccasions.includes(o)) score += 12;
       if (profileOccasions.includes(o)) score += 6;
@@ -565,12 +687,13 @@ function composeOutfits(prompt, profile, lang = "en", count = 3) {
     for (const v of recipe.vibe) {
       if (vibes.includes(v)) score += 5;
     }
-    // Fit lean: fitted prefers structured outer; oversized prefers alts / no outer
+    // Palette precision — dominant signal so colors match what the user chose
+    score += outfitPaletteScore(items, palette, avoid);
     const fit = (profile?.fit || "").toLowerCase();
-    if (fit.includes("fitted") && recipe.outer === "blazer") score += 3;
-    if (fit.includes("oversized") && (recipe.outer === "blazerAlt" || !recipe.outer)) score += 3;
-    if (fit.includes("relaxed") && (recipe.outer === "blazerAlt" || !recipe.outer)) score += 2;
-    return { recipe, score, items: recipeItems(recipe) };
+    if (fit.includes("fitted") && items.includes("blazer")) score += 3;
+    if (fit.includes("oversized") && (items.includes("blazerAlt") || !items.some((k) => k === "blazer" || k === "blazerAlt"))) score += 3;
+    if (fit.includes("relaxed") && (items.includes("blazerAlt") || !items.includes("blazer"))) score += 2;
+    return { recipe, score, items };
   }).sort((a, b) => b.score - a.score);
 
   const picked = [];
@@ -585,19 +708,18 @@ function composeOutfits(prompt, profile, lang = "en", count = 3) {
       id: `${row.recipe.id}-${stylistTurn}-${picked.length}`,
       option: picked.length + 1,
       items: row.items,
-      rationale: buildRationale(row.recipe, occasions, lang),
+      rationale: buildRationale(row.recipe, occasions, lang, palette),
     });
     if (picked.length >= count) break;
   }
 
-  // Guarantee 3 looks even if filtering was aggressive
   while (picked.length < count && scored[picked.length]) {
     const row = scored[picked.length];
     picked.push({
       id: `${row.recipe.id}-fill-${picked.length}`,
       option: picked.length + 1,
       items: [...row.items],
-      rationale: buildRationale(row.recipe, occasions, lang),
+      rationale: buildRationale(row.recipe, occasions, lang, palette),
     });
   }
   return picked;
@@ -832,6 +954,7 @@ const DEFAULT_PROFILE = {
   archetype: "Quiet Tailored",
   fit: "Fitted & tailored",
   palette: ["Olive", "Ivory / Cream", "Black", "Camel / Tan"],
+  avoid: [],
   budget: "balanced",
   occasions: ["Work", "Events & celebrations"],
   modelGender: "woman",
@@ -1167,10 +1290,13 @@ function ModelHero({ itemKeys, gender }) {
 }
 
 // ==================== SHOP ACROSS STORES ====================
-function ShopSheet({ item, onClose, favoriteStores = [] }) {
-  const { t, tName } = useLang();
+function ShopSheet({ item, onClose, favoriteStores = [], palette = [], avoid = [] }) {
+  const { t, tName, tOpt } = useLang();
   const [stock, setStock] = useState({ status: "loading", products: [], scannedAt: null });
   const [showStores, setShowStores] = useState(false);
+
+  const searchQuery = buildItemSearchQuery(item, palette, avoid);
+  const paletteLabels = (palette || []).filter((p) => !(avoid || []).includes(p));
 
   useEffect(() => {
     if (!item) return undefined;
@@ -1185,7 +1311,15 @@ function ShopSheet({ item, onClose, favoriteStores = [] }) {
       .then((res) => (res.ok ? res.json() : Promise.reject(new Error("missing"))))
       .then((data) => {
         if (cancelled) return;
-        const products = Array.isArray(data.products) ? data.products : [];
+        const raw = Array.isArray(data.products) ? data.products : [];
+        const filtered = raw
+          .filter((p) => productMatchesPalette(p, palette, avoid))
+          .sort((a, b) => productPaletteRank(b, palette) - productPaletteRank(a, palette));
+        const hasPalette = (palette || []).some((p) => !(avoid || []).includes(p));
+        const precise = hasPalette
+          ? filtered.filter((p) => productPaletteRank(p, palette) > 0)
+          : filtered;
+        const products = precise.length ? precise : [];
         setStock({
           status: products.length ? "ready" : "empty",
           products,
@@ -1198,13 +1332,14 @@ function ShopSheet({ item, onClose, favoriteStores = [] }) {
     return () => {
       cancelled = true;
     };
-  }, [item]);
+  }, [item, palette, avoid]);
 
   if (!item) return null;
-  const links = storeLinksForItem(item);
-  const shoppingUrl = googleShoppingUrl(item.searchQuery || item.name);
+  const links = storeLinksForItem(item, palette, avoid);
+  const shoppingUrl = googleShoppingUrl(searchQuery);
   const favSet = new Set(favoriteStores);
   const favoriteLinks = links.filter((s) => favSet.has(s.id));
+  const paletteHint = paletteLabels.slice(0, 4).map((l) => tOpt(l)).join(", ");
 
   const productThumb = (product) => {
     const src = product.image || "";
@@ -1224,6 +1359,10 @@ function ShopSheet({ item, onClose, favoriteStores = [] }) {
             <div className="shop-hero-brand">{item.retailer}</div>
             <div className="shop-hero-name">{tName(item)}</div>
             <div className="shop-hero-sub">{t("shopInStockSub")}</div>
+            {paletteHint ? (
+              <div className="shop-palette-hint">{t("shopPaletteFilter").replace("{colors}", paletteHint)}</div>
+            ) : null}
+            <div className="shop-search-hint">{t("shopSearchingAs").replace("{query}", searchQuery)}</div>
           </div>
         </div>
 
@@ -1321,7 +1460,7 @@ function ShopSheet({ item, onClose, favoriteStores = [] }) {
 }
 
 // ==================== OUTFIT CARD ====================
-function OutfitCard({ outfit, onSwap, onSave, saved, modelGender, onModelGenderChange, favoriteStores, optionLabel }) {
+function OutfitCard({ outfit, onSwap, onSave, saved, modelGender, onModelGenderChange, favoriteStores, optionLabel, palette = [], avoid = [] }) {
   const { t, tName } = useLang();
   const [shopItem, setShopItem] = useState(null);
   return (
@@ -1392,6 +1531,8 @@ function OutfitCard({ outfit, onSwap, onSave, saved, modelGender, onModelGenderC
           item={shopItem}
           onClose={() => setShopItem(null)}
           favoriteStores={favoriteStores}
+          palette={palette}
+          avoid={avoid}
         />
       )}
     </div>
@@ -1430,7 +1571,7 @@ function HomeScreen({ profile, onPrompt, homeInput, setHomeInput }) {
   );
 }
 
-function ChatScreen({ messages, onSend, input, setInput, onSwap, onSave, savedIds, pending, modelGender, onModelGenderChange, favoriteStores }) {
+function ChatScreen({ messages, onSend, input, setInput, onSwap, onSave, savedIds, pending, modelGender, onModelGenderChange, favoriteStores, palette = [], avoid = [] }) {
   const { t } = useLang();
   const endRef = useRef(null);
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, pending]);
@@ -1457,6 +1598,8 @@ function ChatScreen({ messages, onSend, input, setInput, onSwap, onSave, savedId
                     modelGender={modelGender}
                     onModelGenderChange={onModelGenderChange}
                     favoriteStores={favoriteStores}
+                    palette={palette}
+                    avoid={avoid}
                   />
                 ))}
               </div>
@@ -1473,6 +1616,8 @@ function ChatScreen({ messages, onSend, input, setInput, onSwap, onSave, savedId
                   modelGender={modelGender}
                   onModelGenderChange={onModelGenderChange}
                   favoriteStores={favoriteStores}
+                  palette={palette}
+                  avoid={avoid}
                 />
               </div>
             );
@@ -1490,7 +1635,7 @@ function ChatScreen({ messages, onSend, input, setInput, onSwap, onSave, savedId
   );
 }
 
-function WardrobeScreen({ savedOutfits, modelGender, onModelGenderChange, favoriteStores }) {
+function WardrobeScreen({ savedOutfits, modelGender, onModelGenderChange, favoriteStores, palette = [], avoid = [] }) {
   const { t } = useLang();
   return (
     <div className="screen">
@@ -1509,6 +1654,8 @@ function WardrobeScreen({ savedOutfits, modelGender, onModelGenderChange, favori
               modelGender={modelGender}
               onModelGenderChange={onModelGenderChange}
               favoriteStores={favoriteStores}
+              palette={palette}
+              avoid={avoid}
             />
           ))}
         </div>
@@ -1517,7 +1664,7 @@ function WardrobeScreen({ savedOutfits, modelGender, onModelGenderChange, favori
   );
 }
 
-function BagScreen({ savedOutfits, favoriteStores }) {
+function BagScreen({ savedOutfits, favoriteStores, palette = [], avoid = [] }) {
   const { t, tName } = useLang();
   const [shopItem, setShopItem] = useState(null);
   const allItems = savedOutfits.flatMap((o) => o.items.map((k) => CATALOG[k]));
@@ -1560,6 +1707,8 @@ function BagScreen({ savedOutfits, favoriteStores }) {
           item={shopItem}
           onClose={() => setShopItem(null)}
           favoriteStores={favoriteStores}
+          palette={palette}
+          avoid={avoid}
         />
       )}
     </div>
@@ -1576,6 +1725,7 @@ function ProfileScreen({ profile, onToggleFavoriteStore }) {
     [t("styleArchetypeLabel"), tOpt(profile.archetype)],
     [t("fitPreferenceLabel"), tOpt(profile.fit)],
     [t("paletteLabel"), (profile.palette || []).map(tOpt).join(", ")],
+    [t("colorsToAvoidLabel"), (profile.avoid || []).map(tOpt).join(", ") || "—"],
     [t("budgetLabel"), budgetLabel],
     [t("dressesForLabel"), (profile.occasions || []).map(tOpt).join(", ") || "—"],
   ];
@@ -1715,6 +1865,7 @@ export default function VestraPrototype() {
       archetype: archetypeShortEn,
       fit: answers.fit,
       palette: answers.palette.length ? answers.palette : DEFAULT_PROFILE.palette,
+      avoid: answers.avoid || [],
       budget: answers.budget,
       occasions: answers.occasions,
       modelGender: audienceMeta.modelGender || DEFAULT_PROFILE.modelGender,
@@ -1939,6 +2090,8 @@ export default function VestraPrototype() {
         .shop-hero-brand{ font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:#A8895C; margin-bottom:4px; }
         .shop-hero-name{ font-family:'Fraunces',serif; font-size:20px; color:#0B0B0C; line-height:1.25; margin-bottom:6px; }
         .shop-hero-sub{ font-size:12.5px; color:#5b5748; font-weight:300; }
+        .shop-palette-hint{ font-size:11.5px; color:#0B0B0C; font-weight:500; margin-top:6px; }
+        .shop-search-hint{ font-size:11px; color:#8b877a; font-weight:300; margin-top:4px; font-style:italic; }
         .shop-google{ display:flex; align-items:center; justify-content:center; gap:8px; width:100%; box-sizing:border-box; background:#0B0B0C; color:#C6A567; text-decoration:none; border-radius:6px; padding:12px 14px; font-size:12px; letter-spacing:0.04em; text-transform:uppercase; font-weight:600; margin-bottom:12px; }
         .shop-more-toggle{ width:100%; background:transparent; border:none; color:#5b5748; font-size:11px; letter-spacing:0.1em; text-transform:uppercase; padding:8px 0 14px; cursor:pointer; text-align:left; }
         .shop-stock{ margin-bottom:16px; }
@@ -2157,6 +2310,8 @@ export default function VestraPrototype() {
                   modelGender={profile.modelGender || "woman"}
                   onModelGenderChange={(g) => setProfile((p) => ({ ...p, modelGender: g }))}
                   favoriteStores={profile.favoriteStores || []}
+                  palette={profile.palette || []}
+                  avoid={profile.avoid || []}
                 />
               )}
               {tab === "wardrobe" && (
@@ -2165,12 +2320,16 @@ export default function VestraPrototype() {
                   modelGender={profile.modelGender || "woman"}
                   onModelGenderChange={(g) => setProfile((p) => ({ ...p, modelGender: g }))}
                   favoriteStores={profile.favoriteStores || []}
+                  palette={profile.palette || []}
+                  avoid={profile.avoid || []}
                 />
               )}
               {tab === "bag" && (
                 <BagScreen
                   savedOutfits={savedOutfits}
                   favoriteStores={profile.favoriteStores || []}
+                  palette={profile.palette || []}
+                  avoid={profile.avoid || []}
                 />
               )}
               {tab === "profile" && (
