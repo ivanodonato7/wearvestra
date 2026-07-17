@@ -1,0 +1,45 @@
+{
+  "updatedAt": "2026-07-17T19:07:38.371Z",
+  "items": {
+    "blazer": {
+      "query": "olive green wool tailored blazer",
+      "count": 12
+    },
+    "blazerAlt": {
+      "query": "sand beige unstructured linen blazer",
+      "count": 12
+    },
+    "shirt": {
+      "query": "ivory crisp cotton dress shirt",
+      "count": 12
+    },
+    "shirtAlt": {
+      "query": "charcoal fine merino turtleneck sweater",
+      "count": 12
+    },
+    "trouser": {
+      "query": "olive tailored straight leg trousers",
+      "count": 12
+    },
+    "trouserAlt": {
+      "query": "grey wide leg wool trousers",
+      "count": 12
+    },
+    "shoe": {
+      "query": "brown leather derby dress shoes",
+      "count": 12
+    },
+    "shoeAlt": {
+      "query": "dark brown suede chelsea boots",
+      "count": 12
+    },
+    "scarf": {
+      "query": "camel tan fine wool scarf",
+      "count": 12
+    },
+    "scarfAlt": {
+      "query": "gold cashmere pocket square",
+      "count": 12
+    }
+  }
+}

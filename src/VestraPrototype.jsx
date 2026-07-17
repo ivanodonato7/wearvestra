@@ -62,6 +62,13 @@ const UI = {
     favoriteStoresHint: "Tap to add or remove stores you shop from most.",
     favoriteStoresEmpty: "No favorites yet — pick a few below.",
     shopYourFavorites: "Your favorites",
+    shopInStock: "In stock now",
+    shopInStockSub: "Live listings scanned across retailers",
+    shopInStockBadge: "In stock",
+    shopBuyAt: "Buy",
+    shopScanning: "Scanning stores for availability…",
+    shopNoStock: "No live listings found — try Google Shopping or a store below.",
+    shopMoreStores: "Search more stores",
   },
   es: {
     welcomeEyebrow: "Vestra", welcomeTitleLine1: "Vamos a vestirte", welcomeTitleLine2: "como es debido.",
@@ -112,6 +119,13 @@ const UI = {
     favoriteStoresHint: "Toca para añadir o quitar las tiendas donde más compras.",
     favoriteStoresEmpty: "Aún no hay favoritas — elige algunas abajo.",
     shopYourFavorites: "Tus favoritas",
+    shopInStock: "Disponible ahora",
+    shopInStockSub: "Listados en stock en varias tiendas",
+    shopInStockBadge: "En stock",
+    shopBuyAt: "Comprar",
+    shopScanning: "Buscando disponibilidad en tiendas…",
+    shopNoStock: "Sin listados en vivo — prueba Google Shopping o una tienda abajo.",
+    shopMoreStores: "Buscar en más tiendas",
   },
   fr: {
     welcomeEyebrow: "Vestra", welcomeTitleLine1: "Habillons-vous", welcomeTitleLine2: "comme il se doit.",
@@ -162,6 +176,13 @@ const UI = {
     favoriteStoresHint: "Touchez pour ajouter ou retirer vos boutiques habituelles.",
     favoriteStoresEmpty: "Aucune favorite — choisissez-en quelques-unes ci-dessous.",
     shopYourFavorites: "Vos favorites",
+    shopInStock: "En stock maintenant",
+    shopInStockSub: "Offres disponibles chez plusieurs enseignes",
+    shopInStockBadge: "En stock",
+    shopBuyAt: "Acheter",
+    shopScanning: "Recherche de disponibilité…",
+    shopNoStock: "Aucune offre trouvée — essayez Google Shopping ou une boutique ci-dessous.",
+    shopMoreStores: "Chercher d'autres boutiques",
   },
 };
 
@@ -280,17 +301,22 @@ function LanguageSwitcher({ corner }) {
 
 // ---------- Product catalog (mirrors the seed data in the real backend) ----------
 const CATALOG = {
-  blazer: { id: "p1", name: "Wool-Blend Tailored Blazer", price: 320, retailer: "Considered Studio", type: "blazer", color: "#3E4228", image: "/products/blazer.jpg", searchQuery: "olive green wool tailored blazer men women" },
-  blazerAlt: { id: "p1b", name: "Unstructured Linen Blazer", price: 265, retailer: "North & Field", type: "blazer", color: "#cbb994", image: "/products/blazer-alt.jpg", searchQuery: "sand beige unstructured linen blazer" },
-  shirt: { id: "p2", name: "Crisp Cotton Shirt", price: 95, retailer: "Considered Studio", type: "shirt", color: "#F5F2E9", image: "/products/shirt.jpg", searchQuery: "ivory crisp cotton dress shirt" },
-  shirtAlt: { id: "p2b", name: "Fine Merino Turtleneck", price: 110, retailer: "North & Field", type: "shirt", color: "#4a4a48", image: "/products/shirt-alt.jpg", searchQuery: "charcoal fine merino turtleneck sweater" },
-  trouser: { id: "p3", name: "Tailored Straight Trouser", price: 140, retailer: "Considered Studio", type: "trouser", color: "#3E4228", image: "/products/trouser.jpg", searchQuery: "olive tailored straight leg trousers" },
-  trouserAlt: { id: "p3b", name: "Wide-Leg Wool Trouser", price: 165, retailer: "Considered Studio", type: "trouser", color: "#6b6b63", image: "/products/trouser-alt.jpg", searchQuery: "grey wide leg wool trousers" },
-  shoe: { id: "p4", name: "Leather Derby Shoe", price: 210, retailer: "Aldern & Co.", type: "shoe", color: "#6b3f22", image: "/products/shoe.jpg", searchQuery: "brown leather derby dress shoes" },
-  shoeAlt: { id: "p4b", name: "Suede Chelsea Boot", price: 245, retailer: "Aldern & Co.", type: "shoe", color: "#4a3527", image: "/products/shoe-alt.jpg", searchQuery: "dark brown suede chelsea boots" },
-  scarf: { id: "p5", name: "Fine Wool Scarf", price: 85, retailer: "North & Field", type: "scarf", color: "#b08a5c", image: "/products/scarf.jpg", searchQuery: "camel tan fine wool scarf" },
-  scarfAlt: { id: "p5b", name: "Cashmere Pocket Square", price: 65, retailer: "Aldern & Co.", type: "scarf", color: "#C6A567", image: "/products/scarf-alt.jpg", searchQuery: "gold cashmere pocket square" },
+  blazer: { key: "blazer", id: "p1", name: "Wool-Blend Tailored Blazer", price: 320, retailer: "Considered Studio", type: "blazer", color: "#3E4228", image: "/products/blazer.jpg", searchQuery: "olive green wool tailored blazer men women" },
+  blazerAlt: { key: "blazerAlt", id: "p1b", name: "Unstructured Linen Blazer", price: 265, retailer: "North & Field", type: "blazer", color: "#cbb994", image: "/products/blazer-alt.jpg", searchQuery: "sand beige unstructured linen blazer" },
+  shirt: { key: "shirt", id: "p2", name: "Crisp Cotton Shirt", price: 95, retailer: "Considered Studio", type: "shirt", color: "#F5F2E9", image: "/products/shirt.jpg", searchQuery: "ivory crisp cotton dress shirt" },
+  shirtAlt: { key: "shirtAlt", id: "p2b", name: "Fine Merino Turtleneck", price: 110, retailer: "North & Field", type: "shirt", color: "#4a4a48", image: "/products/shirt-alt.jpg", searchQuery: "charcoal fine merino turtleneck sweater" },
+  trouser: { key: "trouser", id: "p3", name: "Tailored Straight Trouser", price: 140, retailer: "Considered Studio", type: "trouser", color: "#3E4228", image: "/products/trouser.jpg", searchQuery: "olive tailored straight leg trousers" },
+  trouserAlt: { key: "trouserAlt", id: "p3b", name: "Wide-Leg Wool Trouser", price: 165, retailer: "Considered Studio", type: "trouser", color: "#6b6b63", image: "/products/trouser-alt.jpg", searchQuery: "grey wide leg wool trousers" },
+  shoe: { key: "shoe", id: "p4", name: "Leather Derby Shoe", price: 210, retailer: "Aldern & Co.", type: "shoe", color: "#6b3f22", image: "/products/shoe.jpg", searchQuery: "brown leather derby dress shoes" },
+  shoeAlt: { key: "shoeAlt", id: "p4b", name: "Suede Chelsea Boot", price: 245, retailer: "Aldern & Co.", type: "shoe", color: "#4a3527", image: "/products/shoe-alt.jpg", searchQuery: "dark brown suede chelsea boots" },
+  scarf: { key: "scarf", id: "p5", name: "Fine Wool Scarf", price: 85, retailer: "North & Field", type: "scarf", color: "#b08a5c", image: "/products/scarf.jpg", searchQuery: "camel tan fine wool scarf" },
+  scarfAlt: { key: "scarfAlt", id: "p5b", name: "Cashmere Pocket Square", price: 65, retailer: "Aldern & Co.", type: "scarf", color: "#C6A567", image: "/products/scarf-alt.jpg", searchQuery: "gold cashmere pocket square" },
 };
+
+function catalogKeyForItem(item) {
+  if (item?.key && CATALOG[item.key]) return item.key;
+  return Object.keys(CATALOG).find((k) => CATALOG[k].id === item?.id) || null;
+}
 
 // Real multi-store search — budget → high street → premium → luxury
 const STORE_DIRECTORY = [
@@ -752,11 +778,48 @@ function ModelHero({ itemKeys, gender }) {
 // ==================== SHOP ACROSS STORES ====================
 function ShopSheet({ item, onClose, favoriteStores = [] }) {
   const { t, tName } = useLang();
+  const [stock, setStock] = useState({ status: "loading", products: [], scannedAt: null });
+  const [showStores, setShowStores] = useState(false);
+
+  useEffect(() => {
+    if (!item) return undefined;
+    const key = catalogKeyForItem(item);
+    if (!key) {
+      setStock({ status: "empty", products: [], scannedAt: null });
+      return undefined;
+    }
+    let cancelled = false;
+    setStock({ status: "loading", products: [], scannedAt: null });
+    fetch(`/stock/${key}.json`)
+      .then((res) => (res.ok ? res.json() : Promise.reject(new Error("missing"))))
+      .then((data) => {
+        if (cancelled) return;
+        const products = Array.isArray(data.products) ? data.products : [];
+        setStock({
+          status: products.length ? "ready" : "empty",
+          products,
+          scannedAt: data.scannedAt || null,
+        });
+      })
+      .catch(() => {
+        if (!cancelled) setStock({ status: "empty", products: [], scannedAt: null });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [item]);
+
   if (!item) return null;
   const links = storeLinksForItem(item);
   const shoppingUrl = googleShoppingUrl(item.searchQuery || item.name);
   const favSet = new Set(favoriteStores);
   const favoriteLinks = links.filter((s) => favSet.has(s.id));
+
+  const productThumb = (product) => {
+    const src = product.image || "";
+    if (src && !src.startsWith("data:")) return src;
+    return item.image;
+  };
 
   return (
     <div className="shop-overlay" onClick={onClose} role="presentation">
@@ -769,43 +832,60 @@ function ShopSheet({ item, onClose, favoriteStores = [] }) {
           <div className="shop-hero-copy">
             <div className="shop-hero-brand">{item.retailer}</div>
             <div className="shop-hero-name">{tName(item)}</div>
-            <div className="shop-hero-sub">{t("shopAcrossSub")}</div>
+            <div className="shop-hero-sub">{t("shopInStockSub")}</div>
           </div>
         </div>
-        <a className="shop-google" href={shoppingUrl} target="_blank" rel="noopener noreferrer">
-          {t("shopOpenAll")} <ExternalLink size={13} />
-        </a>
-        {favoriteLinks.length > 0 && (
-          <div className="shop-tier">
-            <div className="shop-tier-label">{t("shopYourFavorites")}</div>
-            <div className="shop-store-grid">
-              {favoriteLinks.map((store) => (
+
+        <div className="shop-stock">
+          <div className="shop-tier-label">{t("shopInStock")}</div>
+          {stock.status === "loading" && <div className="shop-stock-status">{t("shopScanning")}</div>}
+          {stock.status === "empty" && <div className="shop-stock-status">{t("shopNoStock")}</div>}
+          {stock.status === "ready" && (
+            <div className="shop-stock-list">
+              {stock.products.map((product, idx) => (
                 <a
-                  key={`fav-${store.id}`}
-                  className="shop-store-link shop-store-link-fav"
-                  href={store.href}
+                  key={`${product.url}-${idx}`}
+                  className="shop-stock-card"
+                  href={product.url}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <span>{store.name}</span>
-                  <ExternalLink size={12} />
+                  <img className="shop-stock-image" src={productThumb(product)} alt="" loading="lazy" />
+                  <div className="shop-stock-info">
+                    <div className="shop-stock-merchant">{product.merchant || "Retailer"}</div>
+                    <div className="shop-stock-title">{product.title}</div>
+                    <div className="shop-stock-meta">
+                      <span className="shop-stock-price">{product.price}</span>
+                      <span className="shop-stock-badge">{product.availability || t("shopInStockBadge")}</span>
+                    </div>
+                  </div>
+                  <span className="shop-stock-buy">
+                    {t("shopBuyAt")} <ExternalLink size={12} />
+                  </span>
                 </a>
               ))}
             </div>
-          </div>
-        )}
-        <div className="shop-tiers">
-          {STORE_TIERS.map((tier) => {
-            const stores = links.filter((s) => s.tier === tier.id);
-            if (!stores.length) return null;
-            return (
-              <div key={tier.id} className="shop-tier">
-                <div className="shop-tier-label">{t(tier.labelKey)}</div>
+          )}
+        </div>
+
+        <a className="shop-google" href={shoppingUrl} target="_blank" rel="noopener noreferrer">
+          {t("shopOpenAll")} <ExternalLink size={13} />
+        </a>
+
+        <button type="button" className="shop-more-toggle" onClick={() => setShowStores((v) => !v)}>
+          {t("shopMoreStores")} {showStores ? "−" : "+"}
+        </button>
+
+        {showStores && (
+          <>
+            {favoriteLinks.length > 0 && (
+              <div className="shop-tier">
+                <div className="shop-tier-label">{t("shopYourFavorites")}</div>
                 <div className="shop-store-grid">
-                  {stores.map((store) => (
+                  {favoriteLinks.map((store) => (
                     <a
-                      key={store.id}
-                      className={`shop-store-link ${favSet.has(store.id) ? "shop-store-link-fav" : ""}`}
+                      key={`fav-${store.id}`}
+                      className="shop-store-link shop-store-link-fav"
                       href={store.href}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -816,9 +896,34 @@ function ShopSheet({ item, onClose, favoriteStores = [] }) {
                   ))}
                 </div>
               </div>
-            );
-          })}
-        </div>
+            )}
+            <div className="shop-tiers">
+              {STORE_TIERS.map((tier) => {
+                const stores = links.filter((s) => s.tier === tier.id);
+                if (!stores.length) return null;
+                return (
+                  <div key={tier.id} className="shop-tier">
+                    <div className="shop-tier-label">{t(tier.labelKey)}</div>
+                    <div className="shop-store-grid">
+                      {stores.map((store) => (
+                        <a
+                          key={store.id}
+                          className={`shop-store-link ${favSet.has(store.id) ? "shop-store-link-fav" : ""}`}
+                          href={store.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <span>{store.name}</span>
+                          <ExternalLink size={12} />
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
@@ -867,7 +972,7 @@ function OutfitCard({ outfit, onSwap, onSave, saved, modelGender, onModelGenderC
                   <div className="item-row-info">
                     <div className="item-row-brand">{item.retailer}</div>
                     <div className="item-row-name">{tName(item)}</div>
-                    <div className="item-row-meta">${item.price} · {t("shopAcross")}</div>
+                    <div className="item-row-meta">${item.price} · {t("shopInStock")}</div>
                   </div>
                   <span className="link-btn-sm" aria-hidden="true">
                     <ExternalLink size={11} />
@@ -1030,7 +1135,7 @@ function BagScreen({ savedOutfits, favoriteStores }) {
                 <div className="bag-info">
                   <div className="bag-brand">{item.retailer}</div>
                   <div className="bag-name">{tName(item)}</div>
-                  <div className="bag-price">${item.price} · {t("shopAcross")}</div>
+                  <div className="bag-price">${item.price} · {t("shopInStock")}</div>
                 </div>
                 <ExternalLink size={13} color="#8b877a" />
               </button>
@@ -1403,7 +1508,20 @@ export default function VestraPrototype() {
         .shop-hero-brand{ font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:#A8895C; margin-bottom:4px; }
         .shop-hero-name{ font-family:'Fraunces',serif; font-size:20px; color:#0B0B0C; line-height:1.25; margin-bottom:6px; }
         .shop-hero-sub{ font-size:12.5px; color:#5b5748; font-weight:300; }
-        .shop-google{ display:flex; align-items:center; justify-content:center; gap:8px; width:100%; box-sizing:border-box; background:#0B0B0C; color:#C6A567; text-decoration:none; border-radius:6px; padding:12px 14px; font-size:12px; letter-spacing:0.04em; text-transform:uppercase; font-weight:600; margin-bottom:18px; }
+        .shop-google{ display:flex; align-items:center; justify-content:center; gap:8px; width:100%; box-sizing:border-box; background:#0B0B0C; color:#C6A567; text-decoration:none; border-radius:6px; padding:12px 14px; font-size:12px; letter-spacing:0.04em; text-transform:uppercase; font-weight:600; margin-bottom:12px; }
+        .shop-more-toggle{ width:100%; background:transparent; border:none; color:#5b5748; font-size:11px; letter-spacing:0.1em; text-transform:uppercase; padding:8px 0 14px; cursor:pointer; text-align:left; }
+        .shop-stock{ margin-bottom:16px; }
+        .shop-stock-status{ font-size:13px; color:#5b5748; font-weight:300; padding:8px 0 4px; }
+        .shop-stock-list{ display:flex; flex-direction:column; gap:8px; }
+        .shop-stock-card{ display:grid; grid-template-columns:64px 1fr auto; gap:10px; align-items:center; background:#fff; border:1px solid #e6e0d2; border-radius:8px; padding:10px; text-decoration:none; color:#0B0B0C; transition:border-color .15s; }
+        .shop-stock-card:hover{ border-color:#C6A567; }
+        .shop-stock-image{ width:64px; height:64px; object-fit:cover; border-radius:6px; background:#f0ebe0; }
+        .shop-stock-merchant{ font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#A8895C; margin-bottom:2px; }
+        .shop-stock-title{ font-size:12.5px; line-height:1.3; color:#0B0B0C; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+        .shop-stock-meta{ display:flex; align-items:center; gap:8px; margin-top:6px; flex-wrap:wrap; }
+        .shop-stock-price{ font-size:13px; font-weight:600; color:#0B0B0C; }
+        .shop-stock-badge{ font-size:10px; letter-spacing:0.06em; text-transform:uppercase; color:#2f6b45; background:#e8f3eb; padding:3px 7px; border-radius:4px; }
+        .shop-stock-buy{ display:inline-flex; align-items:center; gap:4px; font-size:11px; letter-spacing:0.04em; text-transform:uppercase; color:#8b877a; white-space:nowrap; }
         .shop-tiers{ display:flex; flex-direction:column; gap:16px; }
         .shop-tier-label{ font-size:10px; letter-spacing:0.12em; text-transform:uppercase; color:#8b877a; margin-bottom:8px; }
         .shop-store-grid{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
