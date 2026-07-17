@@ -57,7 +57,8 @@ const UI = {
     chipDressWedding: "Dress me for a wedding", chipWorkDinner: "Work dinner tonight", chipWeekendCasual: "Weekend, nothing fussy",
     yourStylist: "Your Stylist", chatEmpty: "Tell me what you're dressing for — an occasion, a mood, anything.",
     composing: "Composing your outfit…", chatInputPlaceholder: "e.g. wedding in June, semi-formal",
-    stylistSuggests: "Your Stylist Suggests", saveOutfit: "Save Outfit", savedLabel: "Saved",
+    stylistSuggests: "Your Stylist Suggests", stylistLook: "Look", saveOutfit: "Save Outfit", savedLabel: "Saved",
+    stylistPicksIntro: "Three directions for you — tap any piece to shop what's in stock.",
     wardrobeTitle: "Wardrobe", wardrobeEmpty: "Outfits you save from your stylist will live here.",
     bagTitle: "Bag", bagEmpty: "Save an outfit to see its items here, grouped by retailer.", checkoutWith: "Checkout with",
     profileTitle: "Profile", styleArchetypeLabel: "Style Archetype", fitPreferenceLabel: "Fit Preference",
@@ -126,7 +127,8 @@ const UI = {
     chipDressWedding: "Vísteme para una boda", chipWorkDinner: "Cena de trabajo esta noche", chipWeekendCasual: "Fin de semana, sin complicaciones",
     yourStylist: "Tu Estilista", chatEmpty: "Cuéntame para qué te estás vistiendo — una ocasión, un estado de ánimo, lo que sea.",
     composing: "Componiendo tu look…", chatInputPlaceholder: "ej. boda en junio, semi-formal",
-    stylistSuggests: "Tu Estilista Sugiere", saveOutfit: "Guardar Look", savedLabel: "Guardado",
+    stylistSuggests: "Tu Estilista Sugiere", stylistLook: "Look", saveOutfit: "Guardar Look", savedLabel: "Guardado",
+    stylistPicksIntro: "Tres direcciones para ti — toca cualquier prenda para ver stock.",
     wardrobeTitle: "Armario", wardrobeEmpty: "Los looks que guardes de tu estilista aparecerán aquí.",
     bagTitle: "Bolsa", bagEmpty: "Guarda un look para ver sus prendas aquí, agrupadas por tienda.", checkoutWith: "Comprar en",
     profileTitle: "Perfil", styleArchetypeLabel: "Arquetipo de Estilo", fitPreferenceLabel: "Preferencia de Ajuste",
@@ -195,7 +197,8 @@ const UI = {
     chipDressWedding: "Habillez-moi pour un mariage", chipWorkDinner: "Dîner professionnel ce soir", chipWeekendCasual: "Week-end, sans prise de tête",
     yourStylist: "Votre Styliste", chatEmpty: "Dites-moi pour quoi vous vous habillez — une occasion, une humeur, n'importe quoi.",
     composing: "Composition de votre tenue…", chatInputPlaceholder: "ex. mariage en juin, semi-habillé",
-    stylistSuggests: "Votre Styliste Suggère", saveOutfit: "Enregistrer la Tenue", savedLabel: "Enregistré",
+    stylistSuggests: "Votre Styliste Suggère", stylistLook: "Look", saveOutfit: "Enregistrer la Tenue", savedLabel: "Enregistré",
+    stylistPicksIntro: "Trois directions pour vous — touchez une pièce pour voir le stock.",
     wardrobeTitle: "Garde-robe", wardrobeEmpty: "Les tenues que vous enregistrez apparaîtront ici.",
     bagTitle: "Panier", bagEmpty: "Enregistrez une tenue pour voir ses articles ici, regroupés par enseigne.", checkoutWith: "Payer chez",
     profileTitle: "Profil", styleArchetypeLabel: "Archétype de Style", fitPreferenceLabel: "Préférence de Coupe",
@@ -418,28 +421,187 @@ const ALT_MAP = {
 };
 const ALT_MAP_REV = Object.fromEntries(Object.entries(ALT_MAP).map(([k, v]) => [v, k]));
 
-const OUTFIT_TEMPLATES = [
-  {
-    keywords: ["wedding", "formal", "event"],
-    rationale: "A tailored olive blazer keeps this warm and grounded rather than stiff — right for an outdoor, semi-formal moment. The ivory shirt lifts it, the derby stays classic, and a leather belt finishes the proportions.",
-    items: ["blazer", "shirt", "trouser", "shoe", "belt"],
-  },
-  {
-    keywords: ["dinner", "date", "work"],
-    rationale: "Smart, not stiff — the same tailored trouser grounds the look, while the crisp shirt alone (no jacket) keeps it easy for a dinner setting. Add the scarf if the room runs cool.",
-    items: ["shirt", "trouser", "shoe", "scarf"],
-  },
-  {
-    keywords: ["weekend", "casual", "travel", "sunny"],
-    rationale: "Easy everyday pieces with sunglasses to finish — clean lines, nothing fussy, ready for sun and movement.",
-    items: ["shirt", "trouser", "shoe", "sunglasses"],
-  },
-  {
-    keywords: [],
-    rationale: "A quiet, considered everyday look built around your palette — clean lines, nothing shouting for attention, easy to actually live in. Sunglasses when you step outside.",
-    items: ["shirt", "trouser", "shoe", "sunglasses"],
-  },
+/** Recipe library — scored against the user's prompt + profile to pick varied looks. */
+const OUTFIT_RECIPES = [
+  { id: "formal-olive", outer: "blazer", top: "shirt", bottom: "trouser", shoe: "shoe", acc: "belt", occasions: ["wedding", "formal", "event", "work"], vibe: ["quiet", "classic", "polished"] },
+  { id: "formal-linen", outer: "blazerAlt", top: "shirt", bottom: "trouser", shoe: "shoe", acc: "belt", occasions: ["wedding", "formal", "event", "travel"], vibe: ["relaxed", "warm", "classic"] },
+  { id: "sharp-evening", outer: "blazer", top: "shirt", bottom: "trouserAlt", shoe: "shoe", acc: "scarf", occasions: ["dinner", "date", "evening", "event"], vibe: ["modern", "bold", "romantic"] },
+  { id: "dinner-easy", outer: null, top: "shirt", bottom: "trouser", shoe: "shoe", acc: "scarf", occasions: ["dinner", "date", "work", "evening"], vibe: ["quiet", "classic", "minimal"] },
+  { id: "dinner-knit", outer: null, top: "shirtAlt", bottom: "trouser", shoe: "shoeAlt", acc: "scarf", occasions: ["dinner", "date", "evening", "weekend"], vibe: ["warm", "relaxed", "romantic"] },
+  { id: "work-tailored", outer: "blazer", top: "shirt", bottom: "trouser", shoe: "shoe", acc: null, occasions: ["work", "office", "meeting", "client"], vibe: ["quiet", "classic", "modern", "polished"] },
+  { id: "work-directional", outer: "blazer", top: "shirtAlt", bottom: "trouserAlt", shoe: "shoe", acc: "belt", occasions: ["work", "office", "meeting"], vibe: ["modern", "minimal", "bold"] },
+  { id: "weekend-sun", outer: null, top: "shirt", bottom: "trouserAlt", shoe: "shoeAlt", acc: "sunglasses", occasions: ["weekend", "casual", "travel", "everyday", "sunny"], vibe: ["relaxed", "minimal", "warm"] },
+  { id: "travel-layer", outer: "blazerAlt", top: "shirt", bottom: "trouserAlt", shoe: "shoeAlt", acc: "sunglasses", occasions: ["travel", "weekend", "casual"], vibe: ["relaxed", "warm", "modern"] },
+  { id: "everyday-clean", outer: null, top: "shirt", bottom: "trouser", shoe: "shoe", acc: "sunglasses", occasions: ["everyday", "casual", "weekend"], vibe: ["quiet", "minimal", "classic"] },
+  { id: "everyday-knit", outer: null, top: "shirtAlt", bottom: "trouser", shoe: "shoe", acc: "belt", occasions: ["everyday", "work", "weekend"], vibe: ["warm", "relaxed", "quiet"] },
+  { id: "bold-layer", outer: "blazerAlt", top: "shirtAlt", bottom: "trouserAlt", shoe: "shoeAlt", acc: "sunglasses", occasions: ["weekend", "travel", "casual", "date"], vibe: ["bold", "modern", "warm"] },
 ];
+
+const OCCASION_KEYWORDS = [
+  { id: "wedding", keys: ["wedding", "formal", "gala", "black tie", "ceremony", "boda", "mariage", "formel"] },
+  { id: "dinner", keys: ["dinner", "date", "evening", "restaurant", "cena", "dîner", "soir", "rendez"] },
+  { id: "work", keys: ["work", "office", "meeting", "client", "interview", "trabajo", "bureau", "réunion"] },
+  { id: "travel", keys: ["travel", "airport", "trip", "flight", "viaje", "voyage", "avion"] },
+  { id: "weekend", keys: ["weekend", "casual", "brunch", "fin de semana", "week-end"] },
+  { id: "event", keys: ["event", "party", "celebration", "cocktail", "evento", "fête", "soirée"] },
+  { id: "everyday", keys: ["everyday", "daily", "nothing fussy", "diario", "quotidien", "casual"] },
+];
+
+function detectOccasions(text) {
+  const lower = (text || "").toLowerCase();
+  const hits = [];
+  for (const row of OCCASION_KEYWORDS) {
+    if (row.keys.some((k) => lower.includes(k))) hits.push(row.id);
+  }
+  return hits;
+}
+
+function archetypeVibes(archetype) {
+  const a = (archetype || "").toLowerCase();
+  if (a.includes("quiet") || a.includes("tailored")) return ["quiet", "classic", "polished"];
+  if (a.includes("relaxed") || a.includes("considered")) return ["relaxed", "warm"];
+  if (a.includes("modern") || a.includes("sharp")) return ["modern", "minimal"];
+  if (a.includes("warm") || a.includes("layered")) return ["warm", "relaxed"];
+  if (a.includes("classic") || a.includes("polished")) return ["classic", "polished", "quiet"];
+  if (a.includes("minimal") || a.includes("directional")) return ["minimal", "modern"];
+  if (a.includes("romantic") || a.includes("soft")) return ["romantic", "warm"];
+  if (a.includes("bold") || a.includes("expressive")) return ["bold", "modern"];
+  return ["quiet", "classic"];
+}
+
+function profileOccasionIds(profile) {
+  const map = {
+    Work: "work",
+    "Date nights": "dinner",
+    Travel: "travel",
+    "Events & celebrations": "event",
+    "Everyday, just want to feel put together": "everyday",
+  };
+  return (profile?.occasions || []).map((o) => map[o]).filter(Boolean);
+}
+
+function recipeItems(recipe) {
+  return [recipe.outer, recipe.top, recipe.bottom, recipe.shoe, recipe.acc].filter(Boolean);
+}
+
+function hashSeed(str) {
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return Math.abs(h);
+}
+
+function buildRationale(recipe, occasionIds, lang) {
+  const hasBlazer = !!recipe.outer;
+  const acc = recipe.acc;
+  const primary = occasionIds[0] || "everyday";
+  const en = {
+    wedding: hasBlazer
+      ? "A tailored outer layer keeps this occasion-ready without feeling stiff — clean shirt, grounded trousers, and a belt to finish the proportions."
+      : "Polished pieces with soft structure for a formal moment — nothing costume-y, just considered.",
+    dinner: acc === "scarf"
+      ? "Smart, not stiff — a crisp top and tailored trouser for dinner, with a scarf if the room runs cool."
+      : "Evening-ready with clean lines — elevated enough for dinner, easy enough to actually wear.",
+    work: hasBlazer
+      ? "Client-ready tailoring: structured outer layer, crisp top, and trousers that hold a sharp line through the day."
+      : "Desk-to-dinner ease — polished basics that read intentional in meetings without overdoing it.",
+    travel: "Travel-smart layering — pieces that move, pack, and still look put together when you land. Sunglasses for the glare."
+      ,
+    weekend: "Weekend ease with intention — relaxed proportions and a finishing accessory so it never looks unfinished.",
+    event: "Celebration-ready polish — a clear silhouette and one strong finishing piece so you look dressed, not costumed.",
+    everyday: "A quiet everyday edit around your palette — clean lines, nothing shouting, easy to live in.",
+    formal: "Formal without the stiffness — tailored pieces and a refined finish for the room.",
+    evening: "Evening polish with soft structure — elevated, wearable, and ready for low light.",
+    casual: "Casual with a point of view — easy pieces finished so you still look considered.",
+  };
+  const es = {
+    wedding: "Una capa sastre lo deja listo para la ocasión sin rigidez — camisa limpia, pantalón firme y cinturón para cerrar las proporciones.",
+    dinner: "Elegante, sin rigidez — top impecable y pantalón sastre para cenar, con bufanda si refresca.",
+    work: "Sastrería lista para cliente: capa estructurada, top limpio y pantalón con línea nítida.",
+    travel: "Capas para viajar — piezas que se mueven, se pliegan y siguen viéndose cuidadas. Gafas para el sol.",
+    weekend: "Fin de semana con intención — proporciones relajadas y un accesorio que lo remata.",
+    event: "Brillo de celebración — silueta clara y un remate fuerte para verte vestido, no disfrazado.",
+    everyday: "Un edit diario discreto alrededor de tu paleta — líneas limpias, fácil de vivir.",
+    formal: "Formal sin rigidez — piezas sastre y un remate refinado.",
+    evening: "Brillo de noche con estructura suave — elevado y llevadero.",
+    casual: "Casual con criterio — piezas fáciles rematadas para que se vea cuidado.",
+  };
+  const fr = {
+    wedding: "Une couche tailleur pour l'occasion, sans rigidité — chemise nette, pantalon ancré, ceinture pour les proportions.",
+    dinner: "Chic, sans raideur — haut impeccable et pantalon tailleur pour dîner, écharpe s'il fraîchit.",
+    work: "Tailleur prêt pour le client : couche structurée, haut net, pantalon à la ligne précise.",
+    travel: "Superpositions voyage — des pièces qui bougent et restent soignées à l'arrivée. Lunettes pour le soleil.",
+    weekend: "Week-end intentionnel — proportions souples et un accessoire qui termine la tenue.",
+    event: "Éclat de célébration — silhouette claire et une pièce finale forte.",
+    everyday: "Un edit quotidien discret autour de votre palette — lignes nettes, facile à vivre.",
+    formal: "Formel sans rigidité — pièces tailleur et finition raffinée.",
+    evening: "Éclat du soir, structure douce — élevé et portable.",
+    casual: "Casual avec un point de vue — pièces faciles, bien terminées.",
+  };
+  const table = lang === "es" ? es : lang === "fr" ? fr : en;
+  return table[primary] || table.everyday;
+}
+
+let stylistTurn = 0;
+
+function composeOutfits(prompt, profile, lang = "en", count = 3) {
+  stylistTurn += 1;
+  const promptOccasions = detectOccasions(prompt);
+  const profileOccasions = profileOccasionIds(profile);
+  const occasions = [...new Set([...promptOccasions, ...profileOccasions])];
+  if (!occasions.length) occasions.push("everyday");
+  const vibes = archetypeVibes(profile?.archetype);
+  const seed = hashSeed(`${prompt}|${profile?.archetype}|${stylistTurn}`);
+
+  const scored = OUTFIT_RECIPES.map((recipe, i) => {
+    let score = (seed + i * 17) % 7; // light shuffle so repeats don't feel identical
+    for (const o of recipe.occasions) {
+      if (promptOccasions.includes(o)) score += 12;
+      if (profileOccasions.includes(o)) score += 6;
+      if (occasions.includes(o)) score += 2;
+    }
+    for (const v of recipe.vibe) {
+      if (vibes.includes(v)) score += 5;
+    }
+    // Fit lean: fitted prefers structured outer; oversized prefers alts / no outer
+    const fit = (profile?.fit || "").toLowerCase();
+    if (fit.includes("fitted") && recipe.outer === "blazer") score += 3;
+    if (fit.includes("oversized") && (recipe.outer === "blazerAlt" || !recipe.outer)) score += 3;
+    if (fit.includes("relaxed") && (recipe.outer === "blazerAlt" || !recipe.outer)) score += 2;
+    return { recipe, score, items: recipeItems(recipe) };
+  }).sort((a, b) => b.score - a.score);
+
+  const picked = [];
+  const usedSigs = new Set();
+  for (const row of scored) {
+    const sig = outfitSignature(row.items);
+    const core = row.items.filter((k) => !ACCESSORY_KEYS.has(k)).join("+");
+    if (usedSigs.has(sig) || usedSigs.has(`core:${core}`)) continue;
+    usedSigs.add(sig);
+    usedSigs.add(`core:${core}`);
+    picked.push({
+      id: `${row.recipe.id}-${stylistTurn}-${picked.length}`,
+      option: picked.length + 1,
+      items: row.items,
+      rationale: buildRationale(row.recipe, occasions, lang),
+    });
+    if (picked.length >= count) break;
+  }
+
+  // Guarantee 3 looks even if filtering was aggressive
+  while (picked.length < count && scored[picked.length]) {
+    const row = scored[picked.length];
+    picked.push({
+      id: `${row.recipe.id}-fill-${picked.length}`,
+      option: picked.length + 1,
+      items: [...row.items],
+      rationale: buildRationale(row.recipe, occasions, lang),
+    });
+  }
+  return picked;
+}
 
 // AI-generated model photos keyed by gender + outfit signature (catalog keys, stable order)
 const MODEL_KEY_ORDER = [
@@ -493,12 +655,6 @@ function resolveModelImage(itemKeys, gender) {
     }
   }
   return best || map["shirt+trouser+shoe"] || Object.values(map)[0];
-}
-
-function pickOutfitIndex(text) {
-  const lower = text.toLowerCase();
-  const idx = OUTFIT_TEMPLATES.findIndex((t) => t.keywords.some((k) => lower.includes(k)));
-  return idx === -1 ? OUTFIT_TEMPLATES.length - 1 : idx;
 }
 
 // ==================== ONBOARDING DATA ====================
@@ -1165,12 +1321,12 @@ function ShopSheet({ item, onClose, favoriteStores = [] }) {
 }
 
 // ==================== OUTFIT CARD ====================
-function OutfitCard({ outfit, onSwap, onSave, saved, modelGender, onModelGenderChange, favoriteStores }) {
+function OutfitCard({ outfit, onSwap, onSave, saved, modelGender, onModelGenderChange, favoriteStores, optionLabel }) {
   const { t, tName } = useLang();
   const [shopItem, setShopItem] = useState(null);
   return (
     <div className="card">
-      <div className="eyebrow gold">{t("stylistSuggests")}</div>
+      <div className="eyebrow gold">{optionLabel || t("stylistSuggests")}</div>
       <div className="model-gender-row">
         <span className="model-gender-label">{t("modelLabel")}</span>
         <div className="model-gender-switch">
@@ -1195,6 +1351,7 @@ function OutfitCard({ outfit, onSwap, onSave, saved, modelGender, onModelGenderC
         <div className="item-list">
           {outfit.items.map((key) => {
             const item = CATALOG[key];
+            if (!item) return null;
             return (
               <div key={item.id} className="item-row">
                 <button
@@ -1285,14 +1442,34 @@ function ChatScreen({ messages, onSend, input, setInput, onSwap, onSave, savedId
         {messages.length === 0 && <div className="chat-empty">{t("chatEmpty")}</div>}
         {messages.map((m, i) => {
           if (m.role === "user") return <div key={i} className="bubble-user">{m.text}</div>;
+          if (m.outfits?.length) {
+            return (
+              <div key={i} className="bubble-assistant bubble-assistant-stack">
+                <div className="stylist-picks-intro">{t("stylistPicksIntro")}</div>
+                {m.outfits.map((outfit, oi) => (
+                  <OutfitCard
+                    key={outfit.id || oi}
+                    outfit={outfit}
+                    optionLabel={`${t("stylistLook")} ${outfit.option || oi + 1}`}
+                    onSwap={(key) => onSwap(i, oi, key)}
+                    onSave={() => onSave(i, oi)}
+                    saved={savedIds.has(`${i}:${oi}`)}
+                    modelGender={modelGender}
+                    onModelGenderChange={onModelGenderChange}
+                    favoriteStores={favoriteStores}
+                  />
+                ))}
+              </div>
+            );
+          }
           if (m.outfit) {
             return (
               <div key={i} className="bubble-assistant">
                 <OutfitCard
                   outfit={m.outfit}
-                  onSwap={(key) => onSwap(i, key)}
-                  onSave={() => onSave(i)}
-                  saved={savedIds.has(i)}
+                  onSwap={(key) => onSwap(i, 0, key)}
+                  onSave={() => onSave(i, 0)}
+                  saved={savedIds.has(`${i}:0`) || savedIds.has(i)}
                   modelGender={modelGender}
                   onModelGenderChange={onModelGenderChange}
                   favoriteStores={favoriteStores}
@@ -1479,19 +1656,18 @@ export default function VestraPrototype() {
   const tOpt = (value) => (OPTIONS_I18N[lang] && OPTIONS_I18N[lang][value]) || value;
   const tName = (item) => (PRODUCT_NAMES_I18N[lang] && PRODUCT_NAMES_I18N[lang][item.id]) || item.name;
 
-  function sendMessage(text) {
+  function sendMessage(text, profileOverride) {
     const finalText = text ?? input;
     if (!finalText.trim()) return;
+    const activeProfile = profileOverride || profile;
     setMessages((m) => [...m, { role: "user", text: finalText }]);
     setInput("");
     setPending(true);
     setTimeout(() => {
-      const idx = pickOutfitIndex(finalText);
-      const template = OUTFIT_TEMPLATES[idx];
-      const rationale = (RATIONALES_I18N[lang] && RATIONALES_I18N[lang][idx]) || template.rationale;
-      setMessages((m) => [...m, { role: "assistant", outfit: { items: [...template.items], rationale } }]);
+      const outfits = composeOutfits(finalText, activeProfile, lang, 3);
+      setMessages((m) => [...m, { role: "assistant", outfits }]);
       setPending(false);
-    }, 1100);
+    }, 900);
   }
 
   function handlePrompt(p) {
@@ -1500,21 +1676,33 @@ export default function VestraPrototype() {
     sendMessage(p);
   }
 
-  function handleSwap(msgIndex, key) {
+  function handleSwap(msgIndex, outfitIndex, key) {
     const nextKey = ALT_MAP[key] || ALT_MAP_REV[key];
     if (!nextKey) return;
     setMessages((m) =>
       m.map((msg, i) => {
-        if (i !== msgIndex || msg.role !== "assistant" || !msg.outfit) return msg;
-        const newItems = msg.outfit.items.map((k) => (k === key ? nextKey : k));
-        return { ...msg, outfit: { ...msg.outfit, items: newItems } };
+        if (i !== msgIndex || msg.role !== "assistant") return msg;
+        if (msg.outfits?.length) {
+          const outfits = msg.outfits.map((outfit, oi) => {
+            if (oi !== outfitIndex) return outfit;
+            return { ...outfit, items: outfit.items.map((k) => (k === key ? nextKey : k)) };
+          });
+          return { ...msg, outfits };
+        }
+        if (msg.outfit) {
+          const newItems = msg.outfit.items.map((k) => (k === key ? nextKey : k));
+          return { ...msg, outfit: { ...msg.outfit, items: newItems } };
+        }
+        return msg;
       })
     );
   }
 
-  function handleSave(msgIndex) {
-    setSavedIds((s) => new Set(s).add(msgIndex));
-    const outfit = messages[msgIndex].outfit;
+  function handleSave(msgIndex, outfitIndex = 0) {
+    const msg = messages[msgIndex];
+    const outfit = msg?.outfits?.[outfitIndex] || msg?.outfit;
+    if (!outfit) return;
+    setSavedIds((s) => new Set(s).add(`${msgIndex}:${outfitIndex}`));
     setSavedOutfits((prev) => [...prev, outfit]);
   }
 
@@ -1539,7 +1727,7 @@ export default function VestraPrototype() {
     setMessages([{ role: "assistant", text: greeting }]);
     if (occasionText) {
       setTab("chat");
-      sendMessage(occasionText);
+      sendMessage(occasionText, built);
     } else {
       setTab("home");
     }
@@ -1710,6 +1898,8 @@ export default function VestraPrototype() {
         .chat-empty{ text-align:center; font-size:12px; color:#8b877a; font-weight:300; margin-top:40px; padding:0 24px; }
         .bubble-user{ align-self:flex-end; background:#0B0B0C; color:#F6F1E7; font-size:13px; border-radius:4px; padding:10px 14px; max-width:80%; }
         .bubble-assistant{ align-self:flex-start; max-width:94%; width:100%; }
+        .bubble-assistant-stack{ display:flex; flex-direction:column; gap:14px; }
+        .stylist-picks-intro{ font-size:12.5px; color:#5b5748; font-weight:300; line-height:1.45; padding:0 2px 2px; }
         .bubble-assistant-text{ align-self:flex-start; max-width:85%; background:#fff; border:1px solid #e6e0d2; color:#0B0B0C; font-size:13px; font-weight:300; line-height:1.5; border-radius:4px; padding:10px 14px; }
         .typing{ align-self:flex-start; font-size:12px; color:#8b877a; display:flex; align-items:center; gap:6px; padding:0 4px; }
         .dot{ width:6px; height:6px; background:#C6A567; border-radius:50%; display:inline-block; animation:pulse 1.2s infinite; }
