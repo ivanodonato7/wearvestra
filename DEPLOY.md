@@ -33,7 +33,7 @@ GitHub Pages cannot keep an API key secret. Netlify runs the stylist function se
    - `NETLIFY_AUTH_TOKEN`
    - `NETLIFY_SITE_ID`
    - `ANTHROPIC_API_KEY`
-6. Run **Actions → Deploy Netlify (live stylist) → Run workflow**.
+6. Copy `deploy/github-action-deploy-netlify.yml` → `.github/workflows/deploy-netlify.yml`, commit, then run **Actions → Deploy Netlify (live stylist) → Run workflow**.
 
 Or locally after `npx netlify-cli login` and `npx netlify-cli link`:
 
