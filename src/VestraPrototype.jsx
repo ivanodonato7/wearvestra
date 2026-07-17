@@ -58,9 +58,13 @@ const UI = {
     askYourStylist: "Ask your stylist", askPlaceholder: "Tell your stylist what you need…",
     chipDressWedding: "Dress me for a wedding", chipWorkDinner: "Work dinner tonight", chipWeekendCasual: "Weekend, nothing fussy",
     yourStylist: "Your Stylist", chatEmpty: "Tell me what you're dressing for — an occasion, a mood, anything.",
-    composing: "Composing your outfit…", chatInputPlaceholder: "e.g. wedding in June, semi-formal",
+    composing: "Composing your outfit…", revising: "Tweaking that piece…",
+    chatInputPlaceholder: "e.g. wedding in June, or “different belt”",
     stylistSuggests: "Your Stylist Suggests", stylistLook: "Look", saveOutfit: "Save Outfit", savedLabel: "Saved",
     stylistPicksIntro: "Three directions for you — tap any piece to shop what's in stock.",
+    stylistRevisionIntro: "Updated — I changed the {item}. Everything else stays.",
+    stylistRevisionMulti: "Updated — I swapped the pieces you flagged. Everything else stays.",
+    stylistRevisionRemoved: "Updated — I dropped the {item} and finished the look differently.",
     wardrobeTitle: "Wardrobe", wardrobeEmpty: "Outfits you save from your stylist will live here.",
     bagTitle: "Bag", bagEmpty: "Save an outfit to see its items here, grouped by retailer.", checkoutWith: "Checkout with",
     profileTitle: "Profile", nameLabel: "Name", styleArchetypeLabel: "Style Archetype", fitPreferenceLabel: "Fit Preference",
@@ -132,9 +136,13 @@ const UI = {
     askYourStylist: "Pregunta a tu estilista", askPlaceholder: "Dile a tu estilista qué necesitas…",
     chipDressWedding: "Vísteme para una boda", chipWorkDinner: "Cena de trabajo esta noche", chipWeekendCasual: "Fin de semana, sin complicaciones",
     yourStylist: "Tu Estilista", chatEmpty: "Cuéntame para qué te estás vistiendo — una ocasión, un estado de ánimo, lo que sea.",
-    composing: "Componiendo tu look…", chatInputPlaceholder: "ej. boda en junio, semi-formal",
+    composing: "Componiendo tu look…", revising: "Ajustando esa prenda…",
+    chatInputPlaceholder: "ej. boda en junio, o “otro cinturón”",
     stylistSuggests: "Tu Estilista Sugiere", stylistLook: "Look", saveOutfit: "Guardar Look", savedLabel: "Guardado",
     stylistPicksIntro: "Tres direcciones para ti — toca cualquier prenda para ver stock.",
+    stylistRevisionIntro: "Listo — cambié el {item}. El resto se queda.",
+    stylistRevisionMulti: "Listo — cambié las piezas que mencionaste. El resto se queda.",
+    stylistRevisionRemoved: "Listo — quité el {item} y cerré el look de otra forma.",
     wardrobeTitle: "Armario", wardrobeEmpty: "Los looks que guardes de tu estilista aparecerán aquí.",
     bagTitle: "Bolsa", bagEmpty: "Guarda un look para ver sus prendas aquí, agrupadas por tienda.", checkoutWith: "Comprar en",
     profileTitle: "Perfil", nameLabel: "Nombre", styleArchetypeLabel: "Arquetipo de Estilo", fitPreferenceLabel: "Preferencia de Ajuste",
@@ -206,9 +214,13 @@ const UI = {
     askYourStylist: "Demandez à votre styliste", askPlaceholder: "Dites à votre styliste ce dont vous avez besoin…",
     chipDressWedding: "Habillez-moi pour un mariage", chipWorkDinner: "Dîner professionnel ce soir", chipWeekendCasual: "Week-end, sans prise de tête",
     yourStylist: "Votre Styliste", chatEmpty: "Dites-moi pour quoi vous vous habillez — une occasion, une humeur, n'importe quoi.",
-    composing: "Composition de votre tenue…", chatInputPlaceholder: "ex. mariage en juin, semi-habillé",
+    composing: "Composition de votre tenue…", revising: "Ajustement de cette pièce…",
+    chatInputPlaceholder: "ex. mariage en juin, ou « autre ceinture »",
     stylistSuggests: "Votre Styliste Suggère", stylistLook: "Look", saveOutfit: "Enregistrer la Tenue", savedLabel: "Enregistré",
     stylistPicksIntro: "Trois directions pour vous — touchez une pièce pour voir le stock.",
+    stylistRevisionIntro: "C’est noté — j’ai changé le {item}. Le reste reste.",
+    stylistRevisionMulti: "C’est noté — j’ai changé les pièces que vous avez signalées. Le reste reste.",
+    stylistRevisionRemoved: "C’est noté — j’ai retiré le {item} et fini autrement.",
     wardrobeTitle: "Garde-robe", wardrobeEmpty: "Les tenues que vous enregistrez apparaîtront ici.",
     bagTitle: "Panier", bagEmpty: "Enregistrez une tenue pour voir ses articles ici, regroupés par enseigne.", checkoutWith: "Payer chez",
     profileTitle: "Profil", nameLabel: "Prénom", styleArchetypeLabel: "Archétype de Style", fitPreferenceLabel: "Préférence de Coupe",
@@ -544,6 +556,178 @@ const ALT_MAP = {
   sunglasses: "sunglassesAlt",
 };
 const ALT_MAP_REV = Object.fromEntries(Object.entries(ALT_MAP).map(([k, v]) => [v, k]));
+
+const ITEM_FAMILIES = {
+  blazer: ["blazer", "blazerAlt"],
+  shirt: ["shirt", "shirtAlt"],
+  trouser: ["trouser", "trouserAlt"],
+  shoe: ["shoe", "shoeAlt"],
+  scarf: ["scarf", "scarfAlt"],
+  belt: ["belt", "beltAlt"],
+  sunglasses: ["sunglasses", "sunglassesAlt"],
+};
+const ACCESSORY_FAMILIES = ["belt", "scarf", "sunglasses"];
+const ITEM_LABELS = {
+  en: { blazer: "blazer", shirt: "shirt", trouser: "trousers", shoe: "shoes", belt: "belt", scarf: "scarf", sunglasses: "sunglasses" },
+  es: { blazer: "blazer", shirt: "camisa", trouser: "pantalón", shoe: "zapatos", belt: "cinturón", scarf: "bufanda", sunglasses: "gafas" },
+  fr: { blazer: "blazer", shirt: "chemise", trouser: "pantalon", shoe: "chaussures", belt: "ceinture", scarf: "écharpe", sunglasses: "lunettes" },
+};
+const ITEM_KEYWORDS = {
+  blazer: ["blazer", "jacket", "coat", "chaqueta", "veste", "sacou"],
+  shirt: ["shirt", "top", "turtleneck", "sweater", "knit", "camisa", "chemise", "col roulé", "pull"],
+  trouser: ["trouser", "trousers", "pant", "pants", "bottom", "pantalon", "pantalones"],
+  shoe: ["shoe", "shoes", "boot", "boots", "footwear", "zapato", "zapatos", "chaussure", "chaussures", "botas", "bottes"],
+  belt: ["belt", "cinturón", "cinturon", "ceinture"],
+  scarf: ["scarf", "pocket square", "bufanda", "écharpe", "echarpe", "foulard", "pañuelo"],
+  sunglasses: ["sunglass", "sunglasses", "glasses", "gafas", "lunettes"],
+};
+
+function familyOfKey(key) {
+  if (!key) return null;
+  if (ITEM_FAMILIES[key]) return key;
+  return ALT_MAP_REV[key] || null;
+}
+
+/** Detect “change the belt / different shirt / everything but the shoes” style requests. */
+function detectRevisionRequest(text) {
+  const raw = (text || "").trim();
+  const lower = raw.toLowerCase();
+  if (!lower) return null;
+
+  const revisionCue = /\b(different|another|change|swap|replace|instead|not the|don't like|dont like|hate|wrong|update|tweak|switch|new|other|remove|drop|lose|sin el|sin la|cambia|cambiar|otro|otra|diferente|no me gusta|quita|quitar|changer|autre|différent|different|remplace|remplacer|pas le|pas la|enlever|retire)\b/i.test(lower)
+    || /\b(everything|rest|else).{0,40}\b(but|except|aside|menos|sauf)\b/i.test(lower)
+    || /\b(but|except|menos|sauf).{0,20}\b(the|el|la|le|les)?\s*(belt|shirt|blazer|trouser|pant|shoe|scarf|sunglass|cintur|ceinture|camisa|chemise)/i.test(lower);
+
+  const targets = [];
+  for (const [family, keys] of Object.entries(ITEM_KEYWORDS)) {
+    if (keys.some((k) => lower.includes(k))) targets.push(family);
+  }
+  if (!targets.length) return null;
+  if (!revisionCue && targets.length) {
+    // Bare “belt?” isn’t a revision — need a cue unless it’s clearly “different X”
+    return null;
+  }
+
+  const remove = /\b(remove|drop|lose|without|no belt|no scarf|quita|quitar|sin el|sin la|enlever|retire|sans)\b/i.test(lower);
+  const lookMatch = lower.match(/\b(?:look|option|opción|option)\s*(\d)\b/i);
+  const lookIndex = lookMatch ? Math.max(0, parseInt(lookMatch[1], 10) - 1) : null;
+
+  return { targets: [...new Set(targets)], remove, lookIndex };
+}
+
+function otherAccessoryKey(currentFamily, items, palette, avoid, turn = 0) {
+  const present = new Set(items.map(familyOfKey).filter(Boolean));
+  const pool = ACCESSORY_FAMILIES.filter((f) => f !== currentFamily);
+  // Prefer a family not already in the outfit
+  const ordered = [...pool.filter((f) => !present.has(f)), ...pool.filter((f) => present.has(f))];
+  if (!ordered.length) return null;
+  const pick = ordered[turn % ordered.length];
+  return bestVariantForPalette(pick, palette, avoid);
+}
+
+function reviseItemInList(items, family, { remove = false, turn = 0, palette = [], avoid = [] } = {}) {
+  const variants = ITEM_FAMILIES[family] || [];
+  const idx = items.findIndex((k) => variants.includes(k));
+  const next = [...items];
+
+  if (remove) {
+    if (idx >= 0) {
+      const replacement = ACCESSORY_FAMILIES.includes(family)
+        ? otherAccessoryKey(family, items, palette, avoid, turn)
+        : null;
+      if (replacement) next[idx] = replacement;
+      else next.splice(idx, 1);
+    }
+    return next;
+  }
+
+  if (idx >= 0) {
+    const current = next[idx];
+    const alt = ALT_MAP[current] || ALT_MAP_REV[current];
+    if (alt && turn % 2 === 0) {
+      next[idx] = alt;
+      return next;
+    }
+    // Second ask (or no alt): for accessories, swap to a different accessory type
+    if (ACCESSORY_FAMILIES.includes(family)) {
+      const other = otherAccessoryKey(family, items, palette, avoid, turn);
+      if (other) {
+        next[idx] = other;
+        return next;
+      }
+    }
+    if (alt) {
+      next[idx] = alt;
+      return next;
+    }
+    return next;
+  }
+
+  // Target not in outfit — add best palette variant (replace existing accessory if needed)
+  const addKey = bestVariantForPalette(family, palette, avoid);
+  if (ACCESSORY_FAMILIES.includes(family)) {
+    const accIdx = next.findIndex((k) => ACCESSORY_FAMILIES.includes(familyOfKey(k)));
+    if (accIdx >= 0) next[accIdx] = addKey;
+    else next.push(addKey);
+  } else {
+    next.push(addKey);
+  }
+  return next;
+}
+
+function reviseOutfits(baseOutfits, revision, profile, lang = "en") {
+  const palette = profile?.palette || [];
+  const avoid = profile?.avoid || [];
+  const turn = stylistTurn;
+  const labels = ITEM_LABELS[lang] || ITEM_LABELS.en;
+
+  const outfits = baseOutfits.map((outfit, oi) => {
+    if (revision.lookIndex != null && oi !== revision.lookIndex) return { ...outfit };
+    let items = [...outfit.items];
+    for (const family of revision.targets) {
+      items = reviseItemInList(items, family, {
+        remove: revision.remove,
+        turn: turn + oi,
+        palette,
+        avoid,
+      });
+    }
+    // Deduplicate families if accessory swap collided
+    const seen = new Set();
+    items = items.filter((k) => {
+      const fam = familyOfKey(k) || k;
+      if (seen.has(fam)) return false;
+      seen.add(fam);
+      return true;
+    });
+    const changed = revision.targets.map((f) => labels[f] || f).join(", ");
+    const rationale = revision.remove
+      ? (lang === "es"
+        ? `Quité el ${changed} y cerré el look de otra forma — el resto se mantiene.`
+        : lang === "fr"
+          ? `J’ai retiré le ${changed} et fini autrement — le reste est inchangé.`
+          : `I dropped the ${changed} and finished the look differently — everything else stays.`)
+      : (lang === "es"
+        ? `Cambié el ${changed}. El resto del look se mantiene.`
+        : lang === "fr"
+          ? `J’ai changé le ${changed}. Le reste de la tenue reste.`
+          : `I changed the ${changed}. Everything else in the look stays.`);
+    return {
+      ...outfit,
+      id: `${outfit.id || "look"}-rev-${turn}-${oi}`,
+      items,
+      rationale,
+    };
+  });
+
+  return outfits;
+}
+
+function revisionIntroKey(revision) {
+  if (revision.remove) return "stylistRevisionRemoved";
+  if (revision.targets.length > 1) return "stylistRevisionMulti";
+  return "stylistRevisionIntro";
+}
 
 /** Recipe library — scored against the user's prompt + profile to pick varied looks. */
 const OUTFIT_RECIPES = [
@@ -1617,7 +1801,7 @@ function ChatScreen({ messages, onSend, input, setInput, onSwap, onSave, savedId
           if (m.outfits?.length) {
             return (
               <div key={i} className="bubble-assistant bubble-assistant-stack">
-                <div className="stylist-picks-intro">{t("stylistPicksIntro")}</div>
+                <div className="stylist-picks-intro">{m.text || t("stylistPicksIntro")}</div>
                 {m.outfits.map((outfit, oi) => (
                   <OutfitCard
                     key={outfit.id || oi}
@@ -1842,14 +2026,34 @@ export default function VestraPrototype() {
     const finalText = text ?? input;
     if (!finalText.trim()) return;
     const activeProfile = profileOverride || profile;
+    const priorOutfits = [...messages].reverse().find((m) => m.outfits?.length || m.outfit);
+    const revision = detectRevisionRequest(finalText);
     setMessages((m) => [...m, { role: "user", text: finalText }]);
     setInput("");
     setPending(true);
     setTimeout(() => {
+      if (revision && priorOutfits) {
+        const base = priorOutfits.outfits?.length
+          ? priorOutfits.outfits
+          : priorOutfits.outfit
+            ? [priorOutfits.outfit]
+            : [];
+        if (base.length) {
+          stylistTurn += 1;
+          const outfits = reviseOutfits(base, revision, activeProfile, lang);
+          const labels = ITEM_LABELS[lang] || ITEM_LABELS.en;
+          const itemLabel = revision.targets.map((f) => labels[f] || f).join(", ");
+          const introKey = revisionIntroKey(revision);
+          const intro = ((UI[lang] && UI[lang][introKey]) || UI.en[introKey] || "").replace("{item}", itemLabel);
+          setMessages((m) => [...m, { role: "assistant", text: intro, outfits, revision: true }]);
+          setPending(false);
+          return;
+        }
+      }
       const outfits = composeOutfits(finalText, activeProfile, lang, 3);
       setMessages((m) => [...m, { role: "assistant", outfits }]);
       setPending(false);
-    }, 900);
+    }, 700);
   }
 
   function handlePrompt(p) {
