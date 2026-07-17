@@ -289,23 +289,27 @@ const PRODUCT_NAMES_I18N = {
     p1: "Blazer Sastre de Mezcla de Lana", p1b: "Blazer de Lino sin Estructura", p2: "Camisa de Algodón Impecable",
     p2b: "Cuello Alto de Merino Fino", p3: "Pantalón Recto Sastre", p3b: "Pantalón de Lana de Pierna Ancha",
     p4: "Zapato Derby de Piel", p4b: "Botín Chelsea de Ante", p5: "Bufanda de Lana Fina", p5b: "Pañuelo de Bolsillo de Cachemira",
+    p6: "Cinturón de Piel", p6b: "Cinturón de Piel Negro", p7: "Gafas de Sol de Acetato", p7b: "Gafas de Sol Negras",
   },
   fr: {
     p1: "Blazer Cintré en Mélange de Laine", p1b: "Blazer en Lin Déstructuré", p2: "Chemise en Coton Impeccable",
     p2b: "Col Roulé en Mérinos Fin", p3: "Pantalon Droit Tailleur", p3b: "Pantalon en Laine Large",
     p4: "Chaussure Derby en Cuir", p4b: "Boot Chelsea en Daim", p5: "Écharpe en Laine Fine", p5b: "Pochette en Cachemire",
+    p6: "Ceinture en Cuir", p6b: "Ceinture en Cuir Noir", p7: "Lunettes de Soleil en Acétate", p7b: "Lunettes de Soleil Noires",
   },
 };
 const RATIONALES_I18N = {
   es: [
-    "Un blazer sastre en oliva mantiene el look cálido y con los pies en la tierra, sin resultar rígido — perfecto para un momento semi-formal al aire libre. La camisa marfil lo eleva, y el zapato derby se mantiene clásico sin parecer disfraz.",
+    "Un blazer sastre en oliva mantiene el look cálido y con los pies en la tierra, sin resultar rígido — perfecto para un momento semi-formal al aire libre. La camisa marfil lo eleva, el zapato derby se mantiene clásico, y un cinturón de piel remata las proporciones.",
     "Elegante, sin rigidez — el mismo pantalón sastre da base al look, mientras la camisa impecable sola (sin blazer) lo hace fácil para una cena. Añade la bufanda si hace fresco.",
-    "Un look diario, discreto y cuidado, construido alrededor de tu paleta — líneas limpias, nada que grite por atención, fácil de llevar de verdad.",
+    "Piezas fáciles de diario con gafas de sol para rematar — líneas limpias, nada complicado, listo para el sol y el movimiento.",
+    "Un look diario, discreto y cuidado, construido alrededor de tu paleta — líneas limpias, nada que grite por atención, fácil de llevar de verdad. Gafas de sol cuando sales.",
   ],
   fr: [
-    "Un blazer tailleur olive garde cette tenue chaleureuse et ancrée plutôt que rigide — idéal pour un moment semi-habillé en extérieur. La chemise ivoire l'élève, et la chaussure derby reste classique sans donner l'impression d'un déguisement.",
+    "Un blazer tailleur olive garde cette tenue chaleureuse et ancrée plutôt que rigide — idéal pour un moment semi-habillé en extérieur. La chemise ivoire l'élève, la chaussure derby reste classique, et une ceinture en cuir finalise les proportions.",
     "Chic, sans rigidité — le même pantalon tailleur ancre la tenue, tandis que la chemise seule (sans veste) la rend facile pour un dîner. Ajoutez l'écharpe s'il fait frais.",
-    "Une tenue quotidienne discrète et réfléchie, construite autour de votre palette — des lignes nettes, rien qui attire l'attention, facile à porter au quotidien.",
+    "Des pièces faciles du quotidien avec des lunettes de soleil pour finir — lignes nettes, rien de compliqué, prêt pour le soleil et le mouvement.",
+    "Une tenue quotidienne discrète et réfléchie, construite autour de votre palette — des lignes nettes, rien qui attire l'attention, facile à porter au quotidien. Lunettes de soleil dès que vous sortez.",
   ],
 };
 const GREETINGS = {
@@ -338,7 +342,7 @@ function LanguageSwitcher({ corner }) {
 }
 
 // ---------- Product catalog (mirrors the seed data in the real backend) ----------
-const ASSET_V = "6";
+const ASSET_V = "7";
 const assetUrl = (path) => `${path}?v=${ASSET_V}`;
 
 const CATALOG = {
@@ -350,8 +354,12 @@ const CATALOG = {
   trouserAlt: { key: "trouserAlt", id: "p3b", name: "Wide-Leg Wool Trouser", price: 165, retailer: "Considered Studio", type: "trouser", color: "#6b6b63", image: assetUrl("/products/trouser-alt.jpg"), searchQuery: "grey wide leg wool trousers" },
   shoe: { key: "shoe", id: "p4", name: "Leather Derby Shoe", price: 210, retailer: "Aldern & Co.", type: "shoe", color: "#6b3f22", image: assetUrl("/products/shoe.jpg"), searchQuery: "brown leather derby dress shoes" },
   shoeAlt: { key: "shoeAlt", id: "p4b", name: "Suede Chelsea Boot", price: 245, retailer: "Aldern & Co.", type: "shoe", color: "#4a3527", image: assetUrl("/products/shoe-alt.jpg"), searchQuery: "dark brown suede chelsea boots" },
-  scarf: { key: "scarf", id: "p5", name: "Fine Wool Scarf", price: 85, retailer: "North & Field", type: "scarf", color: "#b08a5c", image: assetUrl("/products/scarf.jpg"), searchQuery: "camel tan fine wool scarf" },
-  scarfAlt: { key: "scarfAlt", id: "p5b", name: "Cashmere Pocket Square", price: 65, retailer: "Aldern & Co.", type: "scarf", color: "#C6A567", image: assetUrl("/products/scarf-alt.jpg"), searchQuery: "gold cashmere pocket square" },
+  scarf: { key: "scarf", id: "p5", name: "Fine Wool Scarf", price: 85, retailer: "North & Field", type: "accessory", color: "#b08a5c", image: assetUrl("/products/scarf.jpg"), searchQuery: "camel tan fine wool scarf" },
+  scarfAlt: { key: "scarfAlt", id: "p5b", name: "Cashmere Pocket Square", price: 65, retailer: "Aldern & Co.", type: "accessory", color: "#C6A567", image: assetUrl("/products/scarf-alt.jpg"), searchQuery: "gold cashmere pocket square" },
+  belt: { key: "belt", id: "p6", name: "Leather Belt", price: 95, retailer: "Aldern & Co.", type: "accessory", color: "#6b3f22", image: assetUrl("/products/belt.jpg"), searchQuery: "brown leather dress belt men women" },
+  beltAlt: { key: "beltAlt", id: "p6b", name: "Black Leather Belt", price: 90, retailer: "Aldern & Co.", type: "accessory", color: "#161616", image: assetUrl("/products/belt-alt.jpg"), searchQuery: "black leather dress belt" },
+  sunglasses: { key: "sunglasses", id: "p7", name: "Acetate Sunglasses", price: 145, retailer: "North & Field", type: "accessory", color: "#8B5A2B", image: assetUrl("/products/sunglasses.jpg"), searchQuery: "tortoise acetate sunglasses" },
+  sunglassesAlt: { key: "sunglassesAlt", id: "p7b", name: "Black Acetate Sunglasses", price: 135, retailer: "North & Field", type: "accessory", color: "#0B0B0C", image: assetUrl("/products/sunglasses-alt.jpg"), searchQuery: "black acetate sunglasses gold accents" },
 };
 
 function catalogKeyForItem(item) {
@@ -399,14 +407,22 @@ function storeLinksForItem(item) {
     href: store.url(q),
   }));
 }
-const ALT_MAP = { blazer: "blazerAlt", shirt: "shirtAlt", trouser: "trouserAlt", shoe: "shoeAlt", scarf: "scarfAlt" };
+const ALT_MAP = {
+  blazer: "blazerAlt",
+  shirt: "shirtAlt",
+  trouser: "trouserAlt",
+  shoe: "shoeAlt",
+  scarf: "scarfAlt",
+  belt: "beltAlt",
+  sunglasses: "sunglassesAlt",
+};
 const ALT_MAP_REV = Object.fromEntries(Object.entries(ALT_MAP).map(([k, v]) => [v, k]));
 
 const OUTFIT_TEMPLATES = [
   {
     keywords: ["wedding", "formal", "event"],
-    rationale: "A tailored olive blazer keeps this warm and grounded rather than stiff — right for an outdoor, semi-formal moment. The ivory shirt lifts it, and the derby shoe stays classic without reading costume-y.",
-    items: ["blazer", "shirt", "trouser", "shoe"],
+    rationale: "A tailored olive blazer keeps this warm and grounded rather than stiff — right for an outdoor, semi-formal moment. The ivory shirt lifts it, the derby stays classic, and a leather belt finishes the proportions.",
+    items: ["blazer", "shirt", "trouser", "shoe", "belt"],
   },
   {
     keywords: ["dinner", "date", "work"],
@@ -414,14 +430,23 @@ const OUTFIT_TEMPLATES = [
     items: ["shirt", "trouser", "shoe", "scarf"],
   },
   {
+    keywords: ["weekend", "casual", "travel", "sunny"],
+    rationale: "Easy everyday pieces with sunglasses to finish — clean lines, nothing fussy, ready for sun and movement.",
+    items: ["shirt", "trouser", "shoe", "sunglasses"],
+  },
+  {
     keywords: [],
-    rationale: "A quiet, considered everyday look built around your palette — clean lines, nothing shouting for attention, easy to actually live in.",
-    items: ["shirt", "trouser", "shoe"],
+    rationale: "A quiet, considered everyday look built around your palette — clean lines, nothing shouting for attention, easy to actually live in. Sunglasses when you step outside.",
+    items: ["shirt", "trouser", "shoe", "sunglasses"],
   },
 ];
 
 // AI-generated model photos keyed by gender + outfit signature (catalog keys, stable order)
-const MODEL_KEY_ORDER = ["blazer", "blazerAlt", "shirt", "shirtAlt", "trouser", "trouserAlt", "shoe", "shoeAlt", "scarf", "scarfAlt"];
+const MODEL_KEY_ORDER = [
+  "blazer", "blazerAlt", "shirt", "shirtAlt", "trouser", "trouserAlt",
+  "shoe", "shoeAlt", "scarf", "scarfAlt", "belt", "beltAlt", "sunglasses", "sunglassesAlt",
+];
+const ACCESSORY_KEYS = new Set(["scarf", "scarfAlt", "belt", "beltAlt", "sunglasses", "sunglassesAlt"]);
 function outfitSignature(itemKeys) {
   return [...itemKeys].sort((a, b) => MODEL_KEY_ORDER.indexOf(a) - MODEL_KEY_ORDER.indexOf(b)).join("+");
 }
@@ -450,18 +475,18 @@ function resolveModelImage(itemKeys, gender) {
 
   // Normalize alt keys to base family for fuzzy match (blazerAlt → blazer)
   const family = (k) => ALT_MAP_REV[k] || k;
-  const want = new Set(itemKeys.map(family));
+  // Ignore accessories when matching model photos (models don't always wear them)
+  const coreWant = itemKeys.filter((k) => !ACCESSORY_KEYS.has(k)).map(family);
+  const want = new Set(coreWant);
   let best = null;
   let bestScore = -1;
   for (const [key, src] of Object.entries(map)) {
-    const parts = key.split("+");
+    const parts = key.split("+").filter((k) => !ACCESSORY_KEYS.has(k));
     const have = new Set(parts.map(family));
     let score = 0;
     for (const w of want) if (have.has(w)) score += 2;
     for (const h of have) if (!want.has(h)) score -= 1;
-    // Prefer exact blazer presence match
     if (want.has("blazer") === have.has("blazer")) score += 1;
-    if (want.has("scarf") === have.has("scarf")) score += 1;
     if (score > bestScore) {
       bestScore = score;
       best = src;

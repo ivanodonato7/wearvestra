@@ -24,6 +24,10 @@ const CATALOG = {
   shoeAlt: "dark brown suede chelsea boots",
   scarf: "camel tan fine wool scarf",
   scarfAlt: "gold cashmere pocket square",
+  belt: "brown leather dress belt",
+  beltAlt: "black leather dress belt",
+  sunglasses: "tortoise acetate sunglasses",
+  sunglassesAlt: "black acetate sunglasses",
 };
 
 const MERCHANT_MAP = {

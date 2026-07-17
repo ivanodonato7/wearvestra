@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-17T19:07:38.371Z",
+  "updatedAt": "2026-07-17T19:55:38.243Z",
   "items": {
     "blazer": {
       "query": "olive green wool tailored blazer",
@@ -39,6 +39,22 @@
     },
     "scarfAlt": {
       "query": "gold cashmere pocket square",
+      "count": 12
+    },
+    "belt": {
+      "query": "brown leather dress belt",
+      "count": 12
+    },
+    "beltAlt": {
+      "query": "black leather dress belt",
+      "count": 12
+    },
+    "sunglasses": {
+      "query": "tortoise acetate sunglasses",
+      "count": 12
+    },
+    "sunglassesAlt": {
+      "query": "black acetate sunglasses",
       "count": 12
     }
   }
