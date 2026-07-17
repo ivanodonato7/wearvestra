@@ -46,6 +46,7 @@ const UI = {
     prototypeNote: "This is a click-through prototype — no real account exists yet.", languageLabel: "Language",
     navHome: "Home", navStylist: "Stylist", navWardrobe: "Wardrobe", navBag: "Bag", navProfile: "Profile",
     viewProduct: "View product page", swapItem: "Swap this item",
+    modelOnHer: "Her", modelOnHim: "Him", modelLabel: "Shown on",
   },
   es: {
     welcomeEyebrow: "Vestra", welcomeTitleLine1: "Vamos a vestirte", welcomeTitleLine2: "como es debido.",
@@ -80,6 +81,7 @@ const UI = {
     prototypeNote: "Esto es un prototipo interactivo — aún no existe ninguna cuenta real.", languageLabel: "Idioma",
     navHome: "Inicio", navStylist: "Estilista", navWardrobe: "Armario", navBag: "Bolsa", navProfile: "Perfil",
     viewProduct: "Ver página del producto", swapItem: "Cambiar esta prenda",
+    modelOnHer: "Ella", modelOnHim: "Él", modelLabel: "Mostrado en",
   },
   fr: {
     welcomeEyebrow: "Vestra", welcomeTitleLine1: "Habillons-vous", welcomeTitleLine2: "comme il se doit.",
@@ -114,6 +116,7 @@ const UI = {
     prototypeNote: "Ceci est un prototype interactif — aucun compte réel n'existe encore.", languageLabel: "Langue",
     navHome: "Accueil", navStylist: "Styliste", navWardrobe: "Garde-robe", navBag: "Panier", navProfile: "Profil",
     viewProduct: "Voir la fiche produit", swapItem: "Changer cet article",
+    modelOnHer: "Elle", modelOnHim: "Lui", modelLabel: "Porté par",
   },
 };
 
@@ -320,6 +323,7 @@ const RETAILER_SITES = {
   "Aldern & Co.": "https://example.com/aldern-and-co",
 };
 const ALT_MAP = { blazer: "blazerAlt", shirt: "shirtAlt", trouser: "trouserAlt", shoe: "shoeAlt", scarf: "scarfAlt" };
+const ALT_MAP_REV = Object.fromEntries(Object.entries(ALT_MAP).map(([k, v]) => [v, k]));
 
 const OUTFIT_TEMPLATES = [
   {
@@ -338,6 +342,56 @@ const OUTFIT_TEMPLATES = [
     items: ["shirt", "trouser", "shoe"],
   },
 ];
+
+// AI-generated model photos keyed by gender + outfit signature (catalog keys, stable order)
+const MODEL_KEY_ORDER = ["blazer", "blazerAlt", "shirt", "shirtAlt", "trouser", "trouserAlt", "shoe", "shoeAlt", "scarf", "scarfAlt"];
+function outfitSignature(itemKeys) {
+  return [...itemKeys].sort((a, b) => MODEL_KEY_ORDER.indexOf(a) - MODEL_KEY_ORDER.indexOf(b)).join("+");
+}
+
+const MODEL_IMAGES = {
+  woman: {
+    "blazer+shirt+trouser+shoe": "/models/model-woman-wedding.jpg",
+    "blazerAlt+shirt+trouser+shoe": "/models/model-woman-wedding-linen.jpg",
+    "shirt+trouser+shoe+scarf": "/models/model-woman-dinner.jpg",
+    "shirt+trouser+shoe": "/models/model-woman-everyday.jpg",
+  },
+  man: {
+    "blazer+shirt+trouser+shoe": "/models/model-man-wedding.jpg",
+    "blazerAlt+shirt+trouser+shoe": "/models/model-man-wedding-alt.jpg",
+    "blazer+shirtAlt+trouser+shoe": "/models/model-man-wedding-alt.jpg",
+    "blazerAlt+shirtAlt+trouser+shoe": "/models/model-man-wedding-alt.jpg",
+    "shirt+trouser+shoe+scarf": "/models/model-man-dinner.jpg",
+    "shirt+trouser+shoe": "/models/model-man-everyday.jpg",
+  },
+};
+
+function resolveModelImage(itemKeys, gender) {
+  const map = MODEL_IMAGES[gender] || MODEL_IMAGES.woman;
+  const sig = outfitSignature(itemKeys);
+  if (map[sig]) return map[sig];
+
+  // Normalize alt keys to base family for fuzzy match (blazerAlt → blazer)
+  const family = (k) => ALT_MAP_REV[k] || k;
+  const want = new Set(itemKeys.map(family));
+  let best = null;
+  let bestScore = -1;
+  for (const [key, src] of Object.entries(map)) {
+    const parts = key.split("+");
+    const have = new Set(parts.map(family));
+    let score = 0;
+    for (const w of want) if (have.has(w)) score += 2;
+    for (const h of have) if (!want.has(h)) score -= 1;
+    // Prefer exact blazer presence match
+    if (want.has("blazer") === have.has("blazer")) score += 1;
+    if (want.has("scarf") === have.has("scarf")) score += 1;
+    if (score > bestScore) {
+      bestScore = score;
+      best = src;
+    }
+  }
+  return best || map["shirt+trouser+shoe"] || Object.values(map)[0];
+}
 
 function pickOutfitIndex(text) {
   const lower = text.toLowerCase();
@@ -387,6 +441,7 @@ const DEFAULT_PROFILE = {
   palette: ["Olive", "Ivory / Cream", "Black", "Camel / Tan"],
   budget: "balanced",
   occasions: ["Work", "Events & celebrations"],
+  modelGender: "woman",
 };
 
 // ==================== ONBOARDING SCREENS ====================
@@ -607,54 +662,50 @@ function OccasionScreen({ onSubmit, onSkip }) {
   );
 }
 
-// ==================== CROQUIS FIGURE ====================
-// A stylized fashion-sketch figure wearing the outfit's real colors —
-// not a photo or a likeness of the actual user. Real photo-based try-on
-// was deliberately left out of V1: it needs specialized, expensive AI
-// image generation, is inconsistent in quality, and raises real privacy
-// questions about handling users' body photos. This gets most of the
-// visual payoff without any of that.
-function CroquisFigure({ items }) {
-  const byType = {};
-  items.forEach((it) => { byType[it.type] = it; });
-  const topColor = (byType.shirt || {}).color || "#F5F2E9";
-  const bottomColor = (byType.trouser || {}).color || "#e6e0d2";
-  const shoeColor = (byType.shoe || {}).color || "#4a3527";
-  const outerColor = byType.blazer ? byType.blazer.color : null;
-  const accessoryColor = byType.scarf ? byType.scarf.color : null;
-  const skin = "#e8dbc8";
-  const line = "#0B0B0C";
-
+// ==================== MODEL HERO ====================
+// AI-generated model photos wearing the suggested pieces.
+// Swaps pick the closest matching pre-rendered look.
+function ModelHero({ itemKeys, gender }) {
+  const src = resolveModelImage(itemKeys, gender);
   return (
-    <svg viewBox="0 0 140 340" width="100%" height="100%">
-      <path d="M58 176 L52 288 L64 288 L68 190 L72 190 L76 288 L88 288 L82 176 Z" fill={bottomColor} stroke={line} strokeWidth="1" />
-      <path d="M48 288 H66 L70 296 Q66 300 56 300 Q46 300 46 294 Z" fill={shoeColor} stroke={line} strokeWidth="1" />
-      <path d="M74 288 H92 L94 294 Q94 300 84 300 Q74 300 70 296 Z" fill={shoeColor} stroke={line} strokeWidth="1" />
-      <path d="M50 58 Q70 50 90 58 L94 100 Q92 150 84 176 L56 176 Q48 150 46 100 Z" fill={topColor} stroke={line} strokeWidth="1" />
-      <path d="M50 60 Q34 90 40 140" stroke={line} strokeWidth="1.4" fill="none" />
-      <path d="M90 60 Q106 90 100 140" stroke={line} strokeWidth="1.4" fill="none" />
-      {outerColor && (
-        <>
-          <path d="M46 56 L58 50 L70 66 L82 50 L94 56 L100 96 Q98 150 90 178 L50 178 Q42 150 40 96 Z" fill={outerColor} stroke={line} strokeWidth="1" />
-          <path d="M65 66 L75 66 L73 150 L67 150 Z" fill={topColor} opacity="0.92" />
-        </>
-      )}
-      {accessoryColor && <path d="M52 54 Q70 66 88 54 L86 62 Q70 74 54 62 Z" fill={accessoryColor} stroke={line} strokeWidth="1" />}
-      <rect x="64" y="42" width="12" height="14" fill={skin} stroke={line} strokeWidth="0.8" />
-      <ellipse cx="70" cy="28" rx="14" ry="16" fill={skin} stroke={line} strokeWidth="1" />
-    </svg>
+    <div className="model-wrap">
+      <img
+        className="model-photo"
+        src={src}
+        alt="Outfit on model"
+        loading="lazy"
+      />
+    </div>
   );
 }
 
 // ==================== OUTFIT CARD ====================
-function OutfitCard({ outfit, onSwap, onSave, saved }) {
+function OutfitCard({ outfit, onSwap, onSave, saved, modelGender, onModelGenderChange }) {
   const { t, tName } = useLang();
-  const items = outfit.items.map((key) => CATALOG[key]);
   return (
     <div className="card">
       <div className="eyebrow gold">{t("stylistSuggests")}</div>
+      <div className="model-gender-row">
+        <span className="model-gender-label">{t("modelLabel")}</span>
+        <div className="model-gender-switch">
+          <button
+            type="button"
+            className={`model-gender-pill ${modelGender === "woman" ? "active" : ""}`}
+            onClick={() => onModelGenderChange?.("woman")}
+          >
+            {t("modelOnHer")}
+          </button>
+          <button
+            type="button"
+            className={`model-gender-pill ${modelGender === "man" ? "active" : ""}`}
+            onClick={() => onModelGenderChange?.("man")}
+          >
+            {t("modelOnHim")}
+          </button>
+        </div>
+      </div>
       <div className="outfit-visual">
-        <div className="croquis-wrap"><CroquisFigure items={items} /></div>
+        <ModelHero itemKeys={outfit.items} gender={modelGender} />
         <div className="item-list">
           {outfit.items.map((key) => {
             const item = CATALOG[key];
@@ -714,7 +765,7 @@ function HomeScreen({ profile, onPrompt, homeInput, setHomeInput }) {
   );
 }
 
-function ChatScreen({ messages, onSend, input, setInput, onSwap, onSave, savedIds, pending }) {
+function ChatScreen({ messages, onSend, input, setInput, onSwap, onSave, savedIds, pending, modelGender, onModelGenderChange }) {
   const { t } = useLang();
   const endRef = useRef(null);
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, pending]);
@@ -729,7 +780,14 @@ function ChatScreen({ messages, onSend, input, setInput, onSwap, onSave, savedId
           if (m.outfit) {
             return (
               <div key={i} className="bubble-assistant">
-                <OutfitCard outfit={m.outfit} onSwap={(key) => onSwap(i, key)} onSave={() => onSave(i)} saved={savedIds.has(i)} />
+                <OutfitCard
+                  outfit={m.outfit}
+                  onSwap={(key) => onSwap(i, key)}
+                  onSave={() => onSave(i)}
+                  saved={savedIds.has(i)}
+                  modelGender={modelGender}
+                  onModelGenderChange={onModelGenderChange}
+                />
               </div>
             );
           }
@@ -746,7 +804,7 @@ function ChatScreen({ messages, onSend, input, setInput, onSwap, onSave, savedId
   );
 }
 
-function WardrobeScreen({ savedOutfits }) {
+function WardrobeScreen({ savedOutfits, modelGender, onModelGenderChange }) {
   const { t } = useLang();
   return (
     <div className="screen">
@@ -754,7 +812,19 @@ function WardrobeScreen({ savedOutfits }) {
       {savedOutfits.length === 0 ? (
         <p className="empty-note">{t("wardrobeEmpty")}</p>
       ) : (
-        <div className="stack">{savedOutfits.map((o, i) => <OutfitCard key={i} outfit={o} onSwap={() => {}} onSave={() => {}} saved />)}</div>
+        <div className="stack">
+          {savedOutfits.map((o, i) => (
+            <OutfitCard
+              key={i}
+              outfit={o}
+              onSwap={() => {}}
+              onSave={() => {}}
+              saved
+              modelGender={modelGender}
+              onModelGenderChange={onModelGenderChange}
+            />
+          ))}
+        </div>
       )}
     </div>
   );
@@ -861,12 +931,12 @@ export default function VestraPrototype() {
   }
 
   function handleSwap(msgIndex, key) {
-    const altKey = ALT_MAP[key];
-    if (!altKey) return;
+    const nextKey = ALT_MAP[key] || ALT_MAP_REV[key];
+    if (!nextKey) return;
     setMessages((m) =>
       m.map((msg, i) => {
         if (i !== msgIndex || msg.role !== "assistant" || !msg.outfit) return msg;
-        const newItems = msg.outfit.items.map((k) => (k === key ? altKey : k));
+        const newItems = msg.outfit.items.map((k) => (k === key ? nextKey : k));
         return { ...msg, outfit: { ...msg.outfit, items: newItems } };
       })
     );
@@ -886,6 +956,7 @@ export default function VestraPrototype() {
       palette: answers.palette.length ? answers.palette : DEFAULT_PROFILE.palette,
       budget: answers.budget,
       occasions: answers.occasions,
+      modelGender: profile.modelGender || DEFAULT_PROFILE.modelGender,
     };
     setProfile(built);
     const translatedArchetype = tOpt(archetypeShortEn);
@@ -968,9 +1039,14 @@ export default function VestraPrototype() {
         .send-btn{ background:#0B0B0C; color:#C6A567; border:none; border-radius:4px; padding:10px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
 
         .card{ background:#0B0B0C; border:1px solid #2a2a26; border-radius:4px; padding:16px; color:#F6F1E7; }
-        .outfit-visual{ display:flex; gap:12px; margin-bottom:14px; }
-        .croquis-wrap{ width:104px; flex-shrink:0; background:radial-gradient(ellipse at 50% 30%, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 65%); border-radius:4px; padding:6px 2px; }
-        .croquis-wrap svg{ width:100%; height:auto; filter:drop-shadow(0 4px 6px rgba(0,0,0,0.3)); }
+        .outfit-visual{ display:flex; gap:12px; margin-bottom:14px; align-items:stretch; }
+        .model-wrap{ width:118px; flex-shrink:0; border-radius:4px; overflow:hidden; background:#151513; aspect-ratio:3/4; }
+        .model-photo{ width:100%; height:100%; object-fit:cover; display:block; }
+        .model-gender-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px; }
+        .model-gender-label{ font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#8b877a; }
+        .model-gender-switch{ display:flex; gap:4px; }
+        .model-gender-pill{ font-size:10px; letter-spacing:0.04em; padding:5px 10px; border-radius:999px; border:1px solid #2a2a26; background:#151513; color:#8b877a; cursor:pointer; font-family:'Inter',sans-serif; }
+        .model-gender-pill.active{ background:#C6A567; color:#0B0B0C; border-color:#C6A567; }
         .item-list{ flex:1; display:flex; flex-direction:column; gap:6px; min-width:0; }
         .item-row{ display:flex; align-items:center; gap:8px; background:#151513; border:1px solid #2a2a26; border-radius:4px; padding:8px; }
         .item-row-swatch{ width:16px; height:16px; border-radius:50%; flex-shrink:0; border:1px solid rgba(246,241,231,0.25); }
@@ -1087,9 +1163,26 @@ export default function VestraPrototype() {
             <>
               {tab === "home" && <HomeScreen profile={profile} onPrompt={handlePrompt} homeInput={homeInput} setHomeInput={setHomeInput} />}
               {tab === "chat" && (
-                <ChatScreen messages={messages} input={input} setInput={setInput} onSend={() => sendMessage()} onSwap={handleSwap} onSave={handleSave} savedIds={savedIds} pending={pending} />
+                <ChatScreen
+                  messages={messages}
+                  input={input}
+                  setInput={setInput}
+                  onSend={() => sendMessage()}
+                  onSwap={handleSwap}
+                  onSave={handleSave}
+                  savedIds={savedIds}
+                  pending={pending}
+                  modelGender={profile.modelGender || "woman"}
+                  onModelGenderChange={(g) => setProfile((p) => ({ ...p, modelGender: g }))}
+                />
               )}
-              {tab === "wardrobe" && <WardrobeScreen savedOutfits={savedOutfits} />}
+              {tab === "wardrobe" && (
+                <WardrobeScreen
+                  savedOutfits={savedOutfits}
+                  modelGender={profile.modelGender || "woman"}
+                  onModelGenderChange={(g) => setProfile((p) => ({ ...p, modelGender: g }))}
+                />
+              )}
               {tab === "bag" && <BagScreen savedOutfits={savedOutfits} />}
               {tab === "profile" && <ProfileScreen profile={profile} />}
             </>
