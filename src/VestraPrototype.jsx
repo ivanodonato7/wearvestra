@@ -16,8 +16,10 @@ const UI = {
   en: {
     welcomeEyebrow: "Vestra", welcomeTitleLine1: "Let's get you", welcomeTitleLine2: "dressed properly.",
     welcomeSub: "A few quick questions, then meet your stylist.", getStarted: "Get Started", skipTesting: "Skip for testing → see the app",
-    createAccountEyebrow: "Create Your Account", whereReachYouLine1: "Where should we", whereReachYouLine2: "reach you?",
-    emailPlaceholder: "your@email.com", continueBtn: "Continue", signupNote: "This is a prototype — no account is actually created.",
+    createAccountEyebrow: "Create Your Account", whereReachYouLine1: "What should we", whereReachYouLine2: "call you?",
+    namePlaceholder: "Your first name", emailPlaceholder: "your@email.com", continueBtn: "Continue",
+    signupEmailLabel: "Email (optional)", signupNote: "This is a prototype — no account is actually created.",
+    nameRequired: "Please enter your name to continue.",
     stepAudienceTitle: "Who are we dressing?", stepAudiencePrompt: "This helps us show the right fits and inspiration.",
     step0Title: "How would you describe your day-to-day?", step0Prompt: "Pick the photo that feels closest to your days.",
     lifeOfficeDesc: "Meetings, clients, and polished days that need to look intentional.",
@@ -61,7 +63,7 @@ const UI = {
     stylistPicksIntro: "Three directions for you — tap any piece to shop what's in stock.",
     wardrobeTitle: "Wardrobe", wardrobeEmpty: "Outfits you save from your stylist will live here.",
     bagTitle: "Bag", bagEmpty: "Save an outfit to see its items here, grouped by retailer.", checkoutWith: "Checkout with",
-    profileTitle: "Profile", styleArchetypeLabel: "Style Archetype", fitPreferenceLabel: "Fit Preference",
+    profileTitle: "Profile", nameLabel: "Name", styleArchetypeLabel: "Style Archetype", fitPreferenceLabel: "Fit Preference",
     dressingForLabel: "Dressing for",
     paletteLabel: "Palette", budgetLabel: "Budget", dressesForLabel: "Dresses For",
     prototypeNote: "This is a click-through prototype — no real account exists yet.", languageLabel: "Language",
@@ -88,8 +90,10 @@ const UI = {
   es: {
     welcomeEyebrow: "Vestra", welcomeTitleLine1: "Vamos a vestirte", welcomeTitleLine2: "como es debido.",
     welcomeSub: "Unas preguntas rápidas y luego conoces a tu estilista.", getStarted: "Empezar", skipTesting: "Saltar para probar → ver la app",
-    createAccountEyebrow: "Crea tu cuenta", whereReachYouLine1: "¿Dónde podemos", whereReachYouLine2: "contactarte?",
-    emailPlaceholder: "tu@email.com", continueBtn: "Continuar", signupNote: "Esto es un prototipo — no se crea ninguna cuenta real.",
+    createAccountEyebrow: "Crea tu cuenta", whereReachYouLine1: "¿Cómo te", whereReachYouLine2: "llamamos?",
+    namePlaceholder: "Tu nombre", emailPlaceholder: "tu@email.com", continueBtn: "Continuar",
+    signupEmailLabel: "Email (opcional)", signupNote: "Esto es un prototipo — no se crea ninguna cuenta real.",
+    nameRequired: "Escribe tu nombre para continuar.",
     stepAudienceTitle: "¿Para quién es el estilo?", stepAudiencePrompt: "Así te mostramos los cortes e inspiración adecuados.",
     step0Title: "¿Cómo describirías tu día a día?", step0Prompt: "Elige la foto que más se parezca a tus días.",
     lifeOfficeDesc: "Reuniones, clientes y días que piden un look intencional.",
@@ -133,7 +137,7 @@ const UI = {
     stylistPicksIntro: "Tres direcciones para ti — toca cualquier prenda para ver stock.",
     wardrobeTitle: "Armario", wardrobeEmpty: "Los looks que guardes de tu estilista aparecerán aquí.",
     bagTitle: "Bolsa", bagEmpty: "Guarda un look para ver sus prendas aquí, agrupadas por tienda.", checkoutWith: "Comprar en",
-    profileTitle: "Perfil", styleArchetypeLabel: "Arquetipo de Estilo", fitPreferenceLabel: "Preferencia de Ajuste",
+    profileTitle: "Perfil", nameLabel: "Nombre", styleArchetypeLabel: "Arquetipo de Estilo", fitPreferenceLabel: "Preferencia de Ajuste",
     dressingForLabel: "Vestuario para",
     paletteLabel: "Paleta", budgetLabel: "Presupuesto", dressesForLabel: "Se Viste Para",
     prototypeNote: "Esto es un prototipo interactivo — aún no existe ninguna cuenta real.", languageLabel: "Idioma",
@@ -160,8 +164,10 @@ const UI = {
   fr: {
     welcomeEyebrow: "Vestra", welcomeTitleLine1: "Habillons-vous", welcomeTitleLine2: "comme il se doit.",
     welcomeSub: "Quelques questions rapides, puis rencontrez votre styliste.", getStarted: "Commencer", skipTesting: "Passer pour tester → voir l'app",
-    createAccountEyebrow: "Créez votre compte", whereReachYouLine1: "Où pouvons-nous", whereReachYouLine2: "vous joindre ?",
-    emailPlaceholder: "votre@email.com", continueBtn: "Continuer", signupNote: "Ceci est un prototype — aucun compte n'est réellement créé.",
+    createAccountEyebrow: "Créez votre compte", whereReachYouLine1: "Comment devons-nous", whereReachYouLine2: "vous appeler ?",
+    namePlaceholder: "Votre prénom", emailPlaceholder: "votre@email.com", continueBtn: "Continuer",
+    signupEmailLabel: "Email (optionnel)", signupNote: "Ceci est un prototype — aucun compte n'est réellement créé.",
+    nameRequired: "Indiquez votre prénom pour continuer.",
     stepAudienceTitle: "Pour qui s'habille-t-on ?", stepAudiencePrompt: "Cela nous aide à montrer les coupes et inspirations adaptées.",
     step0Title: "Comment décririez-vous votre quotidien ?", step0Prompt: "Choisissez la photo qui ressemble le plus à vos journées.",
     lifeOfficeDesc: "Réunions, clients, et des journées qui demandent une allure intentionnelle.",
@@ -205,7 +211,7 @@ const UI = {
     stylistPicksIntro: "Trois directions pour vous — touchez une pièce pour voir le stock.",
     wardrobeTitle: "Garde-robe", wardrobeEmpty: "Les tenues que vous enregistrez apparaîtront ici.",
     bagTitle: "Panier", bagEmpty: "Enregistrez une tenue pour voir ses articles ici, regroupés par enseigne.", checkoutWith: "Payer chez",
-    profileTitle: "Profil", styleArchetypeLabel: "Archétype de Style", fitPreferenceLabel: "Préférence de Coupe",
+    profileTitle: "Profil", nameLabel: "Prénom", styleArchetypeLabel: "Archétype de Style", fitPreferenceLabel: "Préférence de Coupe",
     dressingForLabel: "S'habille pour",
     paletteLabel: "Palette", budgetLabel: "Budget", dressesForLabel: "S'habille Pour",
     prototypeNote: "Ceci est un prototype interactif — aucun compte réel n'existe encore.", languageLabel: "Langue",
@@ -950,6 +956,7 @@ const STEPS = [
 ];
 
 const DEFAULT_PROFILE = {
+  name: "Alex",
   audience: "Ladies",
   archetype: "Quiet Tailored",
   fit: "Fitted & tailored",
@@ -978,7 +985,17 @@ function WelcomeScreen({ onStart, onSkip }) {
 
 function SignupScreen({ onContinue, onBack }) {
   const { t } = useLang();
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [hint, setHint] = useState(false);
+  function handleContinue() {
+    const trimmed = name.trim();
+    if (!trimmed) {
+      setHint(true);
+      return;
+    }
+    onContinue({ name: trimmed, email: email.trim() });
+  }
   return (
     <div className="onb-screen">
       <button className="onb-back" onClick={onBack}><ArrowLeft size={16} /></button>
@@ -987,12 +1004,26 @@ function SignupScreen({ onContinue, onBack }) {
         <h2 className="onb-title">{t("whereReachYouLine1")}<br />{t("whereReachYouLine2")}</h2>
         <input
           className="onb-input"
+          type="text"
+          autoComplete="given-name"
+          autoFocus
+          placeholder={t("namePlaceholder")}
+          value={name}
+          onChange={(e) => { setName(e.target.value); setHint(false); }}
+          onKeyDown={(e) => { if (e.key === "Enter") handleContinue(); }}
+        />
+        <div className="onb-mini-label" style={{ marginTop: 18, textAlign: "left", width: "100%", maxWidth: 320 }}>{t("signupEmailLabel")}</div>
+        <input
+          className="onb-input"
           type="email"
+          autoComplete="email"
           placeholder={t("emailPlaceholder")}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter") handleContinue(); }}
         />
-        <button className="onb-primary-btn" onClick={onContinue} style={{ marginTop: 20 }}>{t("continueBtn")}</button>
+        {hint && <p className="onb-fine-print" style={{ color: "#a85832" }}>{t("nameRequired")}</p>}
+        <button className="onb-primary-btn" onClick={handleContinue} style={{ marginTop: 20 }}>{t("continueBtn")}</button>
         <p className="onb-fine-print">{t("signupNote")}</p>
       </div>
     </div>
@@ -1550,7 +1581,7 @@ function HomeScreen({ profile, onPrompt, homeInput, setHomeInput }) {
   return (
     <div className="screen">
       <div className="eyebrow muted">{t("goodEvening")}</div>
-      <h1 className="home-name">Alex</h1>
+      <h1 className="home-name">{profile.name || DEFAULT_PROFILE.name}</h1>
       <div className="dna-card">
         <div className="eyebrow gold-on-dark">{t("styleDnaLabel")}</div>
         <div className="dna-title">{tOpt(profile.archetype)}</div>
@@ -1721,6 +1752,7 @@ function ProfileScreen({ profile, onToggleFavoriteStore }) {
   const favSet = new Set(favorites);
   const budgetLabel = tOpt((BUDGET_OPTIONS.find((b) => b.key === profile.budget) || {}).label || "Balanced");
   const rows = [
+    [t("nameLabel"), profile.name || DEFAULT_PROFILE.name],
     [t("dressingForLabel"), tOpt(profile.audience || DEFAULT_PROFILE.audience)],
     [t("styleArchetypeLabel"), tOpt(profile.archetype)],
     [t("fitPreferenceLabel"), tOpt(profile.fit)],
@@ -1791,7 +1823,7 @@ export default function VestraPrototype() {
   const [lang, setLang] = useState("en");
   const [stage, setStage] = useState("welcome"); // welcome | signup | onboarding | reveal | occasion | app
   const [step, setStep] = useState(0);
-  const [answers, setAnswers] = useState({ audience: null, lifestyle: null, archetype: null, fit: null, palette: [], avoid: [], budget: null, occasions: [], sizes: {} });
+  const [answers, setAnswers] = useState({ name: "", audience: null, lifestyle: null, archetype: null, fit: null, palette: [], avoid: [], budget: null, occasions: [], sizes: {} });
   const [profile, setProfile] = useState(DEFAULT_PROFILE);
 
   const [tab, setTab] = useState("home");
@@ -1861,6 +1893,7 @@ export default function VestraPrototype() {
     const audience = answers.audience || DEFAULT_PROFILE.audience;
     const audienceMeta = AUDIENCE_META[audience] || AUDIENCE_META.Ladies;
     const built = {
+      name: answers.name || profile.name || DEFAULT_PROFILE.name,
       audience,
       archetype: archetypeShortEn,
       fit: answers.fit,
@@ -2280,7 +2313,16 @@ export default function VestraPrototype() {
         )}
         <div className="phone-body">
           {stage === "welcome" && <WelcomeScreen onStart={() => setStage("signup")} onSkip={skipToApp} />}
-          {stage === "signup" && <SignupScreen onContinue={() => setStage("onboarding")} onBack={() => setStage("welcome")} />}
+          {stage === "signup" && (
+            <SignupScreen
+              onContinue={({ name, email }) => {
+                setAnswers((a) => ({ ...a, name, email }));
+                setProfile((p) => ({ ...p, name }));
+                setStage("onboarding");
+              }}
+              onBack={() => setStage("welcome")}
+            />
+          )}
           {stage === "onboarding" && (
             <OnboardingScreen
               step={step}
