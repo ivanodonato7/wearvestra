@@ -1,30 +1,14 @@
 {
   "query": "black leather dress belt",
-  "scannedAt": "2026-07-17T19:55:40.348Z",
+  "scannedAt": "2026-07-17T21:10:37.702Z",
   "source": "bing_shopping",
   "products": [
     {
-      "title": "Trafalgar Jameson 31mm Genuine Leather Dress Belt In Black At Nordstrom, Size 42",
-      "price": "$80.00",
-      "merchant": "Nordstrom",
-      "url": "https://www.nordstrom.com/s/jameson-31mm-genuine-leather-dress-belt/7970385?color=black&size=42&utm_source=bing&utm_medium=organic&utm_campaign=seo_shopping",
-      "image": "https://th.bing.com/th/id/OPHS.wDO0vBA0gTApDg474C474?w=220&h=220&c=17&o=5&pid=21.1",
-      "availability": "In stock"
-    },
-    {
-      "title": "Gallery Seven Traditional Leather Dress Belt In Black At Nordstrom, Size 34",
+      "title": "Gallery Seven Traditional Leather Dress Belt In Black At Nordstrom, Size 40",
       "price": "$30.80",
       "merchant": "Nordstrom",
-      "url": "https://www.nordstrom.com/s/traditional-leather-dress-belt/9171215?color=black&size=34&utm_source=bing&utm_medium=organic&utm_campaign=seo_shopping",
+      "url": "https://www.nordstrom.com/s/traditional-leather-dress-belt/9171215?color=black&size=40&utm_source=bing&utm_medium=organic&utm_campaign=seo_shopping",
       "image": "https://th.bing.com/th/id/OPHS.mOZIcsdowUIr8Q474C474?w=220&h=220&c=17&o=5&pid=21.1",
-      "availability": "In stock"
-    },
-    {
-      "title": "Black Leather Dress Belt 100% Pure Italian Cow Genuine Formal. HILASON. Black. Saddles. 601464913711",
-      "price": "$32.99",
-      "merchant": "Ebay",
-      "url": "https://www.ebay.com/itm/377103107345?_ul=US&mkevt=1&mkcid=1&mkrid=711-53200-19255-0&campid=5339114220&toolid=10001&customid=eb%3Ag%3Avms%3Aeb%3Ap%3A377103107345%3B&_trkparms=ispr%3D1&amdata=enc%3A1Mfq5371MRiqd_l3-zP0yTQ37",
-      "image": "https://th.bing.com/th/id/OPHS.MABAWvBI6eVmSQ474C474?w=220&h=220&c=17&o=5&pid=21.1",
       "availability": "In stock"
     },
     {
@@ -52,14 +36,6 @@
       "availability": "In stock"
     },
     {
-      "title": "CTM Women's Skinny 3/4 Inch Leather Dress Belt (Pack Of 2), Size: Large, Black",
-      "price": "$28.95",
-      "merchant": "Kohls",
-      "url": "https://www.kohls.com/product/prd-7115556/ctm-womens-skinny-34-in-leather-dress-belt-pack-of-2.jsp?skuid=38004495",
-      "image": "https://th.bing.com/th?id=OPHS.WMJr2YbUEWT%2b1A474C474&w=220&h=220&c=17&o=5&pid=21.1",
-      "availability": "In stock"
-    },
-    {
       "title": "Haggar Leather Classic Stitch 32mm Dress Belt In Black | Size: Medium",
       "price": "$32.99",
       "merchant": "Haggar",
@@ -76,6 +52,14 @@
       "availability": "In stock"
     },
     {
+      "title": "CTM Women's Skinny Leather Dress Belt 2-Pack, 3/4 In, Black + Color, Size: XL, Black And",
+      "price": "$28.95",
+      "merchant": "Kohls",
+      "url": "https://www.kohls.com/product/prd-6988079/ctm-womens-skinny-leather-dress-belt-2-pack-34-in-black-color.jsp?skuid=67384280",
+      "image": "https://th.bing.com/th?id=OPHS.F5z%2bLHriebgejg474C474&w=220&h=220&c=17&o=5&pid=21.1",
+      "availability": "In stock"
+    },
+    {
       "title": "Daily Street Co RALPH LAUREN Leather Dress Belt Black, 40",
       "price": "$49.99",
       "merchant": "Shop",
@@ -84,19 +68,35 @@
       "availability": "In stock"
     },
     {
-      "title": "Lvora Modern G-Buckle Genuine Leather Belt - Black Textured Dress Accessory, 100",
-      "price": "$96.00",
-      "merchant": "Shop",
-      "url": "https://shop.app/products/10559890751766?variantId=51417951731990",
-      "image": "https://th.bing.com/th/id/OPHS.1gbopnONFYRbAg474C474?w=220&h=220&c=17&o=5&pid=21.1",
-      "availability": "In stock"
-    },
-    {
       "title": "Voltage RALPH LAUREN Leather Dress Belt Black, 42",
       "price": "$49.99",
       "merchant": "Shop",
       "url": "https://shop.app/products/10211709387035?variantId=52083051757851",
       "image": "https://th.bing.com/th/id/OPHS.GHLaTmOjESy3UA474C474?w=220&h=220&c=17&o=5&pid=21.1",
+      "availability": "In stock"
+    },
+    {
+      "title": "Luxe Shades RALPH LAUREN Leather Dress Belt Black, 42",
+      "price": "$49.99",
+      "merchant": "Shop",
+      "url": "https://shop.app/products/8973156941978?variantId=48207283028122",
+      "image": "https://th.bing.com/th/id/OPHS.GHLaTmOjESy3UA474C474?w=220&h=220&c=17&o=5&pid=21.1",
+      "availability": "In stock"
+    },
+    {
+      "title": "Men's Apt. 9® Pebbled Leather Dress Belt, Size: Medium, Black",
+      "price": "$23.99",
+      "merchant": "Kohls",
+      "url": "https://www.kohls.com/product/prd-8271916/mens-apt-9-pebbled-leather-dress-belt.jsp?skuid=70692555",
+      "image": "https://th.bing.com/th?id=OPHS.DwjF0fhl%2bAbirw474C474&w=220&h=220&c=17&o=5&pid=21.1",
+      "availability": "In stock"
+    },
+    {
+      "title": "Haggar Black Leather Classic Stitch 32mm Dress Belt In | Size: Large",
+      "price": "$32.99",
+      "merchant": "Haggar",
+      "url": "https://www.haggar.com/products/leather-classic-stitch-32mm-dress-belt?variant=54880385663267",
+      "image": "https://th.bing.com/th?id=OPHS.fbamfT%2bjFLJ%2f0A474C474&w=220&h=220&c=17&o=5&pid=21.1",
       "availability": "In stock"
     }
   ]

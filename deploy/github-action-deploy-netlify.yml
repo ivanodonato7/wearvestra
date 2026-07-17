@@ -1,0 +1,68 @@
+# Deploy Vestra to Netlify with the live Claude stylist function.
+#
+# One-time setup (GitHub → Settings → Secrets and variables → Actions):
+#   NETLIFY_AUTH_TOKEN  — https://app.netlify.com/user/applications#personal-access-tokens
+#   NETLIFY_SITE_ID     — Site settings → Site details → Site ID
+#   ANTHROPIC_API_KEY   — https://console.anthropic.com/
+#
+# Then: create an empty Netlify site, copy its Site ID, add the three secrets,
+# and run this workflow (Actions → Deploy Netlify → Run workflow).
+name: Deploy Netlify (live stylist)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check secrets
+        id: check
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          missing=0
+          [[ -z "$NETLIFY_AUTH_TOKEN" ]] && echo "Missing NETLIFY_AUTH_TOKEN" && missing=1
+          [[ -z "$NETLIFY_SITE_ID" ]] && echo "Missing NETLIFY_SITE_ID" && missing=1
+          [[ -z "$ANTHROPIC_API_KEY" ]] && echo "Missing ANTHROPIC_API_KEY" && missing=1
+          if [[ "$missing" -eq 1 ]]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "Add the three secrets under Settings → Secrets → Actions, then re-run."
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-node@v4
+        if: steps.check.outputs.configured == 'true'
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        if: steps.check.outputs.configured == 'true'
+        run: npm ci
+
+      - name: Build
+        if: steps.check.outputs.configured == 'true'
+        run: npm run build
+
+      - name: Set Anthropic key on Netlify site
+        if: steps.check.outputs.configured == 'true'
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: npx netlify-cli env:set ANTHROPIC_API_KEY "$ANTHROPIC_API_KEY" --force
+
+      - name: Deploy production
+        if: steps.check.outputs.configured == 'true'
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        run: npx netlify-cli deploy --prod --dir=dist --functions=netlify/functions --message "Vestra ${GITHUB_SHA}"

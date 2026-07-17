@@ -1,6 +1,6 @@
 {
   "query": "dark brown suede chelsea boots",
-  "scannedAt": "2026-07-17T19:07:49.218Z",
+  "scannedAt": "2026-07-17T21:10:29.057Z",
   "source": "bing_shopping",
   "products": [
     {
@@ -20,10 +20,10 @@
       "availability": "In stock"
     },
     {
-      "title": "DOLCE VESTA Dark Brown Suede Chelsea Boot, 10 / Dark Brown",
+      "title": "DOLCE VESTA Dark Brown Suede Chelsea Boot, 10.5 / Dark Brown",
       "price": "$89.99",
       "merchant": "Shop",
-      "url": "https://shop.app/products/6629331271857?variantId=39530403528881",
+      "url": "https://shop.app/products/6629331271857?variantId=39530403561649",
       "image": "https://th.bing.com/th/id/OPHS.dBesZ94gkUPcGA474C474?w=220&h=220&c=17&o=5&pid=21.1",
       "availability": "In stock"
     },
@@ -52,19 +52,19 @@
       "availability": "In stock"
     },
     {
-      "title": "Canali Men's Dark Suede Chelsea Boots - Brown - Casual Boots - 8",
-      "price": "$950.00",
-      "merchant": "Lyst",
-      "url": "https://www.lyst.com/shoes/canali-dark-suede-chelsea-boots/?product=WTKMTNV&link_id=1207533306&_country=US&size=41&show_express_checkout=true&atc_medium=cpc",
-      "image": "https://th.bing.com/th?id=OPHS.xDWNTkeRcy6c%2bw474C474&w=220&h=220&c=17&o=5&pid=21.1",
-      "availability": "In stock"
-    },
-    {
       "title": "Weston Chelsea Boot // Dark Brown Suede Dark Brown Suede / D / 7",
       "price": "$239.00",
       "merchant": "Anthonyveer",
       "url": "https://anthonyveer.com/products/weston-chelsea-boot-dark-brown-suede?variant=51242858185017",
       "image": "https://th.bing.com/th/id/OPHS.QwfWZjPuMf8aNg474C474?w=220&h=220&c=17&o=5&pid=21.1",
+      "availability": "In stock"
+    },
+    {
+      "title": "Canali Men's Dark Suede Chelsea Boots - Brown - Casual Boots - 10",
+      "price": "$950.00",
+      "merchant": "Lyst",
+      "url": "https://www.lyst.com/shoes/canali-dark-suede-chelsea-boots/?product=WTKMTNV&link_id=1207533306&_country=US&size=43&show_express_checkout=true&atc_medium=cpc",
+      "image": "https://th.bing.com/th?id=OPHS.xDWNTkeRcy6c%2bw474C474&w=220&h=220&c=17&o=5&pid=21.1",
       "availability": "In stock"
     },
     {
