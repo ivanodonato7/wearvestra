@@ -18,6 +18,7 @@ const UI = {
     welcomeSub: "A few quick questions, then meet your stylist.", getStarted: "Get Started", skipTesting: "Skip for testing → see the app",
     createAccountEyebrow: "Create Your Account", whereReachYouLine1: "Where should we", whereReachYouLine2: "reach you?",
     emailPlaceholder: "your@email.com", continueBtn: "Continue", signupNote: "This is a prototype — no account is actually created.",
+    stepAudienceTitle: "Who are we dressing?", stepAudiencePrompt: "This helps us show the right fits and inspiration.",
     step0Title: "Let's get you dressed properly.", step0Prompt: "How would you describe your day-to-day?",
     step1Title: "Which of these feels most like you?", step1Prompt: "Not sure of the name? Pick the photo that feels most like you.",
     archQuietDesc: "Clean lines, refined fits, nothing loud — polished without trying too hard.",
@@ -50,6 +51,7 @@ const UI = {
     wardrobeTitle: "Wardrobe", wardrobeEmpty: "Outfits you save from your stylist will live here.",
     bagTitle: "Bag", bagEmpty: "Save an outfit to see its items here, grouped by retailer.", checkoutWith: "Checkout with",
     profileTitle: "Profile", styleArchetypeLabel: "Style Archetype", fitPreferenceLabel: "Fit Preference",
+    dressingForLabel: "Dressing for",
     paletteLabel: "Palette", budgetLabel: "Budget", dressesForLabel: "Dresses For",
     prototypeNote: "This is a click-through prototype — no real account exists yet.", languageLabel: "Language",
     navHome: "Home", navStylist: "Stylist", navWardrobe: "Wardrobe", navBag: "Bag", navProfile: "Profile",
@@ -75,6 +77,7 @@ const UI = {
     welcomeSub: "Unas preguntas rápidas y luego conoces a tu estilista.", getStarted: "Empezar", skipTesting: "Saltar para probar → ver la app",
     createAccountEyebrow: "Crea tu cuenta", whereReachYouLine1: "¿Dónde podemos", whereReachYouLine2: "contactarte?",
     emailPlaceholder: "tu@email.com", continueBtn: "Continuar", signupNote: "Esto es un prototipo — no se crea ninguna cuenta real.",
+    stepAudienceTitle: "¿Para quién es el estilo?", stepAudiencePrompt: "Así te mostramos los cortes e inspiración adecuados.",
     step0Title: "Vamos a vestirte como es debido.", step0Prompt: "¿Cómo describirías tu día a día?",
     step1Title: "¿Cuál de estos se parece más a ti?", step1Prompt: "Si no sabes el nombre, elige la foto que más te represente.",
     archQuietDesc: "Líneas limpias, cortes refinados, nada estridente — elegancia sin esfuerzo.",
@@ -107,6 +110,7 @@ const UI = {
     wardrobeTitle: "Armario", wardrobeEmpty: "Los looks que guardes de tu estilista aparecerán aquí.",
     bagTitle: "Bolsa", bagEmpty: "Guarda un look para ver sus prendas aquí, agrupadas por tienda.", checkoutWith: "Comprar en",
     profileTitle: "Perfil", styleArchetypeLabel: "Arquetipo de Estilo", fitPreferenceLabel: "Preferencia de Ajuste",
+    dressingForLabel: "Vestuario para",
     paletteLabel: "Paleta", budgetLabel: "Presupuesto", dressesForLabel: "Se Viste Para",
     prototypeNote: "Esto es un prototipo interactivo — aún no existe ninguna cuenta real.", languageLabel: "Idioma",
     navHome: "Inicio", navStylist: "Estilista", navWardrobe: "Armario", navBag: "Bolsa", navProfile: "Perfil",
@@ -132,6 +136,7 @@ const UI = {
     welcomeSub: "Quelques questions rapides, puis rencontrez votre styliste.", getStarted: "Commencer", skipTesting: "Passer pour tester → voir l'app",
     createAccountEyebrow: "Créez votre compte", whereReachYouLine1: "Où pouvons-nous", whereReachYouLine2: "vous joindre ?",
     emailPlaceholder: "votre@email.com", continueBtn: "Continuer", signupNote: "Ceci est un prototype — aucun compte n'est réellement créé.",
+    stepAudienceTitle: "Pour qui s'habille-t-on ?", stepAudiencePrompt: "Cela nous aide à montrer les coupes et inspirations adaptées.",
     step0Title: "Habillons-vous comme il se doit.", step0Prompt: "Comment décririez-vous votre quotidien ?",
     step1Title: "Lequel vous ressemble le plus ?", step1Prompt: "Pas sûr du nom ? Choisissez la photo qui vous parle.",
     archQuietDesc: "Lignes nettes, coupes raffinées, rien de criard — élégance sans effort.",
@@ -164,6 +169,7 @@ const UI = {
     wardrobeTitle: "Garde-robe", wardrobeEmpty: "Les tenues que vous enregistrez apparaîtront ici.",
     bagTitle: "Panier", bagEmpty: "Enregistrez une tenue pour voir ses articles ici, regroupés par enseigne.", checkoutWith: "Payer chez",
     profileTitle: "Profil", styleArchetypeLabel: "Archétype de Style", fitPreferenceLabel: "Préférence de Coupe",
+    dressingForLabel: "S'habille pour",
     paletteLabel: "Palette", budgetLabel: "Budget", dressesForLabel: "S'habille Pour",
     prototypeNote: "Ceci est un prototype interactif — aucun compte réel n'existe encore.", languageLabel: "Langue",
     navHome: "Accueil", navStylist: "Styliste", navWardrobe: "Garde-robe", navBag: "Panier", navProfile: "Profil",
@@ -191,6 +197,7 @@ const OPTIONS_I18N = {
     "Office / client-facing": "Oficina / cara al cliente", "Creative or flexible workplace": "Trabajo creativo o flexible",
     "Remote, mostly at home": "Remoto, mayormente en casa", "On the move — travel, events, varied": "En movimiento — viajes, eventos, variado",
     "Student life": "Vida de estudiante",
+    "Ladies": "Mujer", "Gentlemen": "Hombre", "Gender neutral": "Género neutro",
     "Quiet & Tailored": "Discreto y Sastre", "Relaxed & Considered": "Relajado y Cuidado", "Modern & Sharp": "Moderno y Definido",
     "Warm & Layered": "Cálido y en Capas", "Classic & Polished": "Clásico y Pulido", "Minimal & Directional": "Minimalista y Vanguardista",
     "Romantic & Soft": "Romántico y Suave", "Bold & Expressive": "Audaz y Expresivo",
@@ -212,6 +219,7 @@ const OPTIONS_I18N = {
     "Office / client-facing": "Bureau / relation client", "Creative or flexible workplace": "Travail créatif ou flexible",
     "Remote, mostly at home": "Télétravail, surtout à la maison", "On the move — travel, events, varied": "En mouvement — voyages, événements, varié",
     "Student life": "Vie étudiante",
+    "Ladies": "Femme", "Gentlemen": "Homme", "Gender neutral": "Non genré",
     "Quiet & Tailored": "Discret et Tailleur", "Relaxed & Considered": "Détendu et Réfléchi", "Modern & Sharp": "Moderne et Affûté",
     "Warm & Layered": "Chaleureux et Superposé", "Classic & Polished": "Classique et Soigné", "Minimal & Directional": "Minimaliste et Avant-gardiste",
     "Romantic & Soft": "Romantique et Doux", "Bold & Expressive": "Audacieux et Expressif",
@@ -436,6 +444,12 @@ function pickOutfitIndex(text) {
 }
 
 // ==================== ONBOARDING DATA ====================
+const AUDIENCE_OPTIONS = ["Ladies", "Gentlemen", "Gender neutral"];
+const AUDIENCE_META = {
+  Ladies: { image: "/onboarding/audience-ladies.jpg", modelGender: "woman" },
+  Gentlemen: { image: "/onboarding/audience-gentlemen.jpg", modelGender: "man" },
+  "Gender neutral": { image: "/onboarding/audience-neutral.jpg", modelGender: "woman" },
+};
 const LIFESTYLE_OPTIONS = ["Office / client-facing", "Creative or flexible workplace", "Remote, mostly at home", "On the move — travel, events, varied", "Student life"];
 const LIFESTYLE_META = {
   "Office / client-facing": { image: "/onboarding/life-office.jpg" },
@@ -510,6 +524,7 @@ const BUDGET_OPTIONS = [
 const OCCASION_OPTIONS = ["Work", "Date nights", "Travel", "Events & celebrations", "Everyday, just want to feel put together"];
 
 const STEPS = [
+  { id: "audience", titleKey: "stepAudienceTitle", promptKey: "stepAudiencePrompt", type: "visual", options: AUDIENCE_OPTIONS, meta: AUDIENCE_META },
   { id: "lifestyle", titleKey: "step0Title", promptKey: "step0Prompt", type: "visual", options: LIFESTYLE_OPTIONS, meta: LIFESTYLE_META },
   { id: "archetype", titleKey: "step1Title", promptKey: "step1Prompt", type: "archetype", options: ARCHETYPE_OPTIONS },
   { id: "fit", titleKey: "step2Title", promptKey: "step2Prompt", type: "visual", options: FIT_OPTIONS, meta: FIT_META },
@@ -520,6 +535,7 @@ const STEPS = [
 ];
 
 const DEFAULT_PROFILE = {
+  audience: "Ladies",
   archetype: "Quiet Tailored",
   fit: "Fitted & tailored",
   palette: ["Olive", "Ivory / Cream", "Black", "Camel / Tan"],
@@ -633,7 +649,7 @@ function OnboardingScreen({ step, totalSteps, question, answers, setAnswers, onN
         )}
 
         {question.type === "visual" && (
-          <div className="onb-visual-grid">
+          <div className={`onb-visual-grid ${question.options.length === 3 ? "onb-visual-grid-3" : ""}`}>
             {question.options.map((opt) => {
               const meta = (question.meta && question.meta[opt]) || {};
               return (
@@ -1192,6 +1208,7 @@ function ProfileScreen({ profile, onToggleFavoriteStore }) {
   const favSet = new Set(favorites);
   const budgetLabel = tOpt((BUDGET_OPTIONS.find((b) => b.key === profile.budget) || {}).label || "Balanced");
   const rows = [
+    [t("dressingForLabel"), tOpt(profile.audience || DEFAULT_PROFILE.audience)],
     [t("styleArchetypeLabel"), tOpt(profile.archetype)],
     [t("fitPreferenceLabel"), tOpt(profile.fit)],
     [t("paletteLabel"), (profile.palette || []).map(tOpt).join(", ")],
@@ -1260,7 +1277,7 @@ export default function VestraPrototype() {
   const [lang, setLang] = useState("en");
   const [stage, setStage] = useState("welcome"); // welcome | signup | onboarding | reveal | occasion | app
   const [step, setStep] = useState(0);
-  const [answers, setAnswers] = useState({ lifestyle: null, archetype: null, fit: null, palette: [], avoid: [], budget: null, occasions: [], sizes: {} });
+  const [answers, setAnswers] = useState({ audience: null, lifestyle: null, archetype: null, fit: null, palette: [], avoid: [], budget: null, occasions: [], sizes: {} });
   const [profile, setProfile] = useState(DEFAULT_PROFILE);
 
   const [tab, setTab] = useState("home");
@@ -1316,13 +1333,16 @@ export default function VestraPrototype() {
 
   function finishOnboarding(occasionText) {
     const archetypeShortEn = answers.archetype.replace(" & ", " ");
+    const audience = answers.audience || DEFAULT_PROFILE.audience;
+    const audienceMeta = AUDIENCE_META[audience] || AUDIENCE_META.Ladies;
     const built = {
+      audience,
       archetype: archetypeShortEn,
       fit: answers.fit,
       palette: answers.palette.length ? answers.palette : DEFAULT_PROFILE.palette,
       budget: answers.budget,
       occasions: answers.occasions,
-      modelGender: profile.modelGender || DEFAULT_PROFILE.modelGender,
+      modelGender: audienceMeta.modelGender || DEFAULT_PROFILE.modelGender,
       favoriteStores: profile.favoriteStores || DEFAULT_PROFILE.favoriteStores,
     };
     setProfile(built);
@@ -1663,6 +1683,7 @@ export default function VestraPrototype() {
         .onb-budget-label{ font-size:13.5px; color:#0B0B0C; margin-bottom:2px; }
         .onb-budget-sub{ font-size:11px; color:#8b877a; }
         .onb-visual-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; padding-bottom:12px; }
+        .onb-visual-grid-3{ grid-template-columns:1fr 1fr 1fr; gap:10px; }
         .onb-visual-card{
           display:flex; flex-direction:column; gap:10px; text-align:left;
           background:#fff; border:1.5px solid #e6e0d2; border-radius:10px; padding:8px 8px 12px;
@@ -1671,9 +1692,12 @@ export default function VestraPrototype() {
         .onb-visual-card.selected{ border-color:#C6A567; background:#faf6ec; box-shadow:0 0 0 1px #C6A567; }
         .onb-visual-image{ width:100%; aspect-ratio:3/4; object-fit:cover; border-radius:7px; background:#efe9da; display:block; }
         .onb-visual-label{ font-family:'Fraunces',serif; font-size:14px; line-height:1.3; color:#0B0B0C; padding:0 4px; }
+        .onb-visual-grid-3 .onb-visual-label{ font-size:12.5px; text-align:center; padding:0 2px; }
         @media (min-width:720px){
           .onb-visual-grid{ grid-template-columns:1fr 1fr; gap:14px; max-width:640px; }
+          .onb-visual-grid-3{ grid-template-columns:1fr 1fr 1fr; max-width:720px; }
           .onb-visual-label{ font-size:15px; }
+          .onb-visual-grid-3 .onb-visual-label{ font-size:14px; }
         }
         .onb-swatch-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px; }
         .onb-swatch-card{ display:flex; flex-direction:column; align-items:center; gap:10px; background:#fff; border:1.5px solid #e6e0d2; border-radius:10px; padding:14px 10px 12px; cursor:pointer; font-family:'Inter',sans-serif; transition:all .15s; }
