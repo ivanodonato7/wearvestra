@@ -674,6 +674,8 @@ function ModelHero({ itemKeys, gender }) {
         src={src}
         alt="Outfit on model"
         loading="lazy"
+        decoding="async"
+        sizes="(max-width: 767px) 100vw, (max-width: 1023px) 42vw, 340px"
       />
     </div>
   );
@@ -993,17 +995,69 @@ export default function VestraPrototype() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@300;400;500;600&display=swap');
         .app-outer{ min-height:100vh; min-height:100dvh; background:#e9e4d6; display:flex; align-items:center; justify-content:center; padding:24px; font-family:'Inter',sans-serif; }
-        .phone{ width:380px; height:min(780px, calc(100dvh - 48px)); background:#F6F1E7; border-radius:2.2rem; border:8px solid #0B0B0C; box-shadow:0 30px 60px rgba(0,0,0,0.35); overflow:hidden; position:relative; display:flex; flex-direction:column; }
-        .notch{ position:absolute; top:0; left:50%; transform:translateX(-50%); width:112px; height:20px; background:#0B0B0C; border-radius:0 0 12px 12px; z-index:20; }
-        .phone-body{ flex:1; overflow:hidden; padding-top:20px; min-height:0; }
+        .phone{ width:100%; max-width:420px; height:min(860px, calc(100dvh - 48px)); background:#F6F1E7; border-radius:1.4rem; border:1px solid #d9d2c2; box-shadow:0 18px 48px rgba(0,0,0,0.12); overflow:hidden; position:relative; display:flex; flex-direction:column; }
+        .notch{ display:none; }
+        .phone-body{ flex:1; overflow:hidden; padding-top:0; min-height:0; }
         .screen{ padding:24px 20px 90px; height:100%; overflow-y:auto; box-sizing:border-box; -webkit-overflow-scrolling:touch; }
-        @media (max-width: 480px) {
+
+        /* Phone */
+        @media (max-width: 767px) {
           .app-outer{ padding:0; background:#F6F1E7; align-items:stretch; }
-          .phone{ width:100%; height:100dvh; max-height:none; border:none; border-radius:0; box-shadow:none; }
-          .notch{ display:none; }
+          .phone{ max-width:none; height:100dvh; border:none; border-radius:0; box-shadow:none; }
           .phone-body{ padding-top: env(safe-area-inset-top, 0px); }
           .tabbar{ padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px)); }
           .lang-switcher-corner{ top: calc(12px + env(safe-area-inset-top, 0px)); }
+          .outfit-visual{ flex-direction:column; }
+          .model-wrap{ width:100%; max-width:none; aspect-ratio:3/4; max-height:min(52vh, 420px); }
+          .bubble-assistant{ max-width:100%; }
+          .card{ padding:14px; }
+        }
+
+        /* Tablet */
+        @media (min-width: 768px) and (max-width: 1023px) {
+          .app-outer{ padding:20px; align-items:stretch; }
+          .phone{ max-width:760px; height:calc(100dvh - 40px); margin:0 auto; border-radius:1.2rem; }
+          .outfit-visual{ gap:16px; }
+          .model-wrap{ width:42%; max-width:280px; }
+          .bubble-assistant{ max-width:100%; }
+          .screen{ padding:28px 28px 100px; max-width:720px; margin:0 auto; }
+          .chat-body{ padding:20px 24px; }
+          .home-name{ font-size:32px; }
+        }
+
+        /* Desktop / PC */
+        @media (min-width: 1024px) {
+          .app-outer{
+            padding:32px;
+            background:
+              radial-gradient(ellipse at 20% 10%, rgba(198,165,103,0.18), transparent 45%),
+              radial-gradient(ellipse at 80% 90%, rgba(62,66,40,0.10), transparent 40%),
+              #e9e4d6;
+          }
+          .phone{
+            max-width:1080px;
+            width:min(1080px, calc(100vw - 64px));
+            height:min(900px, calc(100dvh - 64px));
+            border-radius:1.25rem;
+            border:1px solid #d4cdb8;
+            box-shadow:0 28px 70px rgba(0,0,0,0.14);
+          }
+          .screen{ padding:32px 40px 110px; max-width:920px; margin:0 auto; }
+          .chat-header{ padding:18px 32px; }
+          .chat-body{ padding:24px 32px; gap:16px; }
+          .chat-input-row{ padding:16px 32px; }
+          .bubble-assistant{ max-width:720px; }
+          .bubble-user{ max-width:60%; font-size:14px; }
+          .home-name{ font-size:36px; }
+          .dna-card{ padding:22px; }
+          .outfit-visual{ gap:22px; align-items:stretch; }
+          .model-wrap{ width:46%; max-width:340px; min-height:420px; }
+          .item-row{ padding:10px 12px; }
+          .item-row-name{ font-size:12.5px; }
+          .item-row-meta{ font-size:11px; }
+          .rationale{ font-size:14px; }
+          .tabbar{ padding:12px 24px; }
+          .card{ padding:20px; }
         }
         .eyebrow{ font-size:10px; letter-spacing:0.18em; text-transform:uppercase; font-weight:600; margin-bottom:4px; }
         .eyebrow.muted{ color:#A8895C; }
@@ -1041,7 +1095,7 @@ export default function VestraPrototype() {
         .card{ background:#0B0B0C; border:1px solid #2a2a26; border-radius:4px; padding:16px; color:#F6F1E7; }
         .outfit-visual{ display:flex; gap:12px; margin-bottom:14px; align-items:stretch; }
         .model-wrap{ width:118px; flex-shrink:0; border-radius:4px; overflow:hidden; background:#151513; aspect-ratio:3/4; }
-        .model-photo{ width:100%; height:100%; object-fit:cover; display:block; }
+        .model-photo{ width:100%; height:100%; object-fit:cover; object-position:center top; display:block; }
         .model-gender-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px; }
         .model-gender-label{ font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#8b877a; }
         .model-gender-switch{ display:flex; gap:4px; }
