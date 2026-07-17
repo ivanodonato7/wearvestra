@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect, useId, createContext, useContext } from "react";
-import { Home, MessageCircle, Bookmark, ShoppingBag, User, Send, RefreshCw, Check, Sparkles, ArrowLeft, ExternalLink } from "lucide-react";
+import React, { useState, useRef, useEffect, createContext, useContext } from "react";
+import { Home, MessageCircle, Bookmark, ShoppingBag, User, Send, RefreshCw, Check, Sparkles, ArrowLeft, ExternalLink, X } from "lucide-react";
 
 // ==================== LANGUAGE / i18n ====================
 // A real backend barely needs any of this — Claude already answers fluently
@@ -45,8 +45,11 @@ const UI = {
     paletteLabel: "Palette", budgetLabel: "Budget", dressesForLabel: "Dresses For",
     prototypeNote: "This is a click-through prototype — no real account exists yet.", languageLabel: "Language",
     navHome: "Home", navStylist: "Stylist", navWardrobe: "Wardrobe", navBag: "Bag", navProfile: "Profile",
-    viewProduct: "View product page", swapItem: "Swap this item",
+    viewProduct: "Shop this item", swapItem: "Swap this item",
     modelOnHer: "Her", modelOnHim: "Him", modelLabel: "Shown on",
+    shopAcross: "Shop across stores", shopAcrossSub: "Search this piece from budget to luxury",
+    shopClose: "Close", shopTierBudget: "Budget", shopTierHighStreet: "High street", shopTierPremium: "Premium", shopTierLuxury: "Luxury",
+    shopOpenAll: "Open Google Shopping",
   },
   es: {
     welcomeEyebrow: "Vestra", welcomeTitleLine1: "Vamos a vestirte", welcomeTitleLine2: "como es debido.",
@@ -80,8 +83,11 @@ const UI = {
     paletteLabel: "Paleta", budgetLabel: "Presupuesto", dressesForLabel: "Se Viste Para",
     prototypeNote: "Esto es un prototipo interactivo — aún no existe ninguna cuenta real.", languageLabel: "Idioma",
     navHome: "Inicio", navStylist: "Estilista", navWardrobe: "Armario", navBag: "Bolsa", navProfile: "Perfil",
-    viewProduct: "Ver página del producto", swapItem: "Cambiar esta prenda",
+    viewProduct: "Comprar esta prenda", swapItem: "Cambiar esta prenda",
     modelOnHer: "Ella", modelOnHim: "Él", modelLabel: "Mostrado en",
+    shopAcross: "Buscar en tiendas", shopAcrossSub: "Desde low-cost hasta lujo",
+    shopClose: "Cerrar", shopTierBudget: "Económico", shopTierHighStreet: "High street", shopTierPremium: "Premium", shopTierLuxury: "Lujo",
+    shopOpenAll: "Abrir Google Shopping",
   },
   fr: {
     welcomeEyebrow: "Vestra", welcomeTitleLine1: "Habillons-vous", welcomeTitleLine2: "comme il se doit.",
@@ -115,8 +121,11 @@ const UI = {
     paletteLabel: "Palette", budgetLabel: "Budget", dressesForLabel: "S'habille Pour",
     prototypeNote: "Ceci est un prototype interactif — aucun compte réel n'existe encore.", languageLabel: "Langue",
     navHome: "Accueil", navStylist: "Styliste", navWardrobe: "Garde-robe", navBag: "Panier", navProfile: "Profil",
-    viewProduct: "Voir la fiche produit", swapItem: "Changer cet article",
+    viewProduct: "Acheter cet article", swapItem: "Changer cet article",
     modelOnHer: "Elle", modelOnHim: "Lui", modelLabel: "Porté par",
+    shopAcross: "Chercher en boutiques", shopAcrossSub: "Du abordable au luxe",
+    shopClose: "Fermer", shopTierBudget: "Budget", shopTierHighStreet: "High street", shopTierPremium: "Premium", shopTierLuxury: "Luxe",
+    shopOpenAll: "Ouvrir Google Shopping",
   },
 };
 
@@ -233,95 +242,60 @@ function LanguageSwitcher({ corner }) {
   );
 }
 
-// ---------- Garment render (photographic-feeling product illustration) ----------
-// Real product photos in the live app come straight from each retailer's own
-// feed (see Product.imageUrl in the database schema) — this prototype can't
-// legally borrow real photos from real brands for made-up products, so this
-// renders an original, shaded illustration in the item's actual color instead.
-function lighten(hex, amt) {
-  const num = parseInt(hex.replace("#", ""), 16);
-  let r = (num >> 16) + amt, g = ((num >> 8) & 0x00ff) + amt, b = (num & 0x0000ff) + amt;
-  r = Math.min(255, Math.max(0, r)); g = Math.min(255, Math.max(0, g)); b = Math.min(255, Math.max(0, b));
-  return "#" + (0x1000000 + r * 0x10000 + g * 0x100 + b).toString(16).slice(1);
-}
-
-function GarmentPhoto({ type, color = "#3E4228" }) {
-  const uid = useId().replace(/:/g, "");
-  const light = lighten(color, 55);
-  const dark = lighten(color, -35);
-  const gradId = `grad-${type}-${uid}`;
-
-  const bodies = {
-    blazer: (
-      <g>
-        <path d="M22 10 L44 3 L60 14 L76 3 L98 10 L104 30 L88 35 L84 92 L36 92 L32 35 L16 30 Z" fill={`url(#${gradId})`} stroke={dark} strokeWidth="1.2" />
-        <path d="M44 3 L54 26 L60 14 Z M76 3 L66 26 L60 14 Z" fill={dark} opacity="0.18" />
-        <circle cx="60" cy="52" r="2" fill={dark} opacity="0.5" /><circle cx="60" cy="64" r="2" fill={dark} opacity="0.5" />
-        <path d="M36 40 Q60 46 84 40" stroke={dark} strokeWidth="0.8" opacity="0.3" fill="none" />
-      </g>
-    ),
-    shirt: (
-      <g>
-        <path d="M34 4 H86 L94 14 L78 20 L78 92 H42 L42 20 L26 14 Z" fill={`url(#${gradId})`} stroke={dark} strokeWidth="1.2" />
-        <path d="M34 4 L60 18 L86 4" stroke={dark} strokeWidth="1" opacity="0.35" fill="none" />
-        <line x1="60" y1="20" x2="60" y2="90" stroke={dark} strokeWidth="0.8" opacity="0.3" />
-        <circle cx="60" cy="34" r="1.6" fill={dark} opacity="0.5" /><circle cx="60" cy="50" r="1.6" fill={dark} opacity="0.5" /><circle cx="60" cy="66" r="1.6" fill={dark} opacity="0.5" />
-      </g>
-    ),
-    trouser: (
-      <g>
-        <path d="M26 3 H66 L68 92 H50 L46 30 L42 92 H28 Z" fill={`url(#${gradId})`} stroke={dark} strokeWidth="1.2" />
-        <rect x="26" y="3" width="40" height="7" rx="1" fill={dark} opacity="0.22" />
-        <line x1="46" y1="14" x2="46" y2="86" stroke={dark} strokeWidth="0.7" opacity="0.28" />
-      </g>
-    ),
-    shoe: (
-      <g>
-        <path d="M8 58 H20 L28 36 Q40 26 62 32 L92 44 Q100 48 100 58 L100 66 H8 Z" fill={`url(#${gradId})`} stroke={dark} strokeWidth="1.2" />
-        <path d="M8 66 H100 L96 72 H12 Z" fill={dark} opacity="0.35" />
-        <path d="M28 36 Q40 26 62 32" stroke={dark} strokeWidth="0.8" opacity="0.4" fill="none" />
-        <line x1="45" y1="38" x2="55" y2="30" stroke={dark} strokeWidth="0.8" opacity="0.4" />
-      </g>
-    ),
-    scarf: (
-      <g>
-        <path d="M10 18 Q60 2 110 18 L110 32 Q60 20 10 32 Z" fill={`url(#${gradId})`} stroke={dark} strokeWidth="1.2" />
-        <path d="M14 32 L10 44 M22 33 L19 46 M98 33 L101 46 M106 32 L110 44" stroke={dark} strokeWidth="1" opacity="0.4" />
-      </g>
-    ),
-  };
-
-  return (
-    <svg viewBox="0 0 118 96" width="100%" height="100%">
-      <defs>
-        <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={light} />
-          <stop offset="100%" stopColor={color} />
-        </linearGradient>
-      </defs>
-      {bodies[type]}
-    </svg>
-  );
-}
-
 // ---------- Product catalog (mirrors the seed data in the real backend) ----------
 const CATALOG = {
-  blazer: { id: "p1", name: "Wool-Blend Tailored Blazer", price: 320, retailer: "Considered Studio", type: "blazer", color: "#3E4228", image: "/products/blazer.jpg", productUrl: "https://example.com/considered-studio/products/wool-blend-tailored-blazer" },
-  blazerAlt: { id: "p1b", name: "Unstructured Linen Blazer", price: 265, retailer: "North & Field", type: "blazer", color: "#cbb994", image: "/products/blazer-alt.jpg", productUrl: "https://example.com/north-and-field/products/unstructured-linen-blazer" },
-  shirt: { id: "p2", name: "Crisp Cotton Shirt", price: 95, retailer: "Considered Studio", type: "shirt", color: "#F5F2E9", image: "/products/shirt.jpg", productUrl: "https://example.com/considered-studio/products/crisp-cotton-shirt" },
-  shirtAlt: { id: "p2b", name: "Fine Merino Turtleneck", price: 110, retailer: "North & Field", type: "shirt", color: "#4a4a48", image: "/products/shirt-alt.jpg", productUrl: "https://example.com/north-and-field/products/fine-merino-turtleneck" },
-  trouser: { id: "p3", name: "Tailored Straight Trouser", price: 140, retailer: "Considered Studio", type: "trouser", color: "#3E4228", image: "/products/trouser.jpg", productUrl: "https://example.com/considered-studio/products/tailored-straight-trouser" },
-  trouserAlt: { id: "p3b", name: "Wide-Leg Wool Trouser", price: 165, retailer: "Considered Studio", type: "trouser", color: "#6b6b63", image: "/products/trouser-alt.jpg", productUrl: "https://example.com/considered-studio/products/wide-leg-wool-trouser" },
-  shoe: { id: "p4", name: "Leather Derby Shoe", price: 210, retailer: "Aldern & Co.", type: "shoe", color: "#6b3f22", image: "/products/shoe.jpg", productUrl: "https://example.com/aldern-and-co/products/leather-derby-shoe" },
-  shoeAlt: { id: "p4b", name: "Suede Chelsea Boot", price: 245, retailer: "Aldern & Co.", type: "shoe", color: "#4a3527", image: "/products/shoe-alt.jpg", productUrl: "https://example.com/aldern-and-co/products/suede-chelsea-boot" },
-  scarf: { id: "p5", name: "Fine Wool Scarf", price: 85, retailer: "North & Field", type: "scarf", color: "#b08a5c", image: "/products/scarf.jpg", productUrl: "https://example.com/north-and-field/products/fine-wool-scarf" },
-  scarfAlt: { id: "p5b", name: "Cashmere Pocket Square", price: 65, retailer: "Aldern & Co.", type: "scarf", color: "#C6A567", image: "/products/scarf-alt.jpg", productUrl: "https://example.com/aldern-and-co/products/cashmere-pocket-square" },
+  blazer: { id: "p1", name: "Wool-Blend Tailored Blazer", price: 320, retailer: "Considered Studio", type: "blazer", color: "#3E4228", image: "/products/blazer.jpg", searchQuery: "olive green wool tailored blazer men women" },
+  blazerAlt: { id: "p1b", name: "Unstructured Linen Blazer", price: 265, retailer: "North & Field", type: "blazer", color: "#cbb994", image: "/products/blazer-alt.jpg", searchQuery: "sand beige unstructured linen blazer" },
+  shirt: { id: "p2", name: "Crisp Cotton Shirt", price: 95, retailer: "Considered Studio", type: "shirt", color: "#F5F2E9", image: "/products/shirt.jpg", searchQuery: "ivory crisp cotton dress shirt" },
+  shirtAlt: { id: "p2b", name: "Fine Merino Turtleneck", price: 110, retailer: "North & Field", type: "shirt", color: "#4a4a48", image: "/products/shirt-alt.jpg", searchQuery: "charcoal fine merino turtleneck sweater" },
+  trouser: { id: "p3", name: "Tailored Straight Trouser", price: 140, retailer: "Considered Studio", type: "trouser", color: "#3E4228", image: "/products/trouser.jpg", searchQuery: "olive tailored straight leg trousers" },
+  trouserAlt: { id: "p3b", name: "Wide-Leg Wool Trouser", price: 165, retailer: "Considered Studio", type: "trouser", color: "#6b6b63", image: "/products/trouser-alt.jpg", searchQuery: "grey wide leg wool trousers" },
+  shoe: { id: "p4", name: "Leather Derby Shoe", price: 210, retailer: "Aldern & Co.", type: "shoe", color: "#6b3f22", image: "/products/shoe.jpg", searchQuery: "brown leather derby dress shoes" },
+  shoeAlt: { id: "p4b", name: "Suede Chelsea Boot", price: 245, retailer: "Aldern & Co.", type: "shoe", color: "#4a3527", image: "/products/shoe-alt.jpg", searchQuery: "dark brown suede chelsea boots" },
+  scarf: { id: "p5", name: "Fine Wool Scarf", price: 85, retailer: "North & Field", type: "scarf", color: "#b08a5c", image: "/products/scarf.jpg", searchQuery: "camel tan fine wool scarf" },
+  scarfAlt: { id: "p5b", name: "Cashmere Pocket Square", price: 65, retailer: "Aldern & Co.", type: "scarf", color: "#C6A567", image: "/products/scarf-alt.jpg", searchQuery: "gold cashmere pocket square" },
 };
-const RETAILER_SITES = {
-  "Considered Studio": "https://example.com/considered-studio",
-  "North & Field": "https://example.com/north-and-field",
-  "Aldern & Co.": "https://example.com/aldern-and-co",
-};
+
+// Real multi-store search — budget → high street → premium → luxury
+const STORE_DIRECTORY = [
+  { id: "shein", name: "SHEIN", tier: "budget", url: (q) => `https://www.shein.com/pdsearch/${encodeURIComponent(q)}/` },
+  { id: "temu", name: "Temu", tier: "budget", url: (q) => `https://www.temu.com/search_result.html?search_key=${encodeURIComponent(q)}` },
+  { id: "hm", name: "H&M", tier: "highstreet", url: (q) => `https://www2.hm.com/en_us/search-results.html?q=${encodeURIComponent(q)}` },
+  { id: "zara", name: "Zara", tier: "highstreet", url: (q) => `https://www.zara.com/us/en/search?searchTerm=${encodeURIComponent(q)}` },
+  { id: "uniqlo", name: "Uniqlo", tier: "highstreet", url: (q) => `https://www.uniqlo.com/us/en/search?q=${encodeURIComponent(q)}` },
+  { id: "asos", name: "ASOS", tier: "highstreet", url: (q) => `https://www.asos.com/us/search/?q=${encodeURIComponent(q)}` },
+  { id: "mango", name: "Mango", tier: "highstreet", url: (q) => `https://shop.mango.com/us/en/search?kw=${encodeURIComponent(q)}` },
+  { id: "gap", name: "Gap", tier: "highstreet", url: (q) => `https://www.gap.com/browse/search.do?searchText=${encodeURIComponent(q)}` },
+  { id: "nordstrom", name: "Nordstrom", tier: "premium", url: (q) => `https://www.nordstrom.com/sr?keyword=${encodeURIComponent(q)}` },
+  { id: "suitsupply", name: "SuitSupply", tier: "premium", url: (q) => `https://suitsupply.com/en-us/search?q=${encodeURIComponent(q)}` },
+  { id: "revolve", name: "Revolve", tier: "premium", url: (q) => `https://www.revolve.com/r/Search.jsp?s=${encodeURIComponent(q)}` },
+  { id: "bloomingdales", name: "Bloomingdale's", tier: "premium", url: (q) => `https://www.bloomingdales.com/shop/search?keyword=${encodeURIComponent(q)}` },
+  { id: "ssense", name: "SSENSE", tier: "luxury", url: (q) => `https://www.ssense.com/en-us/search?q=${encodeURIComponent(q)}` },
+  { id: "mrporter", name: "Mr Porter", tier: "luxury", url: (q) => `https://www.mrporter.com/en-us/mens/search?q=${encodeURIComponent(q)}` },
+  { id: "netaporter", name: "Net-a-Porter", tier: "luxury", url: (q) => `https://www.net-a-porter.com/en-us/shop/search?q=${encodeURIComponent(q)}` },
+  { id: "farfetch", name: "Farfetch", tier: "luxury", url: (q) => `https://www.farfetch.com/shopping/search/items.aspx?q=${encodeURIComponent(q)}` },
+  { id: "saks", name: "Saks", tier: "luxury", url: (q) => `https://www.saksfifthavenue.com/search?text=${encodeURIComponent(q)}` },
+  { id: "matches", name: "Matches", tier: "luxury", url: (q) => `https://www.matchesfashion.com/us/search?q=${encodeURIComponent(q)}` },
+];
+
+const STORE_TIERS = [
+  { id: "budget", labelKey: "shopTierBudget" },
+  { id: "highstreet", labelKey: "shopTierHighStreet" },
+  { id: "premium", labelKey: "shopTierPremium" },
+  { id: "luxury", labelKey: "shopTierLuxury" },
+];
+
+function googleShoppingUrl(query) {
+  return `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(query)}`;
+}
+
+function storeLinksForItem(item) {
+  const q = item.searchQuery || item.name;
+  return STORE_DIRECTORY.map((store) => ({
+    ...store,
+    href: store.url(q),
+  }));
+}
 const ALT_MAP = { blazer: "blazerAlt", shirt: "shirtAlt", trouser: "trouserAlt", shoe: "shoeAlt", scarf: "scarfAlt" };
 const ALT_MAP_REV = Object.fromEntries(Object.entries(ALT_MAP).map(([k, v]) => [v, k]));
 
@@ -681,9 +655,64 @@ function ModelHero({ itemKeys, gender }) {
   );
 }
 
+// ==================== SHOP ACROSS STORES ====================
+function ShopSheet({ item, onClose }) {
+  const { t, tName } = useLang();
+  if (!item) return null;
+  const links = storeLinksForItem(item);
+  const shoppingUrl = googleShoppingUrl(item.searchQuery || item.name);
+
+  return (
+    <div className="shop-overlay" onClick={onClose} role="presentation">
+      <div className="shop-sheet" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label={t("shopAcross")}>
+        <button type="button" className="shop-close" onClick={onClose} aria-label={t("shopClose")}>
+          <X size={16} />
+        </button>
+        <div className="shop-hero">
+          <img className="shop-hero-image" src={item.image} alt={tName(item)} />
+          <div className="shop-hero-copy">
+            <div className="shop-hero-brand">{item.retailer}</div>
+            <div className="shop-hero-name">{tName(item)}</div>
+            <div className="shop-hero-sub">{t("shopAcrossSub")}</div>
+          </div>
+        </div>
+        <a className="shop-google" href={shoppingUrl} target="_blank" rel="noopener noreferrer">
+          {t("shopOpenAll")} <ExternalLink size={13} />
+        </a>
+        <div className="shop-tiers">
+          {STORE_TIERS.map((tier) => {
+            const stores = links.filter((s) => s.tier === tier.id);
+            if (!stores.length) return null;
+            return (
+              <div key={tier.id} className="shop-tier">
+                <div className="shop-tier-label">{t(tier.labelKey)}</div>
+                <div className="shop-store-grid">
+                  {stores.map((store) => (
+                    <a
+                      key={store.id}
+                      className="shop-store-link"
+                      href={store.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <span>{store.name}</span>
+                      <ExternalLink size={12} />
+                    </a>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ==================== OUTFIT CARD ====================
 function OutfitCard({ outfit, onSwap, onSave, saved, modelGender, onModelGenderChange }) {
   const { t, tName } = useLang();
+  const [shopItem, setShopItem] = useState(null);
   return (
     <div className="card">
       <div className="eyebrow gold">{t("stylistSuggests")}</div>
@@ -712,29 +741,32 @@ function OutfitCard({ outfit, onSwap, onSave, saved, modelGender, onModelGenderC
           {outfit.items.map((key) => {
             const item = CATALOG[key];
             return (
-              <a
-                key={item.id}
-                className="item-row"
-                href={item.productUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                title={t("viewProduct")}
-              >
-                <img className="item-row-image" src={item.image} alt={tName(item)} loading="lazy" />
-                <div className="item-row-info">
-                  <div className="item-row-brand">{item.retailer}</div>
-                  <div className="item-row-name">{tName(item)}</div>
-                  <div className="item-row-meta">${item.price}</div>
-                </div>
+              <div key={item.id} className="item-row">
+                <button
+                  type="button"
+                  className="item-row-shop"
+                  onClick={() => setShopItem(item)}
+                  title={t("viewProduct")}
+                >
+                  <img className="item-row-image" src={item.image} alt={tName(item)} loading="lazy" />
+                  <div className="item-row-info">
+                    <div className="item-row-brand">{item.retailer}</div>
+                    <div className="item-row-name">{tName(item)}</div>
+                    <div className="item-row-meta">${item.price} · {t("shopAcross")}</div>
+                  </div>
+                  <span className="link-btn-sm" aria-hidden="true">
+                    <ExternalLink size={11} />
+                  </span>
+                </button>
                 <button
                   type="button"
                   className="swap-btn-sm"
-                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); onSwap(key); }}
+                  onClick={() => onSwap(key)}
                   title={t("swapItem")}
                 >
                   <RefreshCw size={11} />
                 </button>
-              </a>
+              </div>
             );
           })}
         </div>
@@ -743,6 +775,7 @@ function OutfitCard({ outfit, onSwap, onSave, saved, modelGender, onModelGenderC
       <button className="save-btn" onClick={onSave} disabled={saved}>
         {saved ? <><Check size={12} /> {t("savedLabel")}</> : t("saveOutfit")}
       </button>
+      {shopItem && <ShopSheet item={shopItem} onClose={() => setShopItem(null)} />}
     </div>
   );
 }
@@ -846,6 +879,7 @@ function WardrobeScreen({ savedOutfits, modelGender, onModelGenderChange }) {
 
 function BagScreen({ savedOutfits }) {
   const { t, tName } = useLang();
+  const [shopItem, setShopItem] = useState(null);
   const allItems = savedOutfits.flatMap((o) => o.items.map((k) => CATALOG[k]));
   const byRetailer = allItems.reduce((acc, item) => {
     acc[item.retailer] = acc[item.retailer] || [];
@@ -862,20 +896,26 @@ function BagScreen({ savedOutfits }) {
           <div key={retailer} className="retailer-group">
             <div className="section-label">{retailer}</div>
             {items.map((item, idx) => (
-              <a key={item.id + idx} className="bag-row" href={item.productUrl} target="_blank" rel="noopener noreferrer" title={t("viewProduct")}>
+              <button
+                key={item.id + idx}
+                type="button"
+                className="bag-row"
+                onClick={() => setShopItem(item)}
+                title={t("viewProduct")}
+              >
                 <img className="bag-image" src={item.image} alt={tName(item)} loading="lazy" />
                 <div className="bag-info">
                   <div className="bag-brand">{item.retailer}</div>
                   <div className="bag-name">{tName(item)}</div>
-                  <div className="bag-price">${item.price}</div>
+                  <div className="bag-price">${item.price} · {t("shopAcross")}</div>
                 </div>
                 <ExternalLink size={13} color="#8b877a" />
-              </a>
+              </button>
             ))}
-            <a className="checkout-btn" href={RETAILER_SITES[retailer] || "#"} target="_blank" rel="noopener noreferrer">{t("checkoutWith")} {retailer} →</a>
           </div>
         ))
       )}
+      {shopItem && <ShopSheet item={shopItem} onClose={() => setShopItem(null)} />}
     </div>
   );
 }
@@ -1171,8 +1211,9 @@ export default function VestraPrototype() {
         .model-gender-pill{ font-size:10px; letter-spacing:0.04em; padding:5px 10px; border-radius:999px; border:1px solid #2a2a26; background:#151513; color:#8b877a; cursor:pointer; font-family:'Inter',sans-serif; }
         .model-gender-pill.active{ background:#C6A567; color:#0B0B0C; border-color:#C6A567; }
         .item-list{ flex:1; display:flex; flex-direction:column; gap:8px; min-width:0; }
-        .item-row{ display:flex; align-items:center; gap:10px; background:#151513; border:1px solid #2a2a26; border-radius:4px; padding:8px; text-decoration:none; color:inherit; transition:border-color .2s; }
+        .item-row{ display:flex; align-items:center; gap:8px; background:#151513; border:1px solid #2a2a26; border-radius:4px; padding:6px; color:inherit; }
         .item-row:hover{ border-color:#C6A567; }
+        .item-row-shop{ flex:1; min-width:0; display:flex; align-items:center; gap:10px; background:none; border:none; padding:2px; cursor:pointer; text-align:left; color:inherit; font-family:'Inter',sans-serif; }
         .item-row-image{ width:52px; height:52px; border-radius:4px; object-fit:cover; flex-shrink:0; background:#1c1c19; }
         .item-row-info{ flex:1; min-width:0; display:block; }
         .item-row-brand{ font-size:9.5px; letter-spacing:0.08em; text-transform:uppercase; color:#C6A567; margin-bottom:2px; }
@@ -1180,8 +1221,28 @@ export default function VestraPrototype() {
         .item-row-meta{ font-size:10.5px; color:#8b877a; margin-top:2px; }
         .swap-btn-sm{ flex-shrink:0; background:none; border:1px solid #2a2a26; border-radius:4px; color:#8b877a; padding:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .2s; }
         .swap-btn-sm:hover{ color:#C6A567; border-color:#C6A567; }
-        .link-btn-sm{ flex-shrink:0; background:none; border:1px solid #2a2a26; border-radius:4px; color:#8b877a; padding:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .2s; text-decoration:none; }
-        .link-btn-sm:hover{ color:#C6A567; border-color:#C6A567; }
+        .link-btn-sm{ flex-shrink:0; background:none; border:1px solid #2a2a26; border-radius:4px; color:#8b877a; padding:6px; display:flex; align-items:center; justify-content:center; }
+
+        .shop-overlay{ position:fixed; inset:0; background:rgba(11,11,12,0.55); z-index:80; display:flex; align-items:flex-end; justify-content:center; padding:16px; box-sizing:border-box; }
+        .shop-sheet{ width:min(560px, 100%); max-height:min(88vh, 760px); overflow:auto; background:#F6F1E7; border-radius:16px 16px 12px 12px; padding:20px 18px 24px; position:relative; box-shadow:0 24px 60px rgba(0,0,0,0.35); }
+        .shop-close{ position:absolute; top:14px; right:14px; background:#fff; border:1px solid #e6e0d2; border-radius:999px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:#0B0B0C; }
+        .shop-hero{ display:flex; gap:14px; align-items:center; padding-right:36px; margin-bottom:16px; }
+        .shop-hero-image{ width:84px; height:84px; border-radius:8px; object-fit:cover; background:#fff; flex-shrink:0; }
+        .shop-hero-brand{ font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:#A8895C; margin-bottom:4px; }
+        .shop-hero-name{ font-family:'Fraunces',serif; font-size:20px; color:#0B0B0C; line-height:1.25; margin-bottom:6px; }
+        .shop-hero-sub{ font-size:12.5px; color:#5b5748; font-weight:300; }
+        .shop-google{ display:flex; align-items:center; justify-content:center; gap:8px; width:100%; box-sizing:border-box; background:#0B0B0C; color:#C6A567; text-decoration:none; border-radius:6px; padding:12px 14px; font-size:12px; letter-spacing:0.04em; text-transform:uppercase; font-weight:600; margin-bottom:18px; }
+        .shop-tiers{ display:flex; flex-direction:column; gap:16px; }
+        .shop-tier-label{ font-size:10px; letter-spacing:0.12em; text-transform:uppercase; color:#8b877a; margin-bottom:8px; }
+        .shop-store-grid{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+        .shop-store-link{ display:flex; align-items:center; justify-content:space-between; gap:8px; background:#fff; border:1px solid #e6e0d2; border-radius:6px; padding:11px 12px; text-decoration:none; color:#0B0B0C; font-size:12.5px; transition:border-color .15s; }
+        .shop-store-link:hover{ border-color:#C6A567; }
+
+        @media (min-width: 1024px) {
+          .shop-overlay{ align-items:center; }
+          .shop-sheet{ border-radius:14px; max-height:min(82vh, 820px); padding:24px; }
+          .shop-store-grid{ grid-template-columns:1fr 1fr 1fr; }
+        }
         .rationale{ font-size:12.5px; line-height:1.6; color:#E9E2D2; font-weight:300; margin:0 0 16px; }
         .save-btn{ width:100%; display:flex; align-items:center; justify-content:center; gap:6px; font-size:11px; letter-spacing:0.05em; text-transform:uppercase; font-weight:600; padding:11px; border-radius:4px; background:#C6A567; color:#0B0B0C; border:none; cursor:pointer; font-family:'Inter',sans-serif; transition:background .2s; }
         .save-btn:hover:not(:disabled){ background:#F6F1E7; }
@@ -1192,7 +1253,7 @@ export default function VestraPrototype() {
         .stack{ display:flex; flex-direction:column; gap:12px; }
 
         .retailer-group{ margin-bottom:20px; }
-        .bag-row{ display:flex; align-items:center; gap:12px; background:#fff; border:1px solid #e6e0d2; border-radius:4px; padding:10px; margin-bottom:8px; text-decoration:none; color:inherit; transition:border-color .2s; }
+        .bag-row{ display:flex; align-items:center; gap:12px; width:100%; box-sizing:border-box; background:#fff; border:1px solid #e6e0d2; border-radius:4px; padding:10px; margin-bottom:8px; text-decoration:none; color:inherit; transition:border-color .2s; cursor:pointer; font-family:'Inter',sans-serif; text-align:left; }
         .bag-row:hover{ border-color:#C6A567; }
         .bag-image{ width:56px; height:56px; border-radius:4px; object-fit:cover; flex-shrink:0; background:#f4efe4; }
         .bag-info{ flex:1; min-width:0; }
