@@ -37,7 +37,12 @@ const UI = {
     step2Title: "How do you like things to fit?", step2Prompt: "When you get dressed, you lean toward—",
     step3Title: "Let's talk color.", step3Prompt: "Which of these do you find yourself reaching for? Pick a few.",
     step4Title: "Every stylist should respect your budget.", step4Prompt: "For a typical piece, where are you most comfortable?",
-    step5Title: "What do you find yourself dressing for most?", step5Prompt: "Select all that sound like you.",
+    step5Title: "What do you find yourself dressing for most?", step5Prompt: "Pick all that fit — photos help.",
+    occWorkDesc: "Office days, meetings, and looking sharp at work.",
+    occDateDesc: "Dinner out, evenings, and dressing up a little.",
+    occTravelDesc: "Trips, airports, and outfits that move with you.",
+    occEventsDesc: "Weddings, parties, and celebrations that call for polish.",
+    occEverydayDesc: "Regular days when you just want to feel put together.",
     step6Title: "Last thing — just so we get the fit right.", step6Prompt: "You can skip this and add it later.",
     anyColorsAvoid: "Any colors to avoid?", colorsToAvoidLabel: "Colors to avoid",
     sizeTops: "Tops", sizeBottoms: "Bottoms", sizeShoes: "Shoes", sizePlaceholder: "e.g. M, 32, 10", finishBtn: "Finish",
@@ -101,7 +106,12 @@ const UI = {
     step2Title: "¿Cómo te gusta que te quede la ropa?", step2Prompt: "Cuando te vistes, prefieres—",
     step3Title: "Hablemos de color.", step3Prompt: "¿Cuáles sueles elegir? Marca varios.",
     step4Title: "Tu estilista debe respetar tu presupuesto.", step4Prompt: "Para una prenda típica, ¿dónde te sientes más cómodo/a?",
-    step5Title: "¿Para qué sueles vestirte más?", step5Prompt: "Selecciona todo lo que te describa.",
+    step5Title: "¿Para qué sueles vestirte más?", step5Prompt: "Elige todas las que encajen — con fotos.",
+    occWorkDesc: "Días de oficina, reuniones y verte impecable en el trabajo.",
+    occDateDesc: "Cenas, noches y vestirte un poco más especial.",
+    occTravelDesc: "Viajes, aeropuertos y looks que se mueven contigo.",
+    occEventsDesc: "Bodas, fiestas y celebraciones que piden elegancia.",
+    occEverydayDesc: "Días normales en los que solo quieres verte arreglado/a.",
     step6Title: "Última cosa — para que la talla sea correcta.", step6Prompt: "Puedes omitir esto y añadirlo después.",
     anyColorsAvoid: "¿Algún color que evitas?", colorsToAvoidLabel: "Colores a evitar",
     sizeTops: "Parte superior", sizeBottoms: "Parte inferior", sizeShoes: "Calzado", sizePlaceholder: "ej. M, 32, 10", finishBtn: "Finalizar",
@@ -165,7 +175,12 @@ const UI = {
     step2Title: "Comment aimez-vous que ça tombe ?", step2Prompt: "Quand vous vous habillez, vous préférez—",
     step3Title: "Parlons couleur.", step3Prompt: "Lesquelles portez-vous le plus souvent ? Choisissez-en plusieurs.",
     step4Title: "Votre styliste doit respecter votre budget.", step4Prompt: "Pour une pièce typique, où êtes-vous le plus à l'aise ?",
-    step5Title: "Pour quoi vous habillez-vous le plus souvent ?", step5Prompt: "Sélectionnez tout ce qui vous correspond.",
+    step5Title: "Pour quoi vous habillez-vous le plus souvent ?", step5Prompt: "Choisissez tout ce qui convient — avec photos.",
+    occWorkDesc: "Journées de bureau, réunions, et une allure soignée au travail.",
+    occDateDesc: "Dîners, soirées, et s'habiller un peu plus élégamment.",
+    occTravelDesc: "Voyages, aéroports, et des tenues qui bougent avec vous.",
+    occEventsDesc: "Mariages, fêtes et célébrations qui demandent de la tenue.",
+    occEverydayDesc: "Les jours ordinaires où l'on veut juste être bien habillé.",
     step6Title: "Dernière chose — pour bien ajuster la taille.", step6Prompt: "Vous pouvez passer cette étape et l'ajouter plus tard.",
     anyColorsAvoid: "Des couleurs à éviter ?", colorsToAvoidLabel: "Couleurs à éviter",
     sizeTops: "Hauts", sizeBottoms: "Bas", sizeShoes: "Chaussures", sizePlaceholder: "ex. M, 32, 10", finishBtn: "Terminer",
@@ -323,7 +338,7 @@ function LanguageSwitcher({ corner }) {
 }
 
 // ---------- Product catalog (mirrors the seed data in the real backend) ----------
-const ASSET_V = "5";
+const ASSET_V = "6";
 const assetUrl = (path) => `${path}?v=${ASSET_V}`;
 
 const CATALOG = {
@@ -592,6 +607,33 @@ const BUDGET_OPTIONS = [
   { key: "mixed", label: "Show me a mix", sub: "I'll decide per piece" },
 ];
 const OCCASION_OPTIONS = ["Work", "Date nights", "Travel", "Events & celebrations", "Everyday, just want to feel put together"];
+const OCCASION_META = {
+  Work: {
+    woman: assetUrl("/onboarding/occ-work-woman.jpg"),
+    man: assetUrl("/onboarding/occ-work-man.jpg"),
+    descKey: "occWorkDesc",
+  },
+  "Date nights": {
+    woman: assetUrl("/onboarding/occ-date-woman.jpg"),
+    man: assetUrl("/onboarding/occ-date-man.jpg"),
+    descKey: "occDateDesc",
+  },
+  Travel: {
+    woman: assetUrl("/onboarding/occ-travel-woman.jpg"),
+    man: assetUrl("/onboarding/occ-travel-man.jpg"),
+    descKey: "occTravelDesc",
+  },
+  "Events & celebrations": {
+    woman: assetUrl("/onboarding/occ-events-woman.jpg"),
+    man: assetUrl("/onboarding/occ-events-man.jpg"),
+    descKey: "occEventsDesc",
+  },
+  "Everyday, just want to feel put together": {
+    woman: assetUrl("/onboarding/occ-everyday-woman.jpg"),
+    man: assetUrl("/onboarding/occ-everyday-man.jpg"),
+    descKey: "occEverydayDesc",
+  },
+};
 
 const STEPS = [
   { id: "audience", titleKey: "stepAudienceTitle", promptKey: "stepAudiencePrompt", type: "visual", options: AUDIENCE_OPTIONS, meta: AUDIENCE_META },
@@ -600,7 +642,7 @@ const STEPS = [
   { id: "fit", titleKey: "step2Title", promptKey: "step2Prompt", type: "visual", options: FIT_OPTIONS, meta: FIT_META },
   { id: "palette", titleKey: "step3Title", promptKey: "step3Prompt", type: "palette", options: COLOR_OPTIONS },
   { id: "budget", titleKey: "step4Title", promptKey: "step4Prompt", type: "budget", options: BUDGET_OPTIONS },
-  { id: "occasions", titleKey: "step5Title", promptKey: "step5Prompt", type: "multi", options: OCCASION_OPTIONS },
+  { id: "occasions", titleKey: "step5Title", promptKey: "step5Prompt", type: "photoMulti", options: OCCASION_OPTIONS, meta: OCCASION_META },
   { id: "sizes", titleKey: "step6Title", promptKey: "step6Prompt", type: "sizes" },
 ];
 
@@ -733,6 +775,30 @@ function OnboardingScreen({ step, totalSteps, question, answers, setAnswers, onN
                   onClick={() => selectSingle(opt)}
                 >
                   <img className="onb-style-image onb-lifestyle-image" src={image} alt={tOpt(opt)} loading="eager" />
+                  <div className="onb-style-copy">
+                    <div className="onb-style-title">{tOpt(opt)}</div>
+                    {meta.descKey && <div className="onb-style-desc">{t(meta.descKey)}</div>}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {question.type === "photoMulti" && (
+          <div className="onb-style-grid">
+            {question.options.map((opt, idx) => {
+              const meta = (question.meta && question.meta[opt]) || {};
+              const image = resolveAudienceImage(meta, audience, idx);
+              const selected = (answers[question.id] || []).includes(opt);
+              return (
+                <button
+                  key={opt}
+                  type="button"
+                  className={`onb-style-card ${selected ? "selected" : ""}`}
+                  onClick={() => toggleMulti(opt)}
+                >
+                  <img className="onb-style-image onb-lifestyle-image" src={image} alt={tOpt(opt)} loading="lazy" />
                   <div className="onb-style-copy">
                     <div className="onb-style-title">{tOpt(opt)}</div>
                     {meta.descKey && <div className="onb-style-desc">{t(meta.descKey)}</div>}
