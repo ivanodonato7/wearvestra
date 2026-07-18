@@ -19,6 +19,13 @@ async function bootNativeShell() {
 
 bootNativeShell()
 
+// Force stale PWA shells to pick up new deploys (wearvestra.com)
+if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations?.().then((regs) => {
+    regs.forEach((reg) => reg.update().catch(() => {}))
+  }).catch(() => {})
+}
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <App />

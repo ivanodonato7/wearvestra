@@ -16,7 +16,7 @@ const LANGUAGES = [
 const UI = {
   en: {
     welcomeEyebrow: "Vestra", welcomeTitleLine1: "Let's get you", welcomeTitleLine2: "dressed properly.",
-    welcomeSub: "A few quick questions, then meet your stylist.", getStarted: "Get Started", skipTesting: "Skip for testing → see the app",
+    welcomeSub: "Streetwear to classy to sexy — a few quick questions, then meet your stylist.", getStarted: "Get Started", skipTesting: "Skip for testing → see the app",
     createAccountEyebrow: "Create Your Account", whereReachYouLine1: "What should we", whereReachYouLine2: "call you?",
     namePlaceholder: "Your first name", emailPlaceholder: "your@email.com", continueBtn: "Continue",
     signupEmailLabel: "Email (optional)", signupNote: "This is a prototype — no account is actually created.",
@@ -107,7 +107,7 @@ const UI = {
   },
   es: {
     welcomeEyebrow: "Vestra", welcomeTitleLine1: "Vamos a vestirte", welcomeTitleLine2: "como es debido.",
-    welcomeSub: "Unas preguntas rápidas y luego conoces a tu estilista.", getStarted: "Empezar", skipTesting: "Saltar para probar → ver la app",
+    welcomeSub: "Streetwear, clásico, sexy — unas preguntas rápidas y luego conoces a tu estilista.", getStarted: "Empezar", skipTesting: "Saltar para probar → ver la app",
     createAccountEyebrow: "Crea tu cuenta", whereReachYouLine1: "¿Cómo te", whereReachYouLine2: "llamamos?",
     namePlaceholder: "Tu nombre", emailPlaceholder: "tu@email.com", continueBtn: "Continuar",
     signupEmailLabel: "Email (opcional)", signupNote: "Esto es un prototipo — no se crea ninguna cuenta real.",
@@ -198,7 +198,7 @@ const UI = {
   },
   fr: {
     welcomeEyebrow: "Vestra", welcomeTitleLine1: "Habillons-vous", welcomeTitleLine2: "comme il se doit.",
-    welcomeSub: "Quelques questions rapides, puis rencontrez votre styliste.", getStarted: "Commencer", skipTesting: "Passer pour tester → voir l'app",
+    welcomeSub: "Streetwear, classique, sexy — quelques questions rapides, puis votre styliste.", getStarted: "Commencer", skipTesting: "Passer pour tester → voir l'app",
     createAccountEyebrow: "Créez votre compte", whereReachYouLine1: "Comment devons-nous", whereReachYouLine2: "vous appeler ?",
     namePlaceholder: "Votre prénom", emailPlaceholder: "votre@email.com", continueBtn: "Continuer",
     signupEmailLabel: "Email (optionnel)", signupNote: "Ceci est un prototype — aucun compte n'est réellement créé.",
