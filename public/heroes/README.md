@@ -1,14 +1,13 @@
 # Style inspiration heroes
 
-Stock model photos shown next to each stylist look. Swap these files with your own
-photography — keep the filenames.
+Curated Unsplash fashion photos (Unsplash License) shown next to stylist looks.
+Portrait-cropped to 3:4 for the Vestra UI.
 
-| File | Use |
-|------|-----|
-| `her-date-night.jpg` / `him-date-night.jpg` | Date night, dinner, sexy, evening |
-| `her-casual.jpg` / `him-casual.jpg` | Casual, work, weekend, street, travel, everyday |
-| `her-wedding.jpg` / `him-wedding.jpg` | Wedding, formal, events |
-| `her-default.jpg` / `him-default.jpg` | Fallback when no occasion matches |
+| File | Mood |
+|------|------|
+| `her-date-night.jpg` / `him-date-night.jpg` | Evening / dinner / sexy |
+| `her-casual.jpg` / `him-casual.jpg` | Everyday / street / work / weekend |
+| `her-wedding.jpg` / `him-wedding.jpg` | Wedding / formal / events |
+| `her-default.jpg` / `him-default.jpg` | Fallback |
 
-Recommended: portrait ~3:4, warm/neutral grade that fits Vestra’s cream–charcoal–gold UI.
-Placeholder images are copied from `/public/models` until you drop in finals.
+Sources: [unsplash.com](https://unsplash.com) — free to use under the [Unsplash License](https://unsplash.com/license).
