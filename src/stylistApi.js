@@ -5,7 +5,27 @@
  *   2. /api/stylist          (Netlify redirect)
  *   3. /.netlify/functions/stylist
  * Falls back to null so the client composer can run.
+ *
+ * Modes:
+ *   - "looks" (default): 3 outfit options
+ *   - "week": Mon–Fri weekwardrobe plan (5 looks, no repeat silhouettes, shopping list)
  */
+
+export function isWeekPlanPrompt(prompt) {
+  const lower = String(prompt || "").toLowerCase();
+  if (!lower.trim()) return false;
+  return (
+    /\bweek\s*wardrobe\b/.test(lower)
+    || /\bplan\s+my\s+week\b/.test(lower)
+    || /\b5\s+looks\b/.test(lower)
+    || /\bmon(?:day)?\s*[-–—]\s*fri(?:day)?\b/.test(lower)
+    || /\bplanifica\s+mi\s+semana\b/.test(lower)
+    || /\bplanifier\s+ma\s+semaine\b/.test(lower)
+    || /\bsemana\b/.test(lower) && /\b5\b/.test(lower)
+    || /\bsemaine\b/.test(lower) && /\b5\b/.test(lower)
+  );
+}
+
 function candidateEndpoints() {
   const fromEnv =
     typeof import.meta !== "undefined" && import.meta.env?.VITE_STYLIST_ENDPOINT
@@ -27,15 +47,28 @@ async function postStylist(endpoint, payload, signal) {
   return data;
 }
 
-export async function fetchStylistLooks({ prompt, profile, lang = "en", catalogKeys = [] }) {
+export async function fetchStylistLooks({
+  prompt,
+  profile,
+  lang = "en",
+  catalogKeys = [],
+  mode,
+}) {
+  const resolvedMode = mode || (isWeekPlanPrompt(prompt) ? "week" : "looks");
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 14000);
-  const payload = { prompt, profile, lang, catalogKeys };
+  const timeoutMs = resolvedMode === "week" ? 22000 : 14000;
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  const payload = { prompt, profile, lang, catalogKeys, mode: resolvedMode };
   try {
     for (const endpoint of candidateEndpoints()) {
       try {
         const data = await postStylist(endpoint, payload, controller.signal);
-        if (data) return data;
+        if (data) {
+          return {
+            ...data,
+            mode: data.mode || resolvedMode,
+          };
+        }
       } catch {
         // try next endpoint
       }

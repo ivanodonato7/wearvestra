@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, createContext, useContext } from "react";
 import { Home, MessageCircle, Bookmark, ShoppingBag, User, Send, RefreshCw, Check, Sparkles, ArrowLeft, ExternalLink, X } from "lucide-react";
-import { fetchStylistLooks } from "./stylistApi";
+import { fetchStylistLooks, isWeekPlanPrompt } from "./stylistApi";
 
 // ==================== LANGUAGE / i18n ====================
 // A real backend barely needs any of this — Claude already answers fluently
@@ -58,6 +58,7 @@ const UI = {
     goodEvening: "Good evening", styleDnaLabel: "Style DNA", silhouettesWord: "silhouettes", budgetWord: "budget",
     askYourStylist: "Ask your stylist", askPlaceholder: "Tell your stylist what you need…",
     chipDressWedding: "Dress me for a wedding", chipWorkDinner: "Work dinner tonight", chipWeekendCasual: "Weekend, nothing fussy",
+    chipWeekPlan: "Plan my week — 5 looks",
     chipMoreCasual: "More casual", chipAddBlazer: "Add a blazer", chipUnder200: "Under $200 / piece", chipDifferentBelt: "Different belt",
     refineLooks: "Refine these looks",
     stylistLive: "Styled with your profile live.",
@@ -66,6 +67,9 @@ const UI = {
     chatInputPlaceholder: "e.g. wedding in June, or “different belt”",
     stylistSuggests: "Your Stylist Suggests", stylistLook: "Look", saveOutfit: "Save Outfit", savedLabel: "Saved",
     stylistPicksIntro: "Three directions for you — tap any piece to shop what's in stock.",
+    weekPlanIntro: "Your Mon–Fri plan — five looks, no repeat silhouettes, one shopping list.",
+    weekShoppingList: "Week shopping list",
+    weekDayMon: "Monday", weekDayTue: "Tuesday", weekDayWed: "Wednesday", weekDayThu: "Thursday", weekDayFri: "Friday",
     stylistRevisionIntro: "Updated — I changed the {item}. Everything else stays.",
     stylistRevisionMulti: "Updated — I swapped the pieces you flagged. Everything else stays.",
     stylistRevisionRemoved: "Updated — I dropped the {item} and finished the look differently.",
@@ -140,6 +144,7 @@ const UI = {
     goodEvening: "Buenas tardes", styleDnaLabel: "ADN de Estilo", silhouettesWord: "siluetas", budgetWord: "presupuesto",
     askYourStylist: "Pregunta a tu estilista", askPlaceholder: "Dile a tu estilista qué necesitas…",
     chipDressWedding: "Vísteme para una boda", chipWorkDinner: "Cena de trabajo esta noche", chipWeekendCasual: "Fin de semana, sin complicaciones",
+    chipWeekPlan: "Planifica mi semana — 5 looks",
     chipMoreCasual: "Más casual", chipAddBlazer: "Añade un blazer", chipUnder200: "Menos de $200 / prenda", chipDifferentBelt: "Otro cinturón",
     refineLooks: "Afina estos looks",
     stylistLive: "Estilizado en vivo con tu perfil.",
@@ -148,6 +153,9 @@ const UI = {
     chatInputPlaceholder: "ej. boda en junio, o “otro cinturón”",
     stylistSuggests: "Tu Estilista Sugiere", stylistLook: "Look", saveOutfit: "Guardar Look", savedLabel: "Guardado",
     stylistPicksIntro: "Tres direcciones para ti — toca cualquier prenda para ver stock.",
+    weekPlanIntro: "Tu plan de lunes a viernes — cinco looks, sin siluetas repetidas, una lista de compras.",
+    weekShoppingList: "Lista de compras de la semana",
+    weekDayMon: "Lunes", weekDayTue: "Martes", weekDayWed: "Miércoles", weekDayThu: "Jueves", weekDayFri: "Viernes",
     stylistRevisionIntro: "Listo — cambié el {item}. El resto se queda.",
     stylistRevisionMulti: "Listo — cambié las piezas que mencionaste. El resto se queda.",
     stylistRevisionRemoved: "Listo — quité el {item} y cerré el look de otra forma.",
@@ -222,6 +230,7 @@ const UI = {
     goodEvening: "Bonsoir", styleDnaLabel: "ADN Style", silhouettesWord: "silhouettes", budgetWord: "budget",
     askYourStylist: "Demandez à votre styliste", askPlaceholder: "Dites à votre styliste ce dont vous avez besoin…",
     chipDressWedding: "Habillez-moi pour un mariage", chipWorkDinner: "Dîner professionnel ce soir", chipWeekendCasual: "Week-end, sans prise de tête",
+    chipWeekPlan: "Planifier ma semaine — 5 looks",
     chipMoreCasual: "Plus casual", chipAddBlazer: "Ajouter un blazer", chipUnder200: "Moins de 200 $ / pièce", chipDifferentBelt: "Autre ceinture",
     refineLooks: "Affiner ces looks",
     stylistLive: "Stylisé en direct selon votre profil.",
@@ -230,6 +239,9 @@ const UI = {
     chatInputPlaceholder: "ex. mariage en juin, ou « autre ceinture »",
     stylistSuggests: "Votre Styliste Suggère", stylistLook: "Look", saveOutfit: "Enregistrer la Tenue", savedLabel: "Enregistré",
     stylistPicksIntro: "Trois directions pour vous — touchez une pièce pour voir le stock.",
+    weekPlanIntro: "Votre plan lun–ven — cinq looks, aucune silhouette répétée, une liste de courses.",
+    weekShoppingList: "Liste de courses de la semaine",
+    weekDayMon: "Lundi", weekDayTue: "Mardi", weekDayWed: "Mercredi", weekDayThu: "Jeudi", weekDayFri: "Vendredi",
     stylistRevisionIntro: "C’est noté — j’ai changé le {item}. Le reste reste.",
     stylistRevisionMulti: "C’est noté — j’ai changé les pièces que vous avez signalées. Le reste reste.",
     stylistRevisionRemoved: "C’est noté — j’ai retiré le {item} et fini autrement.",
@@ -1222,6 +1234,158 @@ function composeOutfits(prompt, profile, lang = "en", count = 3) {
   return picked;
 }
 
+const WEEK_DAY_KEYS = ["weekDayMon", "weekDayTue", "weekDayWed", "weekDayThu", "weekDayFri"];
+
+/** Distinct silhouette fingerprint — outer presence, cut, accessory family. */
+function silhouetteKey(items, recipe = null) {
+  const families = (items || []).map(familyOfKey).filter(Boolean);
+  const hasOuter = families.includes("blazer");
+  const acc = families.find((f) => ACCESSORY_FAMILIES.includes(f)) || "none";
+  const trouser = (items || []).find((k) => familyOfKey(k) === "trouser") || "";
+  const shirt = (items || []).find((k) => familyOfKey(k) === "shirt") || "";
+  const bottom = String(trouser).includes("Alt") ? "ease" : "straight";
+  const top = String(shirt).includes("Alt") ? "soft" : "crisp";
+  const structure = recipe?.structure || "neutral";
+  return `${hasOuter ? "layered" : "open"}-${structure}-${top}-${bottom}-${acc}`;
+}
+
+function recipeSilhouette(recipe) {
+  return silhouetteKey(recipeItems(recipe), recipe);
+}
+
+/** One consolidated shopping list of unique pieces across the week's looks. */
+function buildShoppingList(outfits) {
+  const seen = new Set();
+  const list = [];
+  const familyOrder = ["blazer", "shirt", "trouser", "shoe", "belt", "scarf", "sunglasses"];
+  for (const outfit of outfits || []) {
+    for (const key of outfit.items || []) {
+      if (!CATALOG[key] || seen.has(key)) continue;
+      seen.add(key);
+      list.push({ key, reason: "" });
+    }
+  }
+  list.sort((a, b) => {
+    const fa = familyOfKey(a.key) || "";
+    const fb = familyOfKey(b.key) || "";
+    const ia = familyOrder.indexOf(fa);
+    const ib = familyOrder.indexOf(fb);
+    return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib) || a.key.localeCompare(b.key);
+  });
+  return list;
+}
+
+/**
+ * Mon–Fri weekwardrobe plan: 5 looks, no repeat silhouettes, one shopping list.
+ * Biases toward workweek polish from the user's profile.
+ */
+function composeWeekPlan(prompt, profile, lang = "en") {
+  const dayLabels = WEEK_DAY_KEYS.map((k) => (UI[lang] && UI[lang][k]) || UI.en[k]);
+  // Score as a workweek request, then enforce unique silhouettes across 5 days
+  const workPrompt = `${prompt} work office weekday meeting`;
+  stylistTurn += 1;
+  const promptOccasions = ["work", "everyday"];
+  const profileOccasions = profileOccasionIds(profile);
+  const life = lifestyleSignals(profile?.lifestyle);
+  const fit = fitSignals(profile?.fit);
+  const occasions = [...new Set([...promptOccasions, ...profileOccasions, ...life.occasions])];
+  const arch = normalizeArchetype(profile?.archetype);
+  const vibes = archetypeVibes(arch);
+  const palette = profile?.palette || [];
+  const avoid = profile?.avoid || [];
+  const budget = profile?.budget || "balanced";
+  const seed = hashSeed([
+    workPrompt, arch, profile?.fit, profile?.lifestyle, budget,
+    palette.join(","), (avoid || []).join(","), "weekplan", stylistTurn,
+  ].join("|"));
+
+  const scored = OUTFIT_RECIPES.map((recipe, i) => {
+    let items = tuneItemsToProfile(recipeItems(recipe), profile);
+    let score = (seed + i * 31) % 7;
+    const recipeArch = (recipe.archetypes || []).map(normalizeArchetype);
+    if (arch && recipeArch.includes(arch)) score += 40;
+    else if (arch && recipeArch.some((a) => a.split(" ")[0] === arch.split(" ")[0])) score += 18;
+    for (const v of recipe.vibe || []) {
+      if (vibes.includes(v)) score += 8;
+    }
+    if (profile?.lifestyle && (recipe.lifestyles || []).includes(profile.lifestyle)) score += 28;
+    if (fit.structure && recipe.structure === fit.structure) score += 22;
+    else if (fit.structure === "tailored" && recipe.structure === "structured") score += 14;
+    for (const o of recipe.occasions || []) {
+      if (o === "work" || o === "everyday") score += 18;
+      else if (profileOccasions.includes(o)) score += 10;
+    }
+    const paletteScore = outfitPaletteScore(items, palette, avoid);
+    score += Math.min(36, paletteScore);
+    if (palette.length && !paletteWantsGreen(palette)) {
+      score -= items.filter((k) => itemIsGreen(k)).length * 35;
+    }
+    if (budget === "elevated" && items.some((k) => familyOfKey(k) === "blazer")) score += 8;
+    if (budget === "considered" && !items.some((k) => familyOfKey(k) === "blazer")) score += 6;
+    return { recipe, score, items, silhouette: recipeSilhouette(recipe) };
+  }).sort((a, b) => b.score - a.score);
+
+  const picked = [];
+  const usedSilhouettes = new Set();
+  const usedRecipeIds = new Set();
+  for (const row of scored) {
+    const sil = row.silhouette || silhouetteKey(row.items, row.recipe);
+    if (usedSilhouettes.has(sil) || usedRecipeIds.has(row.recipe.id)) continue;
+    // Also guard against identical family shapes after palette tuning
+    const tunedSil = silhouetteKey(row.items, row.recipe);
+    if (usedSilhouettes.has(tunedSil)) continue;
+    usedSilhouettes.add(sil);
+    usedSilhouettes.add(tunedSil);
+    usedRecipeIds.add(row.recipe.id);
+    const dayIndex = picked.length;
+    picked.push({
+      id: `week-${row.recipe.id}-${stylistTurn}-${dayIndex}`,
+      option: dayIndex + 1,
+      day: dayLabels[dayIndex] || `Day ${dayIndex + 1}`,
+      items: row.items,
+      rationale: buildRationale(row.recipe, occasions, lang, profile),
+      recipeId: row.recipe.id,
+      silhouette: tunedSil,
+    });
+    if (picked.length >= 5) break;
+  }
+
+  // Fill if the recipe library couldn't yield 5 unique silhouettes
+  let fill = 0;
+  while (picked.length < 5 && fill < scored.length) {
+    const row = scored[fill++];
+    const dayIndex = picked.length;
+    const items = [...row.items];
+    // Nudge accessory to force a fresh silhouette when needed
+    const accIdx = items.findIndex((k) => ACCESSORY_FAMILIES.includes(familyOfKey(k)));
+    const accPool = ACCESSORY_FAMILIES.filter((f) => !items.some((k) => familyOfKey(k) === f));
+    if (accPool.length) {
+      const nextAcc = bestVariantInFamily(accPool[dayIndex % accPool.length], palette, avoid, row.recipe.structure);
+      if (accIdx >= 0) items[accIdx] = nextAcc;
+      else items.push(nextAcc);
+    } else if (dayIndex % 2 === 1) {
+      // Toggle outer on/off for variety
+      const blazerIdx = items.findIndex((k) => familyOfKey(k) === "blazer");
+      if (blazerIdx >= 0) items.splice(blazerIdx, 1);
+      else items.unshift(bestVariantInFamily("blazer", palette, avoid, row.recipe.structure));
+    }
+    const sil = silhouetteKey(items, row.recipe);
+    if (usedSilhouettes.has(sil)) continue;
+    usedSilhouettes.add(sil);
+    picked.push({
+      id: `week-fill-${stylistTurn}-${dayIndex}`,
+      option: dayIndex + 1,
+      day: dayLabels[dayIndex] || `Day ${dayIndex + 1}`,
+      items,
+      rationale: buildRationale(row.recipe, occasions, lang, profile),
+      recipeId: row.recipe.id,
+      silhouette: sil,
+    });
+  }
+
+  return { outfits: picked, shoppingList: buildShoppingList(picked) };
+}
+
 // AI-generated model photos keyed by gender + outfit signature (catalog keys, stable order)
 const MODEL_KEY_ORDER = [
   "blazer", "blazerAlt", "blazerNavy", "blazerBlack",
@@ -2098,7 +2262,7 @@ function OutfitCard({ outfit, onSwap, onSave, saved, modelGender, onModelGenderC
 // ==================== APP SCREENS ====================
 function HomeScreen({ profile, onPrompt, homeInput, setHomeInput }) {
   const { lang, t, tOpt } = useLang();
-  const chipKeys = ["chipDressWedding", "chipWorkDinner", "chipWeekendCasual"];
+  const chipKeys = ["chipDressWedding", "chipWorkDinner", "chipWeekendCasual", "chipWeekPlan"];
   const fitLabel = (FIT_SHORT[lang] && FIT_SHORT[lang][profile.fit]) || FIT_SHORT.en[profile.fit] || profile.fit;
   const budgetLabel = tOpt((BUDGET_OPTIONS.find((b) => b.key === profile.budget) || {}).label || "Balanced");
   const swatchHexes = (profile.palette || []).map((label) => (COLOR_OPTIONS.find((c) => c.label === label) || {}).hex).filter(Boolean).slice(0, 5);
@@ -2127,6 +2291,48 @@ function HomeScreen({ profile, onPrompt, homeInput, setHomeInput }) {
   );
 }
 
+function WeekShoppingList({ shoppingList, favoriteStores, palette = [], avoid = [] }) {
+  const { t, tName } = useLang();
+  const [shopItem, setShopItem] = useState(null);
+  if (!shoppingList?.length) return null;
+  return (
+    <div className="week-shop-list">
+      <div className="eyebrow gold">{t("weekShoppingList")}</div>
+      <div className="week-shop-rows">
+        {shoppingList.map((row) => {
+          const item = CATALOG[row.key];
+          if (!item) return null;
+          return (
+            <button
+              key={row.key}
+              type="button"
+              className="week-shop-row"
+              onClick={() => setShopItem(item)}
+            >
+              <img className="week-shop-image" src={item.image} alt={tName(item)} loading="lazy" />
+              <div className="week-shop-info">
+                <div className="week-shop-brand">{item.retailer}</div>
+                <div className="week-shop-name">{tName(item)}</div>
+                <div className="week-shop-meta">${item.price}{row.reason ? ` · ${row.reason}` : ""}</div>
+              </div>
+              <ExternalLink size={12} />
+            </button>
+          );
+        })}
+      </div>
+      {shopItem && (
+        <ShopSheet
+          item={shopItem}
+          onClose={() => setShopItem(null)}
+          favoriteStores={favoriteStores}
+          palette={palette}
+          avoid={avoid}
+        />
+      )}
+    </div>
+  );
+}
+
 function ChatScreen({ messages, onSend, input, setInput, onSwap, onSave, savedIds, pending, modelGender, onModelGenderChange, favoriteStores, palette = [], avoid = [] }) {
   const { t } = useLang();
   const endRef = useRef(null);
@@ -2144,12 +2350,12 @@ function ChatScreen({ messages, onSend, input, setInput, onSwap, onSave, savedId
           if (m.outfits?.length) {
             return (
               <div key={i} className="bubble-assistant bubble-assistant-stack">
-                <div className="stylist-picks-intro">{m.text || t("stylistPicksIntro")}</div>
+                <div className="stylist-picks-intro">{m.text || (m.weekPlan ? t("weekPlanIntro") : t("stylistPicksIntro"))}</div>
                 {m.outfits.map((outfit, oi) => (
                   <OutfitCard
                     key={outfit.id || oi}
                     outfit={outfit}
-                    optionLabel={`${t("stylistLook")} ${outfit.option || oi + 1}`}
+                    optionLabel={outfit.day || `${t("stylistLook")} ${outfit.option || oi + 1}`}
                     onSwap={(key) => onSwap(i, oi, key)}
                     onSave={() => onSave(i, oi)}
                     saved={savedIds.has(`${i}:${oi}`)}
@@ -2160,6 +2366,14 @@ function ChatScreen({ messages, onSend, input, setInput, onSwap, onSave, savedId
                     avoid={avoid}
                   />
                 ))}
+                {m.weekPlan && (
+                  <WeekShoppingList
+                    shoppingList={m.shoppingList}
+                    favoriteStores={favoriteStores}
+                    palette={palette}
+                    avoid={avoid}
+                  />
+                )}
               </div>
             );
           }
@@ -2436,24 +2650,40 @@ export default function VestraPrototype() {
       }
     }
 
+    const weekPlan = isWeekPlanPrompt(finalText);
+
     // Try live Claude stylist (Netlify function / custom endpoint), else local composer
     const live = await fetchStylistLooks({
       prompt: finalText,
       profile: activeProfile,
       lang,
       catalogKeys: Object.keys(CATALOG),
+      mode: weekPlan ? "week" : "looks",
     });
     if (live?.outfits?.length) {
+      const dayLabels = WEEK_DAY_KEYS.map((k) => (UI[lang] && UI[lang][k]) || UI.en[k]);
+      const isWeek = weekPlan || live.mode === "week";
       const outfits = live.outfits.map((o, i) => ({
         ...o,
         option: o.option || i + 1,
+        day: isWeek ? (o.day || dayLabels[i]) : o.day,
         items: (o.items || []).filter((k) => CATALOG[k]),
       })).filter((o) => o.items.length >= 3);
       if (outfits.length) {
+        const shoppingList = isWeek
+          ? (Array.isArray(live.shoppingList) && live.shoppingList.length
+            ? live.shoppingList.filter((row) => CATALOG[row.key || row])
+              .map((row) => (typeof row === "string" ? { key: row, reason: "" } : { key: row.key, reason: row.reason || "" }))
+            : buildShoppingList(outfits))
+          : undefined;
         setMessages((m) => [...m, {
           role: "assistant",
-          text: live.source === "claude" ? t("stylistLive") : undefined,
+          text: live.source === "claude"
+            ? (isWeek ? `${t("weekPlanIntro")} ${t("stylistLive")}` : t("stylistLive"))
+            : (isWeek ? t("weekPlanIntro") : undefined),
           outfits,
+          shoppingList,
+          weekPlan: isWeek,
         }]);
         setPending(false);
         return;
@@ -2461,8 +2691,19 @@ export default function VestraPrototype() {
     }
 
     await new Promise((r) => setTimeout(r, 500));
-    const outfits = composeOutfits(finalText, activeProfile, lang, 3);
-    setMessages((m) => [...m, { role: "assistant", outfits }]);
+    if (weekPlan) {
+      const plan = composeWeekPlan(finalText, activeProfile, lang);
+      setMessages((m) => [...m, {
+        role: "assistant",
+        text: t("weekPlanIntro"),
+        outfits: plan.outfits,
+        shoppingList: plan.shoppingList,
+        weekPlan: true,
+      }]);
+    } else {
+      const outfits = composeOutfits(finalText, activeProfile, lang, 3);
+      setMessages((m) => [...m, { role: "assistant", outfits }]);
+    }
     setPending(false);
   }
 
@@ -2701,6 +2942,16 @@ export default function VestraPrototype() {
         .refine-label{ font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:#8b877a; margin-bottom:8px; }
         .chip{ font-size:11.5px; color:#5b5748; background:#fff; border:1px solid #e6e0d2; border-radius:999px; padding:8px 14px; cursor:pointer; font-family:'Inter',sans-serif; transition:all .2s; }
         .chip:hover{ border-color:#C6A567; color:#0B0B0C; }
+        .chip-row{ display:flex; flex-wrap:wrap; gap:8px; }
+        .week-shop-list{ background:#0B0B0C; border:1px solid #2a2a26; border-radius:4px; padding:16px; color:#F6F1E7; }
+        .week-shop-rows{ display:flex; flex-direction:column; gap:8px; margin-top:10px; }
+        .week-shop-row{ display:flex; align-items:center; gap:10px; width:100%; box-sizing:border-box; background:#151513; border:1px solid #2a2a26; border-radius:4px; padding:8px; cursor:pointer; text-align:left; color:inherit; font-family:'Inter',sans-serif; }
+        .week-shop-row:hover{ border-color:#C6A567; }
+        .week-shop-image{ width:52px; height:52px; border-radius:5px; object-fit:cover; flex-shrink:0; background:#1c1c19; }
+        .week-shop-info{ flex:1; min-width:0; }
+        .week-shop-brand{ font-size:9.5px; letter-spacing:0.08em; text-transform:uppercase; color:#C6A567; margin-bottom:2px; }
+        .week-shop-name{ font-size:12px; color:#F6F1E7; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .week-shop-meta{ font-size:10.5px; color:#8b877a; margin-top:2px; }
 
         .chat-wrap{ display:flex; flex-direction:column; height:100%; }
         .chat-header{ padding:16px 20px; border-bottom:1px solid #e6e0d2; display:flex; align-items:center; gap:8px; font-size:13px; font-weight:500; color:#0B0B0C; }
