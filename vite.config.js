@@ -7,11 +7,11 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'icons/*.png', 'icons/*.svg'],
+      includeAssets: ['favicon.svg', 'icons/*.png', 'icons/*.svg', 'version.json'],
       manifest: {
         name: 'Vestra',
         short_name: 'Vestra',
-        description: 'Your AI stylist — outfits, wardrobe, and shopping in one place.',
+        description: 'Your AI stylist — streetwear to classy to sexy — outfits, wardrobe, and shopping.',
         theme_color: '#F6F1E7',
         background_color: '#F6F1E7',
         display: 'standalone',
@@ -40,8 +40,11 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,json}'],
         navigateFallback: '/index.html',
+        cleanupOutdatedCaches: true,
+        clientsClaim: true,
+        skipWaiting: true,
       },
     }),
   ],
