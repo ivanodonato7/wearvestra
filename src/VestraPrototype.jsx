@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, createContext, useContext } from "react";
 import { Home, MessageCircle, Bookmark, ShoppingBag, User, Send, RefreshCw, Check, Sparkles, ArrowLeft, ExternalLink, X } from "lucide-react";
+import { fetchStylistLooks } from "./stylistApi";
 
 // ==================== LANGUAGE / i18n ====================
 // A real backend barely needs any of this — Claude already answers fluently
@@ -16,9 +17,17 @@ const UI = {
   en: {
     welcomeEyebrow: "Vestra", welcomeTitleLine1: "Let's get you", welcomeTitleLine2: "dressed properly.",
     welcomeSub: "A few quick questions, then meet your stylist.", getStarted: "Get Started", skipTesting: "Skip for testing → see the app",
-    createAccountEyebrow: "Create Your Account", whereReachYouLine1: "Where should we", whereReachYouLine2: "reach you?",
-    emailPlaceholder: "your@email.com", continueBtn: "Continue", signupNote: "This is a prototype — no account is actually created.",
-    step0Title: "Let's get you dressed properly.", step0Prompt: "How would you describe your day-to-day?",
+    createAccountEyebrow: "Create Your Account", whereReachYouLine1: "What should we", whereReachYouLine2: "call you?",
+    namePlaceholder: "Your first name", emailPlaceholder: "your@email.com", continueBtn: "Continue",
+    signupEmailLabel: "Email (optional)", signupNote: "This is a prototype — no account is actually created.",
+    nameRequired: "Please enter your name to continue.",
+    stepAudienceTitle: "Who are we dressing?", stepAudiencePrompt: "This helps us show the right fits and inspiration.",
+    step0Title: "How would you describe your day-to-day?", step0Prompt: "Pick the photo that feels closest to your days.",
+    lifeOfficeDesc: "Meetings, clients, and polished days that need to look intentional.",
+    lifeCreativeDesc: "Flexible workplaces where you can dress with a little more ease.",
+    lifeRemoteDesc: "Mostly at home — elevated casual that still feels put together.",
+    lifeTravelDesc: "Travel, events, and days that change — versatile layers.",
+    lifeStudentDesc: "Campus life and moving between classes, work, and evenings.",
     step1Title: "Which of these feels most like you?", step1Prompt: "Not sure of the name? Pick the photo that feels most like you.",
     archQuietDesc: "Clean lines, refined fits, nothing loud — polished without trying too hard.",
     archRelaxedDesc: "Easy fabrics, soft structure, put-together but never stiff.",
@@ -31,7 +40,12 @@ const UI = {
     step2Title: "How do you like things to fit?", step2Prompt: "When you get dressed, you lean toward—",
     step3Title: "Let's talk color.", step3Prompt: "Which of these do you find yourself reaching for? Pick a few.",
     step4Title: "Every stylist should respect your budget.", step4Prompt: "For a typical piece, where are you most comfortable?",
-    step5Title: "What do you find yourself dressing for most?", step5Prompt: "Select all that sound like you.",
+    step5Title: "What do you find yourself dressing for most?", step5Prompt: "Pick all that fit — photos help.",
+    occWorkDesc: "Office days, meetings, and looking sharp at work.",
+    occDateDesc: "Dinner out, evenings, and dressing up a little.",
+    occTravelDesc: "Trips, airports, and outfits that move with you.",
+    occEventsDesc: "Weddings, parties, and celebrations that call for polish.",
+    occEverydayDesc: "Regular days when you just want to feel put together.",
     step6Title: "Last thing — just so we get the fit right.", step6Prompt: "You can skip this and add it later.",
     anyColorsAvoid: "Any colors to avoid?", colorsToAvoidLabel: "Colors to avoid",
     sizeTops: "Tops", sizeBottoms: "Bottoms", sizeShoes: "Shoes", sizePlaceholder: "e.g. M, 32, 10", finishBtn: "Finish",
@@ -44,12 +58,22 @@ const UI = {
     goodEvening: "Good evening", styleDnaLabel: "Style DNA", silhouettesWord: "silhouettes", budgetWord: "budget",
     askYourStylist: "Ask your stylist", askPlaceholder: "Tell your stylist what you need…",
     chipDressWedding: "Dress me for a wedding", chipWorkDinner: "Work dinner tonight", chipWeekendCasual: "Weekend, nothing fussy",
+    chipMoreCasual: "More casual", chipAddBlazer: "Add a blazer", chipUnder200: "Under $200 / piece", chipDifferentBelt: "Different belt",
+    refineLooks: "Refine these looks",
+    stylistLive: "Styled with your profile live.",
     yourStylist: "Your Stylist", chatEmpty: "Tell me what you're dressing for — an occasion, a mood, anything.",
-    composing: "Composing your outfit…", chatInputPlaceholder: "e.g. wedding in June, semi-formal",
-    stylistSuggests: "Your Stylist Suggests", saveOutfit: "Save Outfit", savedLabel: "Saved",
+    composing: "Composing your outfit…", revising: "Tweaking that piece…",
+    chatInputPlaceholder: "e.g. wedding in June, or “different belt”",
+    stylistSuggests: "Your Stylist Suggests", stylistLook: "Look", saveOutfit: "Save Outfit", savedLabel: "Saved",
+    stylistPicksIntro: "Three directions for you — tap any piece to shop what's in stock.",
+    stylistRevisionIntro: "Updated — I changed the {item}. Everything else stays.",
+    stylistRevisionMulti: "Updated — I swapped the pieces you flagged. Everything else stays.",
+    stylistRevisionRemoved: "Updated — I dropped the {item} and finished the look differently.",
     wardrobeTitle: "Wardrobe", wardrobeEmpty: "Outfits you save from your stylist will live here.",
     bagTitle: "Bag", bagEmpty: "Save an outfit to see its items here, grouped by retailer.", checkoutWith: "Checkout with",
-    profileTitle: "Profile", styleArchetypeLabel: "Style Archetype", fitPreferenceLabel: "Fit Preference",
+    profileTitle: "Profile", nameLabel: "Name", styleArchetypeLabel: "Style Archetype", fitPreferenceLabel: "Fit Preference",
+    lifestyleLabel: "Day-to-day",
+    dressingForLabel: "Dressing for",
     paletteLabel: "Palette", budgetLabel: "Budget", dressesForLabel: "Dresses For",
     prototypeNote: "This is a click-through prototype — no real account exists yet.", languageLabel: "Language",
     navHome: "Home", navStylist: "Stylist", navWardrobe: "Wardrobe", navBag: "Bag", navProfile: "Profile",
@@ -62,13 +86,30 @@ const UI = {
     favoriteStoresHint: "Tap to add or remove stores you shop from most.",
     favoriteStoresEmpty: "No favorites yet — pick a few below.",
     shopYourFavorites: "Your favorites",
+    shopInStock: "In stock now",
+    shopInStockSub: "Listings matched to your palette",
+    shopInStockBadge: "In stock",
+    shopBuyAt: "Buy",
+    shopScanning: "Scanning stores for availability…",
+    shopNoStock: "No in-palette listings yet — search Google or a store with your colors below.",
+    shopMoreStores: "Search more stores",
+    shopPaletteFilter: "Colors: {colors}",
+    shopSearchingAs: "Searching as: {query}",
   },
   es: {
     welcomeEyebrow: "Vestra", welcomeTitleLine1: "Vamos a vestirte", welcomeTitleLine2: "como es debido.",
     welcomeSub: "Unas preguntas rápidas y luego conoces a tu estilista.", getStarted: "Empezar", skipTesting: "Saltar para probar → ver la app",
-    createAccountEyebrow: "Crea tu cuenta", whereReachYouLine1: "¿Dónde podemos", whereReachYouLine2: "contactarte?",
-    emailPlaceholder: "tu@email.com", continueBtn: "Continuar", signupNote: "Esto es un prototipo — no se crea ninguna cuenta real.",
-    step0Title: "Vamos a vestirte como es debido.", step0Prompt: "¿Cómo describirías tu día a día?",
+    createAccountEyebrow: "Crea tu cuenta", whereReachYouLine1: "¿Cómo te", whereReachYouLine2: "llamamos?",
+    namePlaceholder: "Tu nombre", emailPlaceholder: "tu@email.com", continueBtn: "Continuar",
+    signupEmailLabel: "Email (opcional)", signupNote: "Esto es un prototipo — no se crea ninguna cuenta real.",
+    nameRequired: "Escribe tu nombre para continuar.",
+    stepAudienceTitle: "¿Para quién es el estilo?", stepAudiencePrompt: "Así te mostramos los cortes e inspiración adecuados.",
+    step0Title: "¿Cómo describirías tu día a día?", step0Prompt: "Elige la foto que más se parezca a tus días.",
+    lifeOfficeDesc: "Reuniones, clientes y días que piden un look intencional.",
+    lifeCreativeDesc: "Espacios flexibles donde puedes vestirte con más soltura.",
+    lifeRemoteDesc: "Mayormente en casa — casual elevado pero cuidado.",
+    lifeTravelDesc: "Viajes, eventos y días cambiantes — capas versátiles.",
+    lifeStudentDesc: "Vida de campus entre clases, trabajo y noches.",
     step1Title: "¿Cuál de estos se parece más a ti?", step1Prompt: "Si no sabes el nombre, elige la foto que más te represente.",
     archQuietDesc: "Líneas limpias, cortes refinados, nada estridente — elegancia sin esfuerzo.",
     archRelaxedDesc: "Tejidos cómodos, estructura suave, cuidado pero nunca rígido.",
@@ -81,7 +122,12 @@ const UI = {
     step2Title: "¿Cómo te gusta que te quede la ropa?", step2Prompt: "Cuando te vistes, prefieres—",
     step3Title: "Hablemos de color.", step3Prompt: "¿Cuáles sueles elegir? Marca varios.",
     step4Title: "Tu estilista debe respetar tu presupuesto.", step4Prompt: "Para una prenda típica, ¿dónde te sientes más cómodo/a?",
-    step5Title: "¿Para qué sueles vestirte más?", step5Prompt: "Selecciona todo lo que te describa.",
+    step5Title: "¿Para qué sueles vestirte más?", step5Prompt: "Elige todas las que encajen — con fotos.",
+    occWorkDesc: "Días de oficina, reuniones y verte impecable en el trabajo.",
+    occDateDesc: "Cenas, noches y vestirte un poco más especial.",
+    occTravelDesc: "Viajes, aeropuertos y looks que se mueven contigo.",
+    occEventsDesc: "Bodas, fiestas y celebraciones que piden elegancia.",
+    occEverydayDesc: "Días normales en los que solo quieres verte arreglado/a.",
     step6Title: "Última cosa — para que la talla sea correcta.", step6Prompt: "Puedes omitir esto y añadirlo después.",
     anyColorsAvoid: "¿Algún color que evitas?", colorsToAvoidLabel: "Colores a evitar",
     sizeTops: "Parte superior", sizeBottoms: "Parte inferior", sizeShoes: "Calzado", sizePlaceholder: "ej. M, 32, 10", finishBtn: "Finalizar",
@@ -94,12 +140,22 @@ const UI = {
     goodEvening: "Buenas tardes", styleDnaLabel: "ADN de Estilo", silhouettesWord: "siluetas", budgetWord: "presupuesto",
     askYourStylist: "Pregunta a tu estilista", askPlaceholder: "Dile a tu estilista qué necesitas…",
     chipDressWedding: "Vísteme para una boda", chipWorkDinner: "Cena de trabajo esta noche", chipWeekendCasual: "Fin de semana, sin complicaciones",
+    chipMoreCasual: "Más casual", chipAddBlazer: "Añade un blazer", chipUnder200: "Menos de $200 / prenda", chipDifferentBelt: "Otro cinturón",
+    refineLooks: "Afina estos looks",
+    stylistLive: "Estilizado en vivo con tu perfil.",
     yourStylist: "Tu Estilista", chatEmpty: "Cuéntame para qué te estás vistiendo — una ocasión, un estado de ánimo, lo que sea.",
-    composing: "Componiendo tu look…", chatInputPlaceholder: "ej. boda en junio, semi-formal",
-    stylistSuggests: "Tu Estilista Sugiere", saveOutfit: "Guardar Look", savedLabel: "Guardado",
+    composing: "Componiendo tu look…", revising: "Ajustando esa prenda…",
+    chatInputPlaceholder: "ej. boda en junio, o “otro cinturón”",
+    stylistSuggests: "Tu Estilista Sugiere", stylistLook: "Look", saveOutfit: "Guardar Look", savedLabel: "Guardado",
+    stylistPicksIntro: "Tres direcciones para ti — toca cualquier prenda para ver stock.",
+    stylistRevisionIntro: "Listo — cambié el {item}. El resto se queda.",
+    stylistRevisionMulti: "Listo — cambié las piezas que mencionaste. El resto se queda.",
+    stylistRevisionRemoved: "Listo — quité el {item} y cerré el look de otra forma.",
     wardrobeTitle: "Armario", wardrobeEmpty: "Los looks que guardes de tu estilista aparecerán aquí.",
     bagTitle: "Bolsa", bagEmpty: "Guarda un look para ver sus prendas aquí, agrupadas por tienda.", checkoutWith: "Comprar en",
-    profileTitle: "Perfil", styleArchetypeLabel: "Arquetipo de Estilo", fitPreferenceLabel: "Preferencia de Ajuste",
+    profileTitle: "Perfil", nameLabel: "Nombre", styleArchetypeLabel: "Arquetipo de Estilo", fitPreferenceLabel: "Preferencia de Ajuste",
+    lifestyleLabel: "Día a día",
+    dressingForLabel: "Vestuario para",
     paletteLabel: "Paleta", budgetLabel: "Presupuesto", dressesForLabel: "Se Viste Para",
     prototypeNote: "Esto es un prototipo interactivo — aún no existe ninguna cuenta real.", languageLabel: "Idioma",
     navHome: "Inicio", navStylist: "Estilista", navWardrobe: "Armario", navBag: "Bolsa", navProfile: "Perfil",
@@ -112,13 +168,30 @@ const UI = {
     favoriteStoresHint: "Toca para añadir o quitar las tiendas donde más compras.",
     favoriteStoresEmpty: "Aún no hay favoritas — elige algunas abajo.",
     shopYourFavorites: "Tus favoritas",
+    shopInStock: "Disponible ahora",
+    shopInStockSub: "Listados alineados con tu paleta",
+    shopInStockBadge: "En stock",
+    shopBuyAt: "Comprar",
+    shopScanning: "Buscando disponibilidad en tiendas…",
+    shopNoStock: "Sin listados en tu paleta — busca en Google o en una tienda con tus colores.",
+    shopMoreStores: "Buscar en más tiendas",
+    shopPaletteFilter: "Colores: {colors}",
+    shopSearchingAs: "Buscando: {query}",
   },
   fr: {
     welcomeEyebrow: "Vestra", welcomeTitleLine1: "Habillons-vous", welcomeTitleLine2: "comme il se doit.",
     welcomeSub: "Quelques questions rapides, puis rencontrez votre styliste.", getStarted: "Commencer", skipTesting: "Passer pour tester → voir l'app",
-    createAccountEyebrow: "Créez votre compte", whereReachYouLine1: "Où pouvons-nous", whereReachYouLine2: "vous joindre ?",
-    emailPlaceholder: "votre@email.com", continueBtn: "Continuer", signupNote: "Ceci est un prototype — aucun compte n'est réellement créé.",
-    step0Title: "Habillons-vous comme il se doit.", step0Prompt: "Comment décririez-vous votre quotidien ?",
+    createAccountEyebrow: "Créez votre compte", whereReachYouLine1: "Comment devons-nous", whereReachYouLine2: "vous appeler ?",
+    namePlaceholder: "Votre prénom", emailPlaceholder: "votre@email.com", continueBtn: "Continuer",
+    signupEmailLabel: "Email (optionnel)", signupNote: "Ceci est un prototype — aucun compte n'est réellement créé.",
+    nameRequired: "Indiquez votre prénom pour continuer.",
+    stepAudienceTitle: "Pour qui s'habille-t-on ?", stepAudiencePrompt: "Cela nous aide à montrer les coupes et inspirations adaptées.",
+    step0Title: "Comment décririez-vous votre quotidien ?", step0Prompt: "Choisissez la photo qui ressemble le plus à vos journées.",
+    lifeOfficeDesc: "Réunions, clients, et des journées qui demandent une allure intentionnelle.",
+    lifeCreativeDesc: "Espaces flexibles où l'on peut s'habiller avec plus de souplesse.",
+    lifeRemoteDesc: "Surtout à la maison — un casual élevé mais soigné.",
+    lifeTravelDesc: "Voyages, événements, journées changeantes — des couches versatiles.",
+    lifeStudentDesc: "Vie de campus entre cours, travail et soirées.",
     step1Title: "Lequel vous ressemble le plus ?", step1Prompt: "Pas sûr du nom ? Choisissez la photo qui vous parle.",
     archQuietDesc: "Lignes nettes, coupes raffinées, rien de criard — élégance sans effort.",
     archRelaxedDesc: "Matières souples, structure douce, soigné sans rigidité.",
@@ -131,7 +204,12 @@ const UI = {
     step2Title: "Comment aimez-vous que ça tombe ?", step2Prompt: "Quand vous vous habillez, vous préférez—",
     step3Title: "Parlons couleur.", step3Prompt: "Lesquelles portez-vous le plus souvent ? Choisissez-en plusieurs.",
     step4Title: "Votre styliste doit respecter votre budget.", step4Prompt: "Pour une pièce typique, où êtes-vous le plus à l'aise ?",
-    step5Title: "Pour quoi vous habillez-vous le plus souvent ?", step5Prompt: "Sélectionnez tout ce qui vous correspond.",
+    step5Title: "Pour quoi vous habillez-vous le plus souvent ?", step5Prompt: "Choisissez tout ce qui convient — avec photos.",
+    occWorkDesc: "Journées de bureau, réunions, et une allure soignée au travail.",
+    occDateDesc: "Dîners, soirées, et s'habiller un peu plus élégamment.",
+    occTravelDesc: "Voyages, aéroports, et des tenues qui bougent avec vous.",
+    occEventsDesc: "Mariages, fêtes et célébrations qui demandent de la tenue.",
+    occEverydayDesc: "Les jours ordinaires où l'on veut juste être bien habillé.",
     step6Title: "Dernière chose — pour bien ajuster la taille.", step6Prompt: "Vous pouvez passer cette étape et l'ajouter plus tard.",
     anyColorsAvoid: "Des couleurs à éviter ?", colorsToAvoidLabel: "Couleurs à éviter",
     sizeTops: "Hauts", sizeBottoms: "Bas", sizeShoes: "Chaussures", sizePlaceholder: "ex. M, 32, 10", finishBtn: "Terminer",
@@ -144,12 +222,22 @@ const UI = {
     goodEvening: "Bonsoir", styleDnaLabel: "ADN Style", silhouettesWord: "silhouettes", budgetWord: "budget",
     askYourStylist: "Demandez à votre styliste", askPlaceholder: "Dites à votre styliste ce dont vous avez besoin…",
     chipDressWedding: "Habillez-moi pour un mariage", chipWorkDinner: "Dîner professionnel ce soir", chipWeekendCasual: "Week-end, sans prise de tête",
+    chipMoreCasual: "Plus casual", chipAddBlazer: "Ajouter un blazer", chipUnder200: "Moins de 200 $ / pièce", chipDifferentBelt: "Autre ceinture",
+    refineLooks: "Affiner ces looks",
+    stylistLive: "Stylisé en direct selon votre profil.",
     yourStylist: "Votre Styliste", chatEmpty: "Dites-moi pour quoi vous vous habillez — une occasion, une humeur, n'importe quoi.",
-    composing: "Composition de votre tenue…", chatInputPlaceholder: "ex. mariage en juin, semi-habillé",
-    stylistSuggests: "Votre Styliste Suggère", saveOutfit: "Enregistrer la Tenue", savedLabel: "Enregistré",
+    composing: "Composition de votre tenue…", revising: "Ajustement de cette pièce…",
+    chatInputPlaceholder: "ex. mariage en juin, ou « autre ceinture »",
+    stylistSuggests: "Votre Styliste Suggère", stylistLook: "Look", saveOutfit: "Enregistrer la Tenue", savedLabel: "Enregistré",
+    stylistPicksIntro: "Trois directions pour vous — touchez une pièce pour voir le stock.",
+    stylistRevisionIntro: "C’est noté — j’ai changé le {item}. Le reste reste.",
+    stylistRevisionMulti: "C’est noté — j’ai changé les pièces que vous avez signalées. Le reste reste.",
+    stylistRevisionRemoved: "C’est noté — j’ai retiré le {item} et fini autrement.",
     wardrobeTitle: "Garde-robe", wardrobeEmpty: "Les tenues que vous enregistrez apparaîtront ici.",
     bagTitle: "Panier", bagEmpty: "Enregistrez une tenue pour voir ses articles ici, regroupés par enseigne.", checkoutWith: "Payer chez",
-    profileTitle: "Profil", styleArchetypeLabel: "Archétype de Style", fitPreferenceLabel: "Préférence de Coupe",
+    profileTitle: "Profil", nameLabel: "Prénom", styleArchetypeLabel: "Archétype de Style", fitPreferenceLabel: "Préférence de Coupe",
+    lifestyleLabel: "Quotidien",
+    dressingForLabel: "S'habille pour",
     paletteLabel: "Palette", budgetLabel: "Budget", dressesForLabel: "S'habille Pour",
     prototypeNote: "Ceci est un prototype interactif — aucun compte réel n'existe encore.", languageLabel: "Langue",
     navHome: "Accueil", navStylist: "Styliste", navWardrobe: "Garde-robe", navBag: "Panier", navProfile: "Profil",
@@ -162,6 +250,15 @@ const UI = {
     favoriteStoresHint: "Touchez pour ajouter ou retirer vos boutiques habituelles.",
     favoriteStoresEmpty: "Aucune favorite — choisissez-en quelques-unes ci-dessous.",
     shopYourFavorites: "Vos favorites",
+    shopInStock: "En stock maintenant",
+    shopInStockSub: "Offres alignées sur votre palette",
+    shopInStockBadge: "En stock",
+    shopBuyAt: "Acheter",
+    shopScanning: "Recherche de disponibilité…",
+    shopNoStock: "Aucune offre dans votre palette — cherchez sur Google ou en boutique avec vos couleurs.",
+    shopMoreStores: "Chercher d'autres boutiques",
+    shopPaletteFilter: "Couleurs : {colors}",
+    shopSearchingAs: "Recherche : {query}",
   },
 };
 
@@ -170,6 +267,7 @@ const OPTIONS_I18N = {
     "Office / client-facing": "Oficina / cara al cliente", "Creative or flexible workplace": "Trabajo creativo o flexible",
     "Remote, mostly at home": "Remoto, mayormente en casa", "On the move — travel, events, varied": "En movimiento — viajes, eventos, variado",
     "Student life": "Vida de estudiante",
+    "Ladies": "Mujer", "Gentlemen": "Hombre", "Gender neutral": "Género neutro",
     "Quiet & Tailored": "Discreto y Sastre", "Relaxed & Considered": "Relajado y Cuidado", "Modern & Sharp": "Moderno y Definido",
     "Warm & Layered": "Cálido y en Capas", "Classic & Polished": "Clásico y Pulido", "Minimal & Directional": "Minimalista y Vanguardista",
     "Romantic & Soft": "Romántico y Suave", "Bold & Expressive": "Audaz y Expresivo",
@@ -191,6 +289,7 @@ const OPTIONS_I18N = {
     "Office / client-facing": "Bureau / relation client", "Creative or flexible workplace": "Travail créatif ou flexible",
     "Remote, mostly at home": "Télétravail, surtout à la maison", "On the move — travel, events, varied": "En mouvement — voyages, événements, varié",
     "Student life": "Vie étudiante",
+    "Ladies": "Femme", "Gentlemen": "Homme", "Gender neutral": "Non genré",
     "Quiet & Tailored": "Discret et Tailleur", "Relaxed & Considered": "Détendu et Réfléchi", "Modern & Sharp": "Moderne et Affûté",
     "Warm & Layered": "Chaleureux et Superposé", "Classic & Polished": "Classique et Soigné", "Minimal & Directional": "Minimaliste et Avant-gardiste",
     "Romantic & Soft": "Romantique et Doux", "Bold & Expressive": "Audacieux et Expressif",
@@ -227,26 +326,34 @@ const FIT_SHORT = {
 };
 const PRODUCT_NAMES_I18N = {
   es: {
-    p1: "Blazer Sastre de Mezcla de Lana", p1b: "Blazer de Lino sin Estructura", p2: "Camisa de Algodón Impecable",
-    p2b: "Cuello Alto de Merino Fino", p3: "Pantalón Recto Sastre", p3b: "Pantalón de Lana de Pierna Ancha",
-    p4: "Zapato Derby de Piel", p4b: "Botín Chelsea de Ante", p5: "Bufanda de Lana Fina", p5b: "Pañuelo de Bolsillo de Cachemira",
+    p1: "Blazer Sastre de Mezcla de Lana", p1b: "Blazer de Lino sin Estructura", p1c: "Blazer Sastre Marino", p1d: "Blazer Sastre Negro",
+    p2: "Camisa de Algodón Impecable", p2b: "Cuello Alto de Merino Fino",
+    p3: "Pantalón Recto Sastre", p3b: "Pantalón de Lana de Pierna Ancha", p3c: "Pantalón Sastre Marino", p3d: "Pantalón Sastre Negro",
+    p4: "Zapato Derby de Piel", p4b: "Botín Chelsea de Ante", p4c: "Derby de Piel Negro",
+    p5: "Bufanda de Lana Fina", p5b: "Pañuelo de Bolsillo de Cachemira", p5c: "Bufanda de Lana Burdeos",
+    p6: "Cinturón de Piel", p6b: "Cinturón de Piel Negro", p7: "Gafas de Sol de Acetato", p7b: "Gafas de Sol Negras",
   },
   fr: {
-    p1: "Blazer Cintré en Mélange de Laine", p1b: "Blazer en Lin Déstructuré", p2: "Chemise en Coton Impeccable",
-    p2b: "Col Roulé en Mérinos Fin", p3: "Pantalon Droit Tailleur", p3b: "Pantalon en Laine Large",
-    p4: "Chaussure Derby en Cuir", p4b: "Boot Chelsea en Daim", p5: "Écharpe en Laine Fine", p5b: "Pochette en Cachemire",
+    p1: "Blazer Cintré en Mélange de Laine", p1b: "Blazer en Lin Déstructuré", p1c: "Blazer Cintré Marine", p1d: "Blazer Cintré Noir",
+    p2: "Chemise en Coton Impeccable", p2b: "Col Roulé en Mérinos Fin",
+    p3: "Pantalon Droit Tailleur", p3b: "Pantalon en Laine Large", p3c: "Pantalon Tailleur Marine", p3d: "Pantalon Tailleur Noir",
+    p4: "Chaussure Derby en Cuir", p4b: "Boot Chelsea en Daim", p4c: "Derby en Cuir Noir",
+    p5: "Écharpe en Laine Fine", p5b: "Pochette en Cachemire", p5c: "Écharpe en Laine Bordeaux",
+    p6: "Ceinture en Cuir", p6b: "Ceinture en Cuir Noir", p7: "Lunettes de Soleil en Acétate", p7b: "Lunettes de Soleil Noires",
   },
 };
 const RATIONALES_I18N = {
   es: [
-    "Un blazer sastre en oliva mantiene el look cálido y con los pies en la tierra, sin resultar rígido — perfecto para un momento semi-formal al aire libre. La camisa marfil lo eleva, y el zapato derby se mantiene clásico sin parecer disfraz.",
+    "Un blazer sastre en oliva mantiene el look cálido y con los pies en la tierra, sin resultar rígido — perfecto para un momento semi-formal al aire libre. La camisa marfil lo eleva, el zapato derby se mantiene clásico, y un cinturón de piel remata las proporciones.",
     "Elegante, sin rigidez — el mismo pantalón sastre da base al look, mientras la camisa impecable sola (sin blazer) lo hace fácil para una cena. Añade la bufanda si hace fresco.",
-    "Un look diario, discreto y cuidado, construido alrededor de tu paleta — líneas limpias, nada que grite por atención, fácil de llevar de verdad.",
+    "Piezas fáciles de diario con gafas de sol para rematar — líneas limpias, nada complicado, listo para el sol y el movimiento.",
+    "Un look diario, discreto y cuidado, construido alrededor de tu paleta — líneas limpias, nada que grite por atención, fácil de llevar de verdad. Gafas de sol cuando sales.",
   ],
   fr: [
-    "Un blazer tailleur olive garde cette tenue chaleureuse et ancrée plutôt que rigide — idéal pour un moment semi-habillé en extérieur. La chemise ivoire l'élève, et la chaussure derby reste classique sans donner l'impression d'un déguisement.",
+    "Un blazer tailleur olive garde cette tenue chaleureuse et ancrée plutôt que rigide — idéal pour un moment semi-habillé en extérieur. La chemise ivoire l'élève, la chaussure derby reste classique, et une ceinture en cuir finalise les proportions.",
     "Chic, sans rigidité — le même pantalon tailleur ancre la tenue, tandis que la chemise seule (sans veste) la rend facile pour un dîner. Ajoutez l'écharpe s'il fait frais.",
-    "Une tenue quotidienne discrète et réfléchie, construite autour de votre palette — des lignes nettes, rien qui attire l'attention, facile à porter au quotidien.",
+    "Des pièces faciles du quotidien avec des lunettes de soleil pour finir — lignes nettes, rien de compliqué, prêt pour le soleil et le mouvement.",
+    "Une tenue quotidienne discrète et réfléchie, construite autour de votre palette — des lignes nettes, rien qui attire l'attention, facile à porter au quotidien. Lunettes de soleil dès que vous sortez.",
   ],
 };
 const GREETINGS = {
@@ -279,18 +386,165 @@ function LanguageSwitcher({ corner }) {
 }
 
 // ---------- Product catalog (mirrors the seed data in the real backend) ----------
+const ASSET_V = "10";
+const assetUrl = (path) => `${path}?v=${ASSET_V}`;
+
+const GREEN_PALETTE = new Set(["Olive", "Forest Green"]);
+const NEUTRAL_PALETTE = new Set(["Black", "Ivory / Cream", "White", "Grey / Charcoal"]);
+
 const CATALOG = {
-  blazer: { id: "p1", name: "Wool-Blend Tailored Blazer", price: 320, retailer: "Considered Studio", type: "blazer", color: "#3E4228", image: "/products/blazer.jpg", searchQuery: "olive green wool tailored blazer men women" },
-  blazerAlt: { id: "p1b", name: "Unstructured Linen Blazer", price: 265, retailer: "North & Field", type: "blazer", color: "#cbb994", image: "/products/blazer-alt.jpg", searchQuery: "sand beige unstructured linen blazer" },
-  shirt: { id: "p2", name: "Crisp Cotton Shirt", price: 95, retailer: "Considered Studio", type: "shirt", color: "#F5F2E9", image: "/products/shirt.jpg", searchQuery: "ivory crisp cotton dress shirt" },
-  shirtAlt: { id: "p2b", name: "Fine Merino Turtleneck", price: 110, retailer: "North & Field", type: "shirt", color: "#4a4a48", image: "/products/shirt-alt.jpg", searchQuery: "charcoal fine merino turtleneck sweater" },
-  trouser: { id: "p3", name: "Tailored Straight Trouser", price: 140, retailer: "Considered Studio", type: "trouser", color: "#3E4228", image: "/products/trouser.jpg", searchQuery: "olive tailored straight leg trousers" },
-  trouserAlt: { id: "p3b", name: "Wide-Leg Wool Trouser", price: 165, retailer: "Considered Studio", type: "trouser", color: "#6b6b63", image: "/products/trouser-alt.jpg", searchQuery: "grey wide leg wool trousers" },
-  shoe: { id: "p4", name: "Leather Derby Shoe", price: 210, retailer: "Aldern & Co.", type: "shoe", color: "#6b3f22", image: "/products/shoe.jpg", searchQuery: "brown leather derby dress shoes" },
-  shoeAlt: { id: "p4b", name: "Suede Chelsea Boot", price: 245, retailer: "Aldern & Co.", type: "shoe", color: "#4a3527", image: "/products/shoe-alt.jpg", searchQuery: "dark brown suede chelsea boots" },
-  scarf: { id: "p5", name: "Fine Wool Scarf", price: 85, retailer: "North & Field", type: "scarf", color: "#b08a5c", image: "/products/scarf.jpg", searchQuery: "camel tan fine wool scarf" },
-  scarfAlt: { id: "p5b", name: "Cashmere Pocket Square", price: 65, retailer: "Aldern & Co.", type: "scarf", color: "#C6A567", image: "/products/scarf-alt.jpg", searchQuery: "gold cashmere pocket square" },
+  blazer: { key: "blazer", id: "p1", name: "Wool-Blend Tailored Blazer", price: 320, retailer: "Considered Studio", type: "blazer", color: "#3E4228", paletteTags: ["Olive", "Forest Green"], image: assetUrl("/products/blazer.jpg"), searchQuery: "olive green wool tailored blazer", searchNoun: "wool tailored blazer" },
+  blazerAlt: { key: "blazerAlt", id: "p1b", name: "Unstructured Linen Blazer", price: 265, retailer: "North & Field", type: "blazer", color: "#cbb994", paletteTags: ["Sand / Beige", "Camel / Tan", "Ivory / Cream"], image: assetUrl("/products/blazer-alt.jpg"), searchQuery: "sand beige unstructured linen blazer", searchNoun: "unstructured linen blazer" },
+  blazerNavy: { key: "blazerNavy", id: "p1c", name: "Navy Wool Tailored Blazer", price: 310, retailer: "Considered Studio", type: "blazer", color: "#1f2a44", paletteTags: ["Navy"], image: assetUrl("/products/blazer-navy.jpg"), searchQuery: "navy wool tailored blazer", searchNoun: "wool tailored blazer" },
+  blazerBlack: { key: "blazerBlack", id: "p1d", name: "Black Wool Tailored Blazer", price: 315, retailer: "Considered Studio", type: "blazer", color: "#161616", paletteTags: ["Black"], image: assetUrl("/products/blazer-black.jpg"), searchQuery: "black wool tailored blazer", searchNoun: "wool tailored blazer" },
+  shirt: { key: "shirt", id: "p2", name: "Crisp Cotton Shirt", price: 95, retailer: "Considered Studio", type: "shirt", color: "#F5F2E9", paletteTags: ["Ivory / Cream", "White"], image: assetUrl("/products/shirt.jpg"), searchQuery: "ivory crisp cotton dress shirt", searchNoun: "crisp cotton dress shirt" },
+  shirtAlt: { key: "shirtAlt", id: "p2b", name: "Fine Merino Turtleneck", price: 110, retailer: "North & Field", type: "shirt", color: "#4a4a48", paletteTags: ["Grey / Charcoal", "Black"], image: assetUrl("/products/shirt-alt.jpg"), searchQuery: "charcoal fine merino turtleneck sweater", searchNoun: "fine merino turtleneck sweater" },
+  trouser: { key: "trouser", id: "p3", name: "Tailored Straight Trouser", price: 140, retailer: "Considered Studio", type: "trouser", color: "#3E4228", paletteTags: ["Olive", "Forest Green"], image: assetUrl("/products/trouser.jpg"), searchQuery: "olive tailored straight leg trousers", searchNoun: "tailored straight leg trousers" },
+  trouserAlt: { key: "trouserAlt", id: "p3b", name: "Wide-Leg Wool Trouser", price: 165, retailer: "Considered Studio", type: "trouser", color: "#6b6b63", paletteTags: ["Grey / Charcoal"], image: assetUrl("/products/trouser-alt.jpg"), searchQuery: "grey wide leg wool trousers", searchNoun: "wide leg wool trousers" },
+  trouserNavy: { key: "trouserNavy", id: "p3c", name: "Navy Tailored Trouser", price: 145, retailer: "Considered Studio", type: "trouser", color: "#1f2a44", paletteTags: ["Navy"], image: assetUrl("/products/trouser-navy.jpg"), searchQuery: "navy tailored dress trousers", searchNoun: "tailored dress trousers" },
+  trouserBlack: { key: "trouserBlack", id: "p3d", name: "Black Tailored Trouser", price: 145, retailer: "Considered Studio", type: "trouser", color: "#161616", paletteTags: ["Black"], image: assetUrl("/products/trouser-black.jpg"), searchQuery: "black tailored dress trousers", searchNoun: "tailored dress trousers" },
+  shoe: { key: "shoe", id: "p4", name: "Leather Derby Shoe", price: 210, retailer: "Aldern & Co.", type: "shoe", color: "#6b3f22", paletteTags: ["Camel / Tan", "Rust / Terracotta"], image: assetUrl("/products/shoe.jpg"), searchQuery: "brown leather derby dress shoes", searchNoun: "leather derby dress shoes" },
+  shoeAlt: { key: "shoeAlt", id: "p4b", name: "Suede Chelsea Boot", price: 245, retailer: "Aldern & Co.", type: "shoe", color: "#4a3527", paletteTags: ["Camel / Tan", "Black"], image: assetUrl("/products/shoe-alt.jpg"), searchQuery: "dark brown suede chelsea boots", searchNoun: "suede chelsea boots" },
+  shoeBlack: { key: "shoeBlack", id: "p4c", name: "Black Leather Derby", price: 220, retailer: "Aldern & Co.", type: "shoe", color: "#161616", paletteTags: ["Black"], image: assetUrl("/products/shoe-black.jpg"), searchQuery: "black leather derby dress shoes", searchNoun: "leather derby dress shoes" },
+  scarf: { key: "scarf", id: "p5", name: "Fine Wool Scarf", price: 85, retailer: "North & Field", type: "accessory", color: "#b08a5c", paletteTags: ["Camel / Tan"], image: assetUrl("/products/scarf.jpg"), searchQuery: "camel tan fine wool scarf", searchNoun: "fine wool scarf" },
+  scarfAlt: { key: "scarfAlt", id: "p5b", name: "Cashmere Pocket Square", price: 65, retailer: "Aldern & Co.", type: "accessory", color: "#C6A567", paletteTags: ["Bold Color", "Camel / Tan"], image: assetUrl("/products/scarf-alt.jpg"), searchQuery: "gold cashmere pocket square", searchNoun: "cashmere pocket square" },
+  scarfBurgundy: { key: "scarfBurgundy", id: "p5c", name: "Burgundy Wool Scarf", price: 88, retailer: "North & Field", type: "accessory", color: "#5c1f2e", paletteTags: ["Burgundy"], image: assetUrl("/products/scarf-burgundy.jpg"), searchQuery: "burgundy wool scarf", searchNoun: "wool scarf" },
+  belt: { key: "belt", id: "p6", name: "Leather Belt", price: 95, retailer: "Aldern & Co.", type: "accessory", color: "#6b3f22", paletteTags: ["Camel / Tan", "Rust / Terracotta"], image: assetUrl("/products/belt.jpg"), searchQuery: "brown leather dress belt", searchNoun: "leather dress belt" },
+  beltAlt: { key: "beltAlt", id: "p6b", name: "Black Leather Belt", price: 90, retailer: "Aldern & Co.", type: "accessory", color: "#161616", paletteTags: ["Black"], image: assetUrl("/products/belt-alt.jpg"), searchQuery: "black leather dress belt", searchNoun: "leather dress belt" },
+  sunglasses: { key: "sunglasses", id: "p7", name: "Acetate Sunglasses", price: 145, retailer: "North & Field", type: "accessory", color: "#8B5A2B", paletteTags: ["Camel / Tan", "Rust / Terracotta"], image: assetUrl("/products/sunglasses.jpg"), searchQuery: "tortoise acetate sunglasses", searchNoun: "acetate sunglasses" },
+  sunglassesAlt: { key: "sunglassesAlt", id: "p7b", name: "Black Acetate Sunglasses", price: 135, retailer: "North & Field", type: "accessory", color: "#0B0B0C", paletteTags: ["Black"], image: assetUrl("/products/sunglasses-alt.jpg"), searchQuery: "black acetate sunglasses", searchNoun: "acetate sunglasses" },
 };
+
+/** Search phrases for each palette swatch — used to make shopping precise. */
+const COLOR_SEARCH_TERMS = {
+  Black: ["black"],
+  "Ivory / Cream": ["ivory", "cream", "off-white"],
+  "Grey / Charcoal": ["charcoal", "grey", "gray"],
+  "Camel / Tan": ["camel", "tan", "cognac", "brown"],
+  Olive: ["olive", "olive green"],
+  Navy: ["navy", "navy blue"],
+  Burgundy: ["burgundy", "wine"],
+  "Forest Green": ["forest green", "dark green"],
+  "Sand / Beige": ["beige", "sand", "khaki"],
+  "Rust / Terracotta": ["rust", "terracotta"],
+  "Blush / Dusty Pink": ["blush", "dusty pink"],
+  "Bold Color": ["bold", "statement color"],
+};
+
+function colorTermsForLabels(labels = []) {
+  return labels.flatMap((l) => COLOR_SEARCH_TERMS[l] || [String(l).toLowerCase()]);
+}
+
+function itemIsGreen(itemKey) {
+  const tags = CATALOG[itemKey]?.paletteTags || [];
+  return tags.some((t) => GREEN_PALETTE.has(t));
+}
+
+function paletteWantsGreen(palette = []) {
+  return (palette || []).some((t) => GREEN_PALETTE.has(t));
+}
+
+function itemPaletteScore(itemKey, palette = [], avoid = []) {
+  const item = CATALOG[itemKey];
+  if (!item) return 0;
+  const tags = item.paletteTags || [];
+  let score = 0;
+  for (const tag of tags) {
+    if (avoid.includes(tag)) score -= 50;
+    if (palette.includes(tag)) score += 20;
+  }
+  // Never push olive/forest when the user did not choose those colors
+  if (itemIsGreen(itemKey) && palette.length && !paletteWantsGreen(palette)) {
+    score -= 60;
+  }
+  // Direct overlap is required for strong pieces; neutrals get a smaller consolation
+  if (score <= 0 && tags.some((t) => NEUTRAL_PALETTE.has(t))) {
+    const wantsNeutral = palette.some((t) => NEUTRAL_PALETTE.has(t) || t === "Navy" || t === "Sand / Beige" || t === "Camel / Tan");
+    score += wantsNeutral ? 8 : 1;
+  }
+  // Soft match: sand/camel pieces for warm palettes without green
+  if (score <= 0 && tags.some((t) => t === "Sand / Beige" || t === "Camel / Tan")) {
+    if (palette.some((t) => ["Sand / Beige", "Camel / Tan", "Ivory / Cream", "Rust / Terracotta", "Navy", "Burgundy"].includes(t))) {
+      score += 10;
+    }
+  }
+  return score;
+}
+
+function outfitPaletteScore(itemKeys, palette = [], avoid = []) {
+  if (!palette.length) return 0;
+  return itemKeys.reduce((sum, k) => sum + itemPaletteScore(k, palette, avoid), 0);
+}
+
+/** Prefer the alt/base variant that best matches the user's palette. */
+function bestVariantForPalette(baseKey, palette = [], avoid = []) {
+  const fam = familyOfKey(baseKey) || baseKey;
+  return bestVariantInFamily(fam, palette, avoid);
+}
+
+function tuneItemsToPalette(itemKeys, palette = [], avoid = []) {
+  return itemKeys.map((key) => {
+    const fam = familyOfKey(key);
+    if (!fam) return key;
+    return bestVariantInFamily(fam, palette, avoid);
+  });
+}
+
+/** Build a shopping query that forces the user's palette colors. */
+function buildItemSearchQuery(item, palette = [], avoid = []) {
+  if (!item) return "";
+  const preferred = (palette || []).filter((p) => !(avoid || []).includes(p));
+  const tags = item.paletteTags || [];
+  let colorLabel = preferred.find((p) => tags.includes(p));
+  if (!colorLabel && preferred.length) {
+    // Map garment type to a sensible palette pick when catalog photo color differs
+    if (item.type === "shirt") {
+      colorLabel = preferred.find((p) => ["Ivory / Cream", "White", "Black", "Grey / Charcoal", "Navy", "Blush / Dusty Pink"].includes(p)) || preferred[0];
+    } else if (item.type === "shoe" || item.key?.includes("belt") || item.key?.includes("Belt")) {
+      colorLabel = preferred.find((p) => ["Black", "Camel / Tan", "Rust / Terracotta", "Burgundy", "Navy"].includes(p)) || preferred[0];
+    } else if (item.key?.includes("sunglasses")) {
+      colorLabel = preferred.find((p) => ["Black", "Camel / Tan", "Ivory / Cream"].includes(p)) || preferred[0];
+    } else {
+      // Outer/trouser/scarf — prefer non-basics first so navy/olive/burgundy win over black
+      colorLabel = preferred.find((p) => !["Black", "Ivory / Cream", "White"].includes(p)) || preferred[0];
+    }
+  }
+  // If still no palette, fall back to the garment's own tagged color
+  if (!colorLabel && tags.length) colorLabel = tags[0];
+  const colorPhrase = colorLabel ? (COLOR_SEARCH_TERMS[colorLabel] || [colorLabel.toLowerCase()])[0] : null;
+  const noun = item.searchNoun || item.name;
+  if (colorPhrase) return `${colorPhrase} ${noun}`.replace(/\s+/g, " ").trim();
+  return item.searchQuery || item.name;
+}
+
+function productMatchesPalette(product, palette = [], avoid = []) {
+  const title = `${product.title || ""} ${product.merchant || ""}`.toLowerCase();
+  const avoidTerms = colorTermsForLabels(avoid);
+  if (avoidTerms.some((t) => t.length > 2 && title.includes(t))) return false;
+  if (!palette.length) return true;
+  const want = colorTermsForLabels(palette);
+  if (want.some((t) => t.length > 2 && title.includes(t))) return true;
+  // Has a recognizable fashion color that is NOT in the palette → reject for precision
+  const knownColors = ["white", "ivory", "cream", "off-white", "black", "navy", "grey", "gray", "charcoal", "beige", "sand", "khaki", "olive", "camel", "tan", "cognac", "brown", "burgundy", "wine", "rust", "terracotta", "blush", "pink", "forest", "green", "blue"];
+  if (knownColors.some((c) => new RegExp(`\\b${c}\\b`).test(title))) return false;
+  // No color word — keep as a soft candidate (ranked lower)
+  return true;
+}
+
+function productPaletteRank(product, palette = []) {
+  const title = (product.title || "").toLowerCase();
+  const want = colorTermsForLabels(palette);
+  let score = 0;
+  for (const t of want) {
+    if (t.length > 2 && title.includes(t)) score += 3;
+  }
+  return score;
+}
+
+function catalogKeyForItem(item) {
+  if (item?.key && CATALOG[item.key]) return item.key;
+  return Object.keys(CATALOG).find((k) => CATALOG[k].id === item?.id) || null;
+}
 
 // Real multi-store search — budget → high street → premium → luxury
 const STORE_DIRECTORY = [
@@ -325,54 +579,678 @@ function googleShoppingUrl(query) {
   return `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(query)}`;
 }
 
-function storeLinksForItem(item) {
-  const q = item.searchQuery || item.name;
+function storeLinksForItem(item, palette = [], avoid = []) {
+  const q = buildItemSearchQuery(item, palette, avoid);
   return STORE_DIRECTORY.map((store) => ({
     ...store,
     href: store.url(q),
   }));
 }
-const ALT_MAP = { blazer: "blazerAlt", shirt: "shirtAlt", trouser: "trouserAlt", shoe: "shoeAlt", scarf: "scarfAlt" };
+const ALT_MAP = {
+  blazer: "blazerAlt",
+  shirt: "shirtAlt",
+  trouser: "trouserAlt",
+  shoe: "shoeAlt",
+  scarf: "scarfAlt",
+  belt: "beltAlt",
+  sunglasses: "sunglassesAlt",
+};
 const ALT_MAP_REV = Object.fromEntries(Object.entries(ALT_MAP).map(([k, v]) => [v, k]));
 
-const OUTFIT_TEMPLATES = [
+/** All color/cut variants per garment family — palette picker chooses among these. */
+const ITEM_FAMILY_VARIANTS = {
+  blazer: ["blazer", "blazerAlt", "blazerNavy", "blazerBlack"],
+  shirt: ["shirt", "shirtAlt"],
+  trouser: ["trouser", "trouserAlt", "trouserNavy", "trouserBlack"],
+  shoe: ["shoe", "shoeAlt", "shoeBlack"],
+  scarf: ["scarf", "scarfAlt", "scarfBurgundy"],
+  belt: ["belt", "beltAlt"],
+  sunglasses: ["sunglasses", "sunglassesAlt"],
+};
+const KEY_TO_FAMILY = Object.fromEntries(
+  Object.entries(ITEM_FAMILY_VARIANTS).flatMap(([fam, keys]) => keys.map((k) => [k, fam]))
+);
+
+function familyOfKey(key) {
+  if (!key) return null;
+  return KEY_TO_FAMILY[key] || (ITEM_FAMILY_VARIANTS[key] ? key : null);
+}
+
+function variantsForKey(key) {
+  const fam = familyOfKey(key);
+  return fam ? ITEM_FAMILY_VARIANTS[fam] : [key];
+}
+
+/** Best catalog variant for a family given the user's palette. */
+function bestVariantInFamily(family, palette = [], avoid = [], structureHint = null) {
+  const variants = ITEM_FAMILY_VARIANTS[family] || [];
+  if (!variants.length) return family;
+  let best = variants[0];
+  let bestScore = -Infinity;
+  for (const v of variants) {
+    let s = itemPaletteScore(v, palette, avoid);
+    // Prefer structured (non-Alt linen/wide) when tailored
+    if (structureHint === "tailored" && !String(v).includes("Alt")) s += 4;
+    if (structureHint === "relaxed" && String(v).includes("Alt")) s += 4;
+    if (s > bestScore) {
+      bestScore = s;
+      best = v;
+    }
+  }
+  return best;
+}
+
+function nextVariantInFamily(currentKey) {
+  const variants = variantsForKey(currentKey);
+  const idx = variants.indexOf(currentKey);
+  if (idx < 0) return variants[0] || currentKey;
+  return variants[(idx + 1) % variants.length];
+}
+
+const ACCESSORY_FAMILIES = ["belt", "scarf", "sunglasses"];
+const ITEM_LABELS = {
+  en: { blazer: "blazer", shirt: "shirt", trouser: "trousers", shoe: "shoes", belt: "belt", scarf: "scarf", sunglasses: "sunglasses" },
+  es: { blazer: "blazer", shirt: "camisa", trouser: "pantalón", shoe: "zapatos", belt: "cinturón", scarf: "bufanda", sunglasses: "gafas" },
+  fr: { blazer: "blazer", shirt: "chemise", trouser: "pantalon", shoe: "chaussures", belt: "ceinture", scarf: "écharpe", sunglasses: "lunettes" },
+};
+const ITEM_KEYWORDS = {
+  blazer: ["blazer", "jacket", "coat", "chaqueta", "veste", "sacou"],
+  shirt: ["shirt", "top", "turtleneck", "sweater", "knit", "camisa", "chemise", "col roulé", "pull"],
+  trouser: ["trouser", "trousers", "pant", "pants", "bottom", "pantalon", "pantalones"],
+  shoe: ["shoe", "shoes", "boot", "boots", "footwear", "zapato", "zapatos", "chaussure", "chaussures", "botas", "bottes"],
+  belt: ["belt", "cinturón", "cinturon", "ceinture"],
+  scarf: ["scarf", "pocket square", "bufanda", "écharpe", "echarpe", "foulard", "pañuelo"],
+  sunglasses: ["sunglass", "sunglasses", "glasses", "gafas", "lunettes"],
+};
+
+/** Detect “change the belt / different shirt / everything but the shoes” style requests. */
+function detectRevisionRequest(text) {
+  const raw = (text || "").trim();
+  const lower = raw.toLowerCase();
+  if (!lower) return null;
+
+  const revisionCue = /\b(different|another|change|swap|replace|instead|not the|don't like|dont like|hate|wrong|update|tweak|switch|new|other|remove|drop|lose|add|sin el|sin la|cambia|cambiar|otro|otra|diferente|no me gusta|quita|quitar|añade|anade|changer|autre|différent|different|remplace|remplacer|pas le|pas la|enlever|retire|ajouter)\b/i.test(lower)
+    || /\b(everything|rest|else).{0,40}\b(but|except|aside|menos|sauf)\b/i.test(lower)
+    || /\b(but|except|menos|sauf).{0,20}\b(the|el|la|le|les)?\s*(belt|shirt|blazer|trouser|pant|shoe|scarf|sunglass|cintur|ceinture|camisa|chemise)/i.test(lower);
+
+  const targets = [];
+  for (const [family, keys] of Object.entries(ITEM_KEYWORDS)) {
+    if (keys.some((k) => lower.includes(k))) targets.push(family);
+  }
+  if (!targets.length) return null;
+  if (!revisionCue && targets.length) {
+    // Bare “belt?” isn’t a revision — need a cue unless it’s clearly “different X”
+    return null;
+  }
+
+  const remove = /\b(remove|drop|lose|without|no belt|no scarf|quita|quitar|sin el|sin la|enlever|retire|sans)\b/i.test(lower);
+  const lookMatch = lower.match(/\b(?:look|option|opción|option)\s*(\d)\b/i);
+  const lookIndex = lookMatch ? Math.max(0, parseInt(lookMatch[1], 10) - 1) : null;
+
+  return { targets: [...new Set(targets)], remove, lookIndex };
+}
+
+function otherAccessoryKey(currentFamily, items, palette, avoid, turn = 0) {
+  const present = new Set(items.map(familyOfKey).filter(Boolean));
+  const pool = ACCESSORY_FAMILIES.filter((f) => f !== currentFamily);
+  // Prefer a family not already in the outfit
+  const ordered = [...pool.filter((f) => !present.has(f)), ...pool.filter((f) => present.has(f))];
+  if (!ordered.length) return null;
+  const pick = ordered[turn % ordered.length];
+  return bestVariantForPalette(pick, palette, avoid);
+}
+
+function reviseItemInList(items, family, { remove = false, turn = 0, palette = [], avoid = [] } = {}) {
+  const variants = ITEM_FAMILY_VARIANTS[family] || [];
+  const idx = items.findIndex((k) => variants.includes(k));
+  const next = [...items];
+
+  if (remove) {
+    if (idx >= 0) {
+      const replacement = ACCESSORY_FAMILIES.includes(family)
+        ? otherAccessoryKey(family, items, palette, avoid, turn)
+        : null;
+      if (replacement) next[idx] = replacement;
+      else next.splice(idx, 1);
+    }
+    return next;
+  }
+
+  if (idx >= 0) {
+    // Cycle through color variants in the family
+    next[idx] = nextVariantInFamily(next[idx]);
+    // Every other ask on accessories: jump to a different accessory type
+    if (ACCESSORY_FAMILIES.includes(family) && turn % 3 === 2) {
+      const other = otherAccessoryKey(family, items, palette, avoid, turn);
+      if (other) next[idx] = other;
+    }
+    return next;
+  }
+
+  // Target not in outfit — add best palette variant
+  const addKey = bestVariantInFamily(family, palette, avoid);
+  if (ACCESSORY_FAMILIES.includes(family)) {
+    const accIdx = next.findIndex((k) => ACCESSORY_FAMILIES.includes(familyOfKey(k)));
+    if (accIdx >= 0) next[accIdx] = addKey;
+    else next.push(addKey);
+  } else {
+    next.push(addKey);
+  }
+  return next;
+}
+
+function reviseOutfits(baseOutfits, revision, profile, lang = "en") {
+  const palette = profile?.palette || [];
+  const avoid = profile?.avoid || [];
+  const turn = stylistTurn;
+  const labels = ITEM_LABELS[lang] || ITEM_LABELS.en;
+
+  const outfits = baseOutfits.map((outfit, oi) => {
+    if (revision.lookIndex != null && oi !== revision.lookIndex) return { ...outfit };
+    let items = [...outfit.items];
+    for (const family of revision.targets) {
+      items = reviseItemInList(items, family, {
+        remove: revision.remove,
+        turn: turn + oi,
+        palette,
+        avoid,
+      });
+    }
+    // Deduplicate families if accessory swap collided
+    const seen = new Set();
+    items = items.filter((k) => {
+      const fam = familyOfKey(k) || k;
+      if (seen.has(fam)) return false;
+      seen.add(fam);
+      return true;
+    });
+    const changed = revision.targets.map((f) => labels[f] || f).join(", ");
+    const rationale = revision.remove
+      ? (lang === "es"
+        ? `Quité el ${changed} y cerré el look de otra forma — el resto se mantiene.`
+        : lang === "fr"
+          ? `J’ai retiré le ${changed} et fini autrement — le reste est inchangé.`
+          : `I dropped the ${changed} and finished the look differently — everything else stays.`)
+      : (lang === "es"
+        ? `Cambié el ${changed}. El resto del look se mantiene.`
+        : lang === "fr"
+          ? `J’ai changé le ${changed}. Le reste de la tenue reste.`
+          : `I changed the ${changed}. Everything else in the look stays.`);
+    return {
+      ...outfit,
+      id: `${outfit.id || "look"}-rev-${turn}-${oi}`,
+      items,
+      rationale,
+    };
+  });
+
+  return outfits;
+}
+
+function revisionIntroKey(revision) {
+  if (revision.remove) return "stylistRevisionRemoved";
+  if (revision.targets.length > 1) return "stylistRevisionMulti";
+  return "stylistRevisionIntro";
+}
+
+/** Recipe library — scored against the user's prompt + profile to pick varied looks. */
+const OUTFIT_RECIPES = [
   {
-    keywords: ["wedding", "formal", "event"],
-    rationale: "A tailored olive blazer keeps this warm and grounded rather than stiff — right for an outdoor, semi-formal moment. The ivory shirt lifts it, and the derby shoe stays classic without reading costume-y.",
-    items: ["blazer", "shirt", "trouser", "shoe"],
+    id: "quiet-tailored-work",
+    outer: "blazer", top: "shirt", bottom: "trouser", shoe: "shoe", acc: "belt",
+    occasions: ["work", "office", "meeting", "client", "formal", "wedding", "event"],
+    vibe: ["quiet", "classic", "polished"],
+    archetypes: ["Quiet Tailored", "Classic Polished"],
+    lifestyles: ["Office / client-facing"],
+    structure: "tailored",
   },
   {
-    keywords: ["dinner", "date", "work"],
-    rationale: "Smart, not stiff — the same tailored trouser grounds the look, while the crisp shirt alone (no jacket) keeps it easy for a dinner setting. Add the scarf if the room runs cool.",
-    items: ["shirt", "trouser", "shoe", "scarf"],
+    id: "classic-polished-event",
+    outer: "blazer", top: "shirt", bottom: "trouser", shoe: "shoe", acc: "scarf",
+    occasions: ["wedding", "formal", "event", "dinner"],
+    vibe: ["classic", "polished", "quiet"],
+    archetypes: ["Classic Polished", "Quiet Tailored"],
+    lifestyles: ["Office / client-facing", "On the move — travel, events, varied"],
+    structure: "tailored",
   },
   {
-    keywords: [],
-    rationale: "A quiet, considered everyday look built around your palette — clean lines, nothing shouting for attention, easy to actually live in.",
-    items: ["shirt", "trouser", "shoe"],
+    id: "modern-sharp-work",
+    outer: "blazer", top: "shirtAlt", bottom: "trouserAlt", shoe: "shoe", acc: "belt",
+    occasions: ["work", "office", "meeting", "dinner", "evening"],
+    vibe: ["modern", "minimal", "bold"],
+    archetypes: ["Modern Sharp", "Minimal Directional", "Bold Expressive"],
+    lifestyles: ["Office / client-facing", "Creative or flexible workplace"],
+    structure: "structured",
+  },
+  {
+    id: "minimal-clean",
+    outer: null, top: "shirt", bottom: "trouser", shoe: "shoe", acc: "sunglasses",
+    occasions: ["everyday", "casual", "weekend", "work"],
+    vibe: ["minimal", "quiet", "modern"],
+    archetypes: ["Minimal Directional", "Quiet Tailored", "Modern Sharp"],
+    lifestyles: ["Remote, mostly at home", "Creative or flexible workplace", "Student life"],
+    structure: "tailored",
+  },
+  {
+    id: "relaxed-considered",
+    outer: "blazerAlt", top: "shirt", bottom: "trouserAlt", shoe: "shoeAlt", acc: "sunglasses",
+    occasions: ["weekend", "casual", "travel", "everyday", "dinner"],
+    vibe: ["relaxed", "warm", "classic"],
+    archetypes: ["Relaxed Considered", "Warm Layered"],
+    lifestyles: ["Creative or flexible workplace", "Remote, mostly at home", "On the move — travel, events, varied"],
+    structure: "relaxed",
+  },
+  {
+    id: "warm-layered-knit",
+    outer: null, top: "shirtAlt", bottom: "trouser", shoe: "shoeAlt", acc: "scarf",
+    occasions: ["dinner", "date", "evening", "weekend", "everyday"],
+    vibe: ["warm", "relaxed", "romantic"],
+    archetypes: ["Warm Layered", "Romantic Soft", "Relaxed Considered"],
+    lifestyles: ["Remote, mostly at home", "Creative or flexible workplace"],
+    structure: "relaxed",
+  },
+  {
+    id: "romantic-soft-dinner",
+    outer: null, top: "shirt", bottom: "trouserAlt", shoe: "shoe", acc: "scarf",
+    occasions: ["dinner", "date", "evening", "event"],
+    vibe: ["romantic", "warm", "soft"],
+    archetypes: ["Romantic Soft", "Warm Layered"],
+    lifestyles: ["Creative or flexible workplace", "On the move — travel, events, varied"],
+    structure: "relaxed",
+  },
+  {
+    id: "bold-expressive",
+    outer: "blazerAlt", top: "shirtAlt", bottom: "trouserAlt", shoe: "shoeAlt", acc: "sunglasses",
+    occasions: ["weekend", "travel", "casual", "date", "event"],
+    vibe: ["bold", "modern", "warm"],
+    archetypes: ["Bold Expressive", "Modern Sharp"],
+    lifestyles: ["Creative or flexible workplace", "Student life", "On the move — travel, events, varied"],
+    structure: "relaxed",
+  },
+  {
+    id: "travel-easy",
+    outer: "blazerAlt", top: "shirt", bottom: "trouserAlt", shoe: "shoeAlt", acc: "sunglasses",
+    occasions: ["travel", "weekend", "casual", "everyday"],
+    vibe: ["relaxed", "warm", "modern"],
+    archetypes: ["Relaxed Considered", "Warm Layered", "Minimal Directional"],
+    lifestyles: ["On the move — travel, events, varied", "Student life"],
+    structure: "relaxed",
+  },
+  {
+    id: "office-no-fuss",
+    outer: "blazer", top: "shirt", bottom: "trouser", shoe: "shoe", acc: null,
+    occasions: ["work", "office", "meeting", "client"],
+    vibe: ["quiet", "classic", "modern", "polished"],
+    archetypes: ["Quiet Tailored", "Classic Polished", "Minimal Directional"],
+    lifestyles: ["Office / client-facing"],
+    structure: "tailored",
+  },
+  {
+    id: "remote-elevated",
+    outer: null, top: "shirtAlt", bottom: "trouser", shoe: "shoe", acc: "belt",
+    occasions: ["everyday", "work", "weekend", "casual"],
+    vibe: ["warm", "relaxed", "quiet", "minimal"],
+    archetypes: ["Relaxed Considered", "Warm Layered", "Minimal Directional"],
+    lifestyles: ["Remote, mostly at home", "Student life"],
+    structure: "relaxed",
+  },
+  {
+    id: "student-sun",
+    outer: null, top: "shirt", bottom: "trouserAlt", shoe: "shoeAlt", acc: "sunglasses",
+    occasions: ["weekend", "casual", "everyday", "sunny", "travel"],
+    vibe: ["relaxed", "minimal", "warm", "bold"],
+    archetypes: ["Relaxed Considered", "Bold Expressive", "Minimal Directional"],
+    lifestyles: ["Student life", "Remote, mostly at home"],
+    structure: "relaxed",
+  },
+  {
+    id: "sharp-evening",
+    outer: "blazer", top: "shirt", bottom: "trouserAlt", shoe: "shoe", acc: "scarf",
+    occasions: ["dinner", "date", "evening", "event"],
+    vibe: ["modern", "bold", "romantic", "polished"],
+    archetypes: ["Modern Sharp", "Bold Expressive", "Romantic Soft", "Classic Polished"],
+    lifestyles: ["On the move — travel, events, varied", "Creative or flexible workplace"],
+    structure: "structured",
+  },
+  {
+    id: "formal-linen",
+    outer: "blazerAlt", top: "shirt", bottom: "trouser", shoe: "shoe", acc: "belt",
+    occasions: ["wedding", "formal", "event", "travel"],
+    vibe: ["relaxed", "warm", "classic"],
+    archetypes: ["Relaxed Considered", "Warm Layered", "Classic Polished"],
+    lifestyles: ["On the move — travel, events, varied", "Creative or flexible workplace"],
+    structure: "relaxed",
   },
 ];
 
+const OCCASION_KEYWORDS = [
+  { id: "wedding", keys: ["wedding", "formal", "gala", "black tie", "ceremony", "boda", "mariage", "formel"] },
+  { id: "dinner", keys: ["dinner", "date", "evening", "restaurant", "cena", "dîner", "soir", "rendez"] },
+  { id: "work", keys: ["work", "office", "meeting", "client", "interview", "trabajo", "bureau", "réunion"] },
+  { id: "travel", keys: ["travel", "airport", "trip", "flight", "viaje", "voyage", "avion"] },
+  { id: "weekend", keys: ["weekend", "casual", "brunch", "fin de semana", "week-end"] },
+  { id: "event", keys: ["event", "party", "celebration", "cocktail", "evento", "fête", "soirée"] },
+  { id: "everyday", keys: ["everyday", "daily", "nothing fussy", "diario", "quotidien", "casual"] },
+];
+
+function detectOccasions(text) {
+  const lower = (text || "").toLowerCase();
+  const hits = [];
+  for (const row of OCCASION_KEYWORDS) {
+    if (row.keys.some((k) => lower.includes(k))) hits.push(row.id);
+  }
+  return hits;
+}
+
+function normalizeArchetype(archetype) {
+  return String(archetype || "").replace(/\s*&\s*/g, " ").replace(/\s+/g, " ").trim();
+}
+
+function archetypeVibes(archetype) {
+  const a = normalizeArchetype(archetype).toLowerCase();
+  if (a.includes("quiet")) return ["quiet", "classic", "polished"];
+  if (a.includes("relaxed")) return ["relaxed", "warm", "classic"];
+  if (a.includes("modern")) return ["modern", "minimal", "bold"];
+  if (a.includes("warm")) return ["warm", "relaxed", "romantic"];
+  if (a.includes("classic")) return ["classic", "polished", "quiet"];
+  if (a.includes("minimal")) return ["minimal", "modern", "quiet"];
+  if (a.includes("romantic")) return ["romantic", "warm", "soft"];
+  if (a.includes("bold")) return ["bold", "modern", "warm"];
+  return ["quiet", "classic"];
+}
+
+function profileOccasionIds(profile) {
+  const map = {
+    Work: "work",
+    "Date nights": "dinner",
+    Travel: "travel",
+    "Events & celebrations": "event",
+    "Everyday, just want to feel put together": "everyday",
+  };
+  return (profile?.occasions || []).map((o) => map[o]).filter(Boolean);
+}
+
+function lifestyleSignals(lifestyle) {
+  const l = lifestyle || "";
+  if (l.includes("Office")) return { occasions: ["work"], preferStructure: "tailored", preferOuter: true };
+  if (l.includes("Creative")) return { occasions: ["work", "weekend", "dinner"], preferStructure: "relaxed", preferOuter: false };
+  if (l.includes("Remote")) return { occasions: ["everyday", "weekend"], preferStructure: "relaxed", preferOuter: false };
+  if (l.includes("On the move") || l.includes("travel")) return { occasions: ["travel", "event", "weekend"], preferStructure: "relaxed", preferOuter: true };
+  if (l.includes("Student")) return { occasions: ["everyday", "weekend", "casual"], preferStructure: "relaxed", preferOuter: false };
+  return { occasions: [], preferStructure: null, preferOuter: null };
+}
+
+function fitSignals(fit) {
+  const f = (fit || "").toLowerCase();
+  if (f.includes("fitted") || f.includes("tailored")) return { structure: "tailored", preferBase: true, preferOuter: true };
+  if (f.includes("structured") || f.includes("true to size")) return { structure: "structured", preferBase: true, preferOuter: true };
+  if (f.includes("oversized")) return { structure: "relaxed", preferBase: false, preferOuter: false };
+  if (f.includes("relaxed")) return { structure: "relaxed", preferBase: false, preferOuter: null };
+  return { structure: null, preferBase: null, preferOuter: null };
+}
+
+function recipeItems(recipe) {
+  return [recipe.outer, recipe.top, recipe.bottom, recipe.shoe, recipe.acc].filter(Boolean);
+}
+
+/** Pick the best color variant per family using palette first, then fit. */
+function tuneItemsToProfile(itemKeys, profile) {
+  const palette = profile?.palette || [];
+  const avoid = profile?.avoid || [];
+  const fit = fitSignals(profile?.fit);
+  const life = lifestyleSignals(profile?.lifestyle);
+  const vibes = archetypeVibes(profile?.archetype);
+  const wantTailored = fit.structure === "tailored" || fit.structure === "structured"
+    || life.preferStructure === "tailored"
+    || vibes.some((v) => ["quiet", "classic", "polished", "minimal"].includes(v));
+  const wantRelaxed = fit.structure === "relaxed"
+    || life.preferStructure === "relaxed"
+    || vibes.some((v) => ["relaxed", "warm", "romantic", "bold"].includes(v));
+  const structureHint = wantRelaxed && !wantTailored ? "relaxed" : wantTailored && !wantRelaxed ? "tailored" : fit.structure;
+
+  return itemKeys.map((key) => {
+    const fam = familyOfKey(key);
+    if (!fam) return key;
+    return bestVariantInFamily(fam, palette, avoid, structureHint);
+  });
+}
+
+function hashSeed(str) {
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return Math.abs(h);
+}
+
+function buildRationale(recipe, occasionIds, lang, profile = {}) {
+  const palette = profile?.palette || [];
+  const hasBlazer = !!recipe.outer;
+  const primary = occasionIds[0] || "everyday";
+  const colorHint = palette.slice(0, 2).join(", ");
+  const arch = normalizeArchetype(profile?.archetype) || "your style";
+  const fit = profile?.fit || "";
+  const fitBit = fit ? ` ${fit.toLowerCase()} fit,` : "";
+  const en = {
+    wedding: hasBlazer
+      ? `Built for your ${arch} profile —${fitBit} a tailored outer layer in ${colorHint || "your palette"}, clean shirt, and trousers that hold the line.`
+      : `For your ${arch} taste — polished pieces in ${colorHint || "your colors"} without going costume.`,
+    dinner: `Dialed to your ${arch} DNA —${fitBit} evening-ready in ${colorHint || "your palette"}, finished so it feels intentional.`,
+    work: hasBlazer
+      ? `Client-ready for how you actually dress (${arch}) —${fitBit} structured layers in ${colorHint || "your palette"}.`
+      : `Work-appropriate for your ${arch} style —${fitBit} elevated basics in ${colorHint || "your colors"}.`,
+    travel: `Travel-smart for your ${arch} wardrobe — pieces in ${colorHint || "your palette"} that move and still look put together.`,
+    weekend: `Weekend ease matched to your ${arch} answers —${fitBit} relaxed intention in ${colorHint || "your colors"}.`,
+    event: `Celebration polish for a ${arch} dresser —${fitBit} clear silhouette in ${colorHint || "your palette"}.`,
+    everyday: `An everyday edit from your profile (${arch}) —${fitBit} built around ${colorHint || "your palette"}, nothing shouting.`,
+    formal: `Formal without stiffness — aligned to your ${arch} choices and ${colorHint || "chosen"} colors.`,
+    evening: `Evening polish for your ${arch} style — ${colorHint || "your palette"}, wearable in low light.`,
+    casual: `Casual with your point of view (${arch}) — easy pieces in ${colorHint || "your colors"}.`,
+  };
+  const es = {
+    wedding: `Según tu perfil ${arch} — capa sastre en ${colorHint || "tu paleta"}.`,
+    dinner: `Ajustado a tu estilo ${arch} — listo para la noche en ${colorHint || "tu paleta"}.`,
+    work: `Listo para el trabajo según tu perfil ${arch} — ${colorHint || "tu paleta"}.`,
+    travel: `Viaje inteligente para tu estilo ${arch} — ${colorHint || "tu paleta"}.`,
+    weekend: `Fin de semana según tus respuestas (${arch}) — ${colorHint || "tus colores"}.`,
+    event: `Brillo de celebración para un estilo ${arch} — ${colorHint || "tu paleta"}.`,
+    everyday: `Edit diario desde tu perfil (${arch}) — alrededor de ${colorHint || "tu paleta"}.`,
+    formal: `Formal sin rigidez — alineado a tu ${arch} y ${colorHint || "tus colores"}.`,
+    evening: `Noche según tu estilo ${arch} — ${colorHint || "tu paleta"}.`,
+    casual: `Casual con tu criterio (${arch}) — ${colorHint || "tus colores"}.`,
+  };
+  const fr = {
+    wedding: `Selon votre profil ${arch} — couche tailleur dans ${colorHint || "votre palette"}.`,
+    dinner: `Calé sur votre style ${arch} — prêt pour le soir dans ${colorHint || "votre palette"}.`,
+    work: `Prêt pour le bureau selon votre profil ${arch} — ${colorHint || "votre palette"}.`,
+    travel: `Voyage malin pour votre style ${arch} — ${colorHint || "votre palette"}.`,
+    weekend: `Week-end selon vos réponses (${arch}) — ${colorHint || "vos couleurs"}.`,
+    event: `Éclat de célébration pour un style ${arch} — ${colorHint || "votre palette"}.`,
+    everyday: `Edit quotidien depuis votre profil (${arch}) — autour de ${colorHint || "votre palette"}.`,
+    formal: `Formel sans rigidité — aligné sur votre ${arch} et ${colorHint || "vos couleurs"}.`,
+    evening: `Soir selon votre style ${arch} — ${colorHint || "votre palette"}.`,
+    casual: `Casual avec votre point de vue (${arch}) — ${colorHint || "vos couleurs"}.`,
+  };
+  const table = lang === "es" ? es : lang === "fr" ? fr : en;
+  return table[primary] || table.everyday;
+}
+
+let stylistTurn = 0;
+
+function composeOutfits(prompt, profile, lang = "en", count = 3) {
+  stylistTurn += 1;
+  const promptOccasions = detectOccasions(prompt);
+  const profileOccasions = profileOccasionIds(profile);
+  const life = lifestyleSignals(profile?.lifestyle);
+  const fit = fitSignals(profile?.fit);
+  const occasions = [...new Set([...promptOccasions, ...profileOccasions, ...life.occasions])];
+  if (!occasions.length) occasions.push("everyday");
+  const arch = normalizeArchetype(profile?.archetype);
+  const vibes = archetypeVibes(arch);
+  const palette = profile?.palette || [];
+  const avoid = profile?.avoid || [];
+  const budget = profile?.budget || "balanced";
+  // Seed from full profile so different quiz answers shuffle differently
+  const seed = hashSeed([
+    prompt,
+    arch,
+    profile?.fit,
+    profile?.lifestyle,
+    budget,
+    (profileOccasions || []).join(","),
+    palette.join(","),
+    (avoid || []).join(","),
+    stylistTurn,
+  ].join("|"));
+
+  const scored = OUTFIT_RECIPES.map((recipe, i) => {
+    let items = recipeItems(recipe);
+    items = tuneItemsToProfile(items, profile);
+    let score = (seed + i * 31) % 7; // light shuffle only
+
+    // --- Archetype (strongest style signal) ---
+    const recipeArch = (recipe.archetypes || []).map(normalizeArchetype);
+    if (arch && recipeArch.includes(arch)) score += 40;
+    else if (arch && recipeArch.some((a) => a.split(" ")[0] === arch.split(" ")[0])) score += 18;
+    else score -= 8;
+    for (const v of recipe.vibe || []) {
+      if (vibes.includes(v)) score += 8;
+      else score -= 2;
+    }
+
+    // --- Lifestyle ---
+    const recipeLife = recipe.lifestyles || [];
+    if (profile?.lifestyle && recipeLife.includes(profile.lifestyle)) score += 28;
+    else if (profile?.lifestyle) score -= 4;
+    for (const o of life.occasions) {
+      if ((recipe.occasions || []).includes(o)) score += 10;
+    }
+
+    // --- Fit / structure ---
+    if (fit.structure && recipe.structure === fit.structure) score += 22;
+    else if (fit.structure === "tailored" && recipe.structure === "structured") score += 14;
+    else if (fit.structure === "structured" && recipe.structure === "tailored") score += 14;
+    else if (fit.structure && recipe.structure && fit.structure !== recipe.structure) score -= 12;
+
+    const hasOuter = items.some((k) => familyOfKey(k) === "blazer");
+    if (fit.preferOuter === true && hasOuter) score += 10;
+    if (fit.preferOuter === false && !hasOuter) score += 10;
+    if (fit.preferOuter === true && !hasOuter) score -= 6;
+    if (life.preferOuter === true && hasOuter) score += 6;
+    if (life.preferOuter === false && !hasOuter) score += 6;
+
+    // Prefer base vs alt pieces per fit
+    const altCount = items.filter((k) => ALT_MAP_REV[k]).length;
+    if (fit.preferBase === true) score += Math.max(0, 4 - altCount) * 3;
+    if (fit.preferBase === false) score += altCount * 3;
+
+    // --- Occasions (prompt beats profile) ---
+    for (const o of recipe.occasions || []) {
+      if (promptOccasions.includes(o)) score += 24;
+      else if (profileOccasions.includes(o)) score += 14;
+      else if (occasions.includes(o)) score += 4;
+    }
+    // Penalize formal recipes for casual prompts and vice versa
+    if (promptOccasions.includes("weekend") || promptOccasions.includes("everyday")) {
+      if ((recipe.occasions || []).includes("wedding") || (recipe.occasions || []).includes("formal")) score -= 10;
+    }
+    if (promptOccasions.includes("wedding") || promptOccasions.includes("formal")) {
+      if (!hasOuter) score -= 8;
+    }
+
+    // --- Palette (hard constraint — green only when chosen) ---
+    const paletteScore = outfitPaletteScore(items, palette, avoid);
+    score += Math.min(36, paletteScore);
+    if (palette.length && !paletteWantsGreen(palette)) {
+      const greenCount = items.filter((k) => itemIsGreen(k)).length;
+      score -= greenCount * 35;
+    } else if (paletteWantsGreen(palette)) {
+      const greenCount = items.filter((k) => itemIsGreen(k)).length;
+      score += greenCount * 12;
+    }
+
+    // --- Budget / price cap from prompt ("under $200") ---
+    if (budget === "elevated" && hasOuter) score += 8;
+    if (budget === "elevated" && items.some((k) => familyOfKey(k) === "scarf")) score += 4;
+    if (budget === "considered" && !hasOuter) score += 6;
+    if (budget === "considered" && hasOuter) score -= 2;
+    if (budget === "mixed") score += (seed + i) % 5;
+    const priceCap = (prompt || "").match(/under\s*\$?\s*(\d+)/i) || (prompt || "").match(/menos\s*de\s*\$?\s*(\d+)/i) || (prompt || "").match(/moins\s*de\s*(\d+)/i);
+    if (priceCap) {
+      const cap = Number(priceCap[1]);
+      const over = items.reduce((n, k) => n + ((CATALOG[k]?.price || 0) > cap ? 1 : 0), 0);
+      score -= over * 18;
+      const under = items.reduce((n, k) => n + ((CATALOG[k]?.price || 0) <= cap ? 1 : 0), 0);
+      score += under * 4;
+    }
+
+    return { recipe, score, items };
+  }).sort((a, b) => b.score - a.score);
+
+  const picked = [];
+  const usedSigs = new Set();
+  const usedRecipeIds = new Set();
+  for (const row of scored) {
+    const sig = outfitSignature(row.items);
+    const core = row.items.filter((k) => !ACCESSORY_KEYS.has(k)).join("+");
+    if (usedSigs.has(sig) || usedSigs.has(`core:${core}`) || usedRecipeIds.has(row.recipe.id)) continue;
+    usedSigs.add(sig);
+    usedSigs.add(`core:${core}`);
+    usedRecipeIds.add(row.recipe.id);
+    picked.push({
+      id: `${row.recipe.id}-${stylistTurn}-${picked.length}`,
+      option: picked.length + 1,
+      items: row.items,
+      rationale: buildRationale(row.recipe, occasions, lang, profile),
+      recipeId: row.recipe.id,
+      score: row.score,
+    });
+    if (picked.length >= count) break;
+  }
+
+  while (picked.length < count && scored[picked.length]) {
+    const row = scored[picked.length];
+    picked.push({
+      id: `${row.recipe.id}-fill-${picked.length}`,
+      option: picked.length + 1,
+      items: [...row.items],
+      rationale: buildRationale(row.recipe, occasions, lang, profile),
+      recipeId: row.recipe.id,
+    });
+  }
+  return picked;
+}
+
 // AI-generated model photos keyed by gender + outfit signature (catalog keys, stable order)
-const MODEL_KEY_ORDER = ["blazer", "blazerAlt", "shirt", "shirtAlt", "trouser", "trouserAlt", "shoe", "shoeAlt", "scarf", "scarfAlt"];
+const MODEL_KEY_ORDER = [
+  "blazer", "blazerAlt", "blazerNavy", "blazerBlack",
+  "shirt", "shirtAlt",
+  "trouser", "trouserAlt", "trouserNavy", "trouserBlack",
+  "shoe", "shoeAlt", "shoeBlack",
+  "scarf", "scarfAlt", "scarfBurgundy",
+  "belt", "beltAlt",
+  "sunglasses", "sunglassesAlt",
+];
+const ACCESSORY_KEYS = new Set(["scarf", "scarfAlt", "scarfBurgundy", "belt", "beltAlt", "sunglasses", "sunglassesAlt"]);
 function outfitSignature(itemKeys) {
   return [...itemKeys].sort((a, b) => MODEL_KEY_ORDER.indexOf(a) - MODEL_KEY_ORDER.indexOf(b)).join("+");
 }
 
 const MODEL_IMAGES = {
   woman: {
-    "blazer+shirt+trouser+shoe": "/models/model-woman-wedding.jpg",
-    "blazerAlt+shirt+trouser+shoe": "/models/model-woman-wedding-linen.jpg",
-    "shirt+trouser+shoe+scarf": "/models/model-woman-dinner.jpg",
-    "shirt+trouser+shoe": "/models/model-woman-everyday.jpg",
+    "blazer+shirt+trouser+shoe": assetUrl("/models/model-woman-wedding.jpg"),
+    "blazerAlt+shirt+trouser+shoe": assetUrl("/models/model-woman-wedding-linen.jpg"),
+    "shirt+trouser+shoe+scarf": assetUrl("/models/model-woman-dinner.jpg"),
+    "shirt+trouser+shoe": assetUrl("/models/model-woman-everyday.jpg"),
   },
   man: {
-    "blazer+shirt+trouser+shoe": "/models/model-man-wedding.jpg",
-    "blazerAlt+shirt+trouser+shoe": "/models/model-man-wedding-alt.jpg",
-    "blazer+shirtAlt+trouser+shoe": "/models/model-man-wedding-alt.jpg",
-    "blazerAlt+shirtAlt+trouser+shoe": "/models/model-man-wedding-alt.jpg",
-    "shirt+trouser+shoe+scarf": "/models/model-man-dinner.jpg",
-    "shirt+trouser+shoe": "/models/model-man-everyday.jpg",
+    "blazer+shirt+trouser+shoe": assetUrl("/models/model-man-wedding.jpg"),
+    "blazerAlt+shirt+trouser+shoe": assetUrl("/models/model-man-wedding-alt.jpg"),
+    "blazer+shirtAlt+trouser+shoe": assetUrl("/models/model-man-wedding-alt.jpg"),
+    "blazerAlt+shirtAlt+trouser+shoe": assetUrl("/models/model-man-wedding-alt.jpg"),
+    "shirt+trouser+shoe+scarf": assetUrl("/models/model-man-dinner.jpg"),
+    "shirt+trouser+shoe": assetUrl("/models/model-man-everyday.jpg"),
   },
 };
 
@@ -381,20 +1259,20 @@ function resolveModelImage(itemKeys, gender) {
   const sig = outfitSignature(itemKeys);
   if (map[sig]) return map[sig];
 
-  // Normalize alt keys to base family for fuzzy match (blazerAlt → blazer)
-  const family = (k) => ALT_MAP_REV[k] || k;
-  const want = new Set(itemKeys.map(family));
+  // Normalize keys to garment family for fuzzy match
+  const family = (k) => familyOfKey(k) || ALT_MAP_REV[k] || k;
+  // Ignore accessories when matching model photos (models don't always wear them)
+  const coreWant = itemKeys.filter((k) => !ACCESSORY_KEYS.has(k)).map(family);
+  const want = new Set(coreWant);
   let best = null;
   let bestScore = -1;
   for (const [key, src] of Object.entries(map)) {
-    const parts = key.split("+");
+    const parts = key.split("+").filter((k) => !ACCESSORY_KEYS.has(k));
     const have = new Set(parts.map(family));
     let score = 0;
     for (const w of want) if (have.has(w)) score += 2;
     for (const h of have) if (!want.has(h)) score -= 1;
-    // Prefer exact blazer presence match
     if (want.has("blazer") === have.has("blazer")) score += 1;
-    if (want.has("scarf") === have.has("scarf")) score += 1;
     if (score > bestScore) {
       bestScore = score;
       best = src;
@@ -403,51 +1281,116 @@ function resolveModelImage(itemKeys, gender) {
   return best || map["shirt+trouser+shoe"] || Object.values(map)[0];
 }
 
-function pickOutfitIndex(text) {
-  const lower = text.toLowerCase();
-  const idx = OUTFIT_TEMPLATES.findIndex((t) => t.keywords.some((k) => lower.includes(k)));
-  return idx === -1 ? OUTFIT_TEMPLATES.length - 1 : idx;
+// ==================== ONBOARDING DATA ====================
+const AUDIENCE_OPTIONS = ["Ladies", "Gentlemen", "Gender neutral"];
+const AUDIENCE_META = {
+  Ladies: { image: assetUrl("/onboarding/audience-ladies.jpg"), modelGender: "woman" },
+  Gentlemen: { image: assetUrl("/onboarding/audience-gentlemen.jpg"), modelGender: "man" },
+  "Gender neutral": { image: assetUrl("/onboarding/audience-neutral.jpg"), modelGender: "woman" },
+};
+
+/** Pick woman/man photo from option meta based on audience choice. */
+function resolveAudienceImage(meta, audience, optionIndex = 0) {
+  if (!meta) return "";
+  if (meta.image) return meta.image; // audience step itself
+  if (audience === "Gentlemen") return meta.man || meta.woman || "";
+  if (audience === "Ladies") return meta.woman || meta.man || "";
+  // Gender neutral: alternate so both presentations appear
+  const pair = optionIndex % 2 === 0 ? meta.woman : meta.man;
+  return pair || meta.woman || meta.man || "";
 }
 
-// ==================== ONBOARDING DATA ====================
 const LIFESTYLE_OPTIONS = ["Office / client-facing", "Creative or flexible workplace", "Remote, mostly at home", "On the move — travel, events, varied", "Student life"];
+const LIFESTYLE_META = {
+  "Office / client-facing": {
+    woman: assetUrl("/onboarding/life-office.jpg"),
+    man: assetUrl("/onboarding/life-office-man.jpg"),
+    descKey: "lifeOfficeDesc",
+  },
+  "Creative or flexible workplace": {
+    woman: assetUrl("/onboarding/life-creative.jpg"),
+    man: assetUrl("/onboarding/life-creative-man.jpg"),
+    descKey: "lifeCreativeDesc",
+  },
+  "Remote, mostly at home": {
+    woman: assetUrl("/onboarding/life-remote.jpg"),
+    man: assetUrl("/onboarding/life-remote-man.jpg"),
+    descKey: "lifeRemoteDesc",
+  },
+  "On the move — travel, events, varied": {
+    woman: assetUrl("/onboarding/life-travel.jpg"),
+    man: assetUrl("/onboarding/life-travel-man.jpg"),
+    descKey: "lifeTravelDesc",
+  },
+  "Student life": {
+    woman: assetUrl("/onboarding/life-student.jpg"),
+    man: assetUrl("/onboarding/life-student-man.jpg"),
+    descKey: "lifeStudentDesc",
+  },
+};
 const ARCHETYPE_OPTIONS = ["Quiet & Tailored", "Relaxed & Considered", "Modern & Sharp", "Warm & Layered", "Classic & Polished", "Minimal & Directional", "Romantic & Soft", "Bold & Expressive"];
 
 const ARCHETYPE_META = {
   "Quiet & Tailored": {
-    image: "/styles/style-quiet-tailored.jpg",
+    woman: assetUrl("/styles/style-quiet-tailored.jpg"),
+    man: assetUrl("/styles/style-quiet-tailored-man.jpg"),
     descKey: "archQuietDesc",
   },
   "Relaxed & Considered": {
-    image: "/styles/style-relaxed-considered.jpg",
+    woman: assetUrl("/styles/style-relaxed-considered.jpg"),
+    man: assetUrl("/styles/style-relaxed-considered-man.jpg"),
     descKey: "archRelaxedDesc",
   },
   "Modern & Sharp": {
-    image: "/styles/style-modern-sharp.jpg",
+    woman: assetUrl("/styles/style-modern-sharp.jpg"),
+    man: assetUrl("/styles/style-modern-sharp-man.jpg"),
     descKey: "archModernDesc",
   },
   "Warm & Layered": {
-    image: "/styles/style-warm-layered.jpg",
+    woman: assetUrl("/styles/style-warm-layered.jpg"),
+    man: assetUrl("/styles/style-warm-layered-man.jpg"),
     descKey: "archWarmDesc",
   },
   "Classic & Polished": {
-    image: "/styles/style-classic-polished.jpg",
+    woman: assetUrl("/styles/style-classic-polished.jpg"),
+    man: assetUrl("/styles/style-classic-polished-man.jpg"),
     descKey: "archClassicDesc",
   },
   "Minimal & Directional": {
-    image: "/styles/style-minimal-directional.jpg",
+    woman: assetUrl("/styles/style-minimal-directional.jpg"),
+    man: assetUrl("/styles/style-minimal-directional-man.jpg"),
     descKey: "archMinimalDesc",
   },
   "Romantic & Soft": {
-    image: "/styles/style-romantic-soft.jpg",
+    woman: assetUrl("/styles/style-romantic-soft.jpg"),
+    man: assetUrl("/styles/style-romantic-soft-man.jpg"),
     descKey: "archRomanticDesc",
   },
   "Bold & Expressive": {
-    image: "/styles/style-bold-expressive.jpg",
+    woman: assetUrl("/styles/style-bold-expressive.jpg"),
+    man: assetUrl("/styles/style-bold-expressive-man.jpg"),
     descKey: "archBoldDesc",
   },
 };
 const FIT_OPTIONS = ["Fitted & tailored", "True to size, structured", "Relaxed, room to move", "Oversized, intentionally loose"];
+const FIT_META = {
+  "Fitted & tailored": {
+    woman: assetUrl("/onboarding/fit-fitted.jpg"),
+    man: assetUrl("/onboarding/fit-fitted-man.jpg"),
+  },
+  "True to size, structured": {
+    woman: assetUrl("/onboarding/fit-structured.jpg"),
+    man: assetUrl("/onboarding/fit-structured-man.jpg"),
+  },
+  "Relaxed, room to move": {
+    woman: assetUrl("/onboarding/fit-relaxed.jpg"),
+    man: assetUrl("/onboarding/fit-relaxed-man.jpg"),
+  },
+  "Oversized, intentionally loose": {
+    woman: assetUrl("/onboarding/fit-oversized.jpg"),
+    man: assetUrl("/onboarding/fit-oversized-man.jpg"),
+  },
+};
 const COLOR_OPTIONS = [
   { label: "Black", hex: "#161616" },
   { label: "Ivory / Cream", hex: "#F6F1E7" },
@@ -469,21 +1412,53 @@ const BUDGET_OPTIONS = [
   { key: "mixed", label: "Show me a mix", sub: "I'll decide per piece" },
 ];
 const OCCASION_OPTIONS = ["Work", "Date nights", "Travel", "Events & celebrations", "Everyday, just want to feel put together"];
+const OCCASION_META = {
+  Work: {
+    woman: assetUrl("/onboarding/occ-work-woman.jpg"),
+    man: assetUrl("/onboarding/occ-work-man.jpg"),
+    descKey: "occWorkDesc",
+  },
+  "Date nights": {
+    woman: assetUrl("/onboarding/occ-date-woman.jpg"),
+    man: assetUrl("/onboarding/occ-date-man.jpg"),
+    descKey: "occDateDesc",
+  },
+  Travel: {
+    woman: assetUrl("/onboarding/occ-travel-woman.jpg"),
+    man: assetUrl("/onboarding/occ-travel-man.jpg"),
+    descKey: "occTravelDesc",
+  },
+  "Events & celebrations": {
+    woman: assetUrl("/onboarding/occ-events-woman.jpg"),
+    man: assetUrl("/onboarding/occ-events-man.jpg"),
+    descKey: "occEventsDesc",
+  },
+  "Everyday, just want to feel put together": {
+    woman: assetUrl("/onboarding/occ-everyday-woman.jpg"),
+    man: assetUrl("/onboarding/occ-everyday-man.jpg"),
+    descKey: "occEverydayDesc",
+  },
+};
 
 const STEPS = [
-  { id: "lifestyle", titleKey: "step0Title", promptKey: "step0Prompt", type: "single", options: LIFESTYLE_OPTIONS },
+  { id: "audience", titleKey: "stepAudienceTitle", promptKey: "stepAudiencePrompt", type: "visual", options: AUDIENCE_OPTIONS, meta: AUDIENCE_META },
+  { id: "lifestyle", titleKey: "step0Title", promptKey: "step0Prompt", type: "photoList", options: LIFESTYLE_OPTIONS, meta: LIFESTYLE_META },
   { id: "archetype", titleKey: "step1Title", promptKey: "step1Prompt", type: "archetype", options: ARCHETYPE_OPTIONS },
-  { id: "fit", titleKey: "step2Title", promptKey: "step2Prompt", type: "single", options: FIT_OPTIONS },
+  { id: "fit", titleKey: "step2Title", promptKey: "step2Prompt", type: "visual", options: FIT_OPTIONS, meta: FIT_META },
   { id: "palette", titleKey: "step3Title", promptKey: "step3Prompt", type: "palette", options: COLOR_OPTIONS },
   { id: "budget", titleKey: "step4Title", promptKey: "step4Prompt", type: "budget", options: BUDGET_OPTIONS },
-  { id: "occasions", titleKey: "step5Title", promptKey: "step5Prompt", type: "multi", options: OCCASION_OPTIONS },
+  { id: "occasions", titleKey: "step5Title", promptKey: "step5Prompt", type: "photoMulti", options: OCCASION_OPTIONS, meta: OCCASION_META },
   { id: "sizes", titleKey: "step6Title", promptKey: "step6Prompt", type: "sizes" },
 ];
 
 const DEFAULT_PROFILE = {
+  name: "Alex",
+  audience: "Ladies",
   archetype: "Quiet Tailored",
   fit: "Fitted & tailored",
-  palette: ["Olive", "Ivory / Cream", "Black", "Camel / Tan"],
+  lifestyle: "Office / client-facing",
+  palette: ["Navy", "Ivory / Cream", "Black", "Camel / Tan"],
+  avoid: [],
   budget: "balanced",
   occasions: ["Work", "Events & celebrations"],
   modelGender: "woman",
@@ -507,7 +1482,17 @@ function WelcomeScreen({ onStart, onSkip }) {
 
 function SignupScreen({ onContinue, onBack }) {
   const { t } = useLang();
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [hint, setHint] = useState(false);
+  function handleContinue() {
+    const trimmed = name.trim();
+    if (!trimmed) {
+      setHint(true);
+      return;
+    }
+    onContinue({ name: trimmed, email: email.trim() });
+  }
   return (
     <div className="onb-screen">
       <button className="onb-back" onClick={onBack}><ArrowLeft size={16} /></button>
@@ -516,12 +1501,26 @@ function SignupScreen({ onContinue, onBack }) {
         <h2 className="onb-title">{t("whereReachYouLine1")}<br />{t("whereReachYouLine2")}</h2>
         <input
           className="onb-input"
+          type="text"
+          autoComplete="given-name"
+          autoFocus
+          placeholder={t("namePlaceholder")}
+          value={name}
+          onChange={(e) => { setName(e.target.value); setHint(false); }}
+          onKeyDown={(e) => { if (e.key === "Enter") handleContinue(); }}
+        />
+        <div className="onb-mini-label" style={{ marginTop: 18, textAlign: "left", width: "100%", maxWidth: 320 }}>{t("signupEmailLabel")}</div>
+        <input
+          className="onb-input"
           type="email"
+          autoComplete="email"
           placeholder={t("emailPlaceholder")}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter") handleContinue(); }}
         />
-        <button className="onb-primary-btn" onClick={onContinue} style={{ marginTop: 20 }}>{t("continueBtn")}</button>
+        {hint && <p className="onb-fine-print" style={{ color: "#a85832" }}>{t("nameRequired")}</p>}
+        <button className="onb-primary-btn" onClick={handleContinue} style={{ marginTop: 20 }}>{t("continueBtn")}</button>
         <p className="onb-fine-print">{t("signupNote")}</p>
       </div>
     </div>
@@ -531,6 +1530,7 @@ function SignupScreen({ onContinue, onBack }) {
 function OnboardingScreen({ step, totalSteps, question, answers, setAnswers, onNext, onBack }) {
   const { t, tOpt } = useLang();
   const [showAvoid, setShowAvoid] = useState(false);
+  const audience = answers.audience || "Ladies";
 
   function selectSingle(value) {
     setAnswers((a) => ({ ...a, [question.id]: value }));
@@ -556,7 +1556,7 @@ function OnboardingScreen({ step, totalSteps, question, answers, setAnswers, onN
   const canContinue =
     question.type === "sizes"
       ? true
-      : question.type === "single" || question.type === "budget" || question.type === "archetype"
+      : question.type === "single" || question.type === "budget" || question.type === "archetype" || question.type === "visual" || question.type === "photoList"
       ? !!answers[question.id]
       : (answers[question.id] || []).length > 0;
 
@@ -573,8 +1573,9 @@ function OnboardingScreen({ step, totalSteps, question, answers, setAnswers, onN
 
         {question.type === "archetype" && (
           <div className="onb-style-grid">
-            {question.options.map((opt) => {
+            {question.options.map((opt, idx) => {
               const meta = ARCHETYPE_META[opt] || {};
+              const image = resolveAudienceImage(meta, audience, idx);
               return (
                 <button
                   key={opt}
@@ -582,11 +1583,78 @@ function OnboardingScreen({ step, totalSteps, question, answers, setAnswers, onN
                   className={`onb-style-card ${answers[question.id] === opt ? "selected" : ""}`}
                   onClick={() => selectSingle(opt)}
                 >
-                  <img className="onb-style-image" src={meta.image} alt={tOpt(opt)} loading="lazy" />
+                  <img className="onb-style-image" src={image} alt={tOpt(opt)} loading="lazy" />
                   <div className="onb-style-copy">
                     <div className="onb-style-title">{tOpt(opt)}</div>
                     <div className="onb-style-desc">{t(meta.descKey)}</div>
                   </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {question.type === "photoList" && (
+          <div className="onb-style-grid">
+            {question.options.map((opt, idx) => {
+              const meta = (question.meta && question.meta[opt]) || {};
+              const image = resolveAudienceImage(meta, audience, idx);
+              return (
+                <button
+                  key={opt}
+                  type="button"
+                  className={`onb-style-card ${answers[question.id] === opt ? "selected" : ""}`}
+                  onClick={() => selectSingle(opt)}
+                >
+                  <img className="onb-style-image onb-lifestyle-image" src={image} alt={tOpt(opt)} loading="eager" />
+                  <div className="onb-style-copy">
+                    <div className="onb-style-title">{tOpt(opt)}</div>
+                    {meta.descKey && <div className="onb-style-desc">{t(meta.descKey)}</div>}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {question.type === "photoMulti" && (
+          <div className="onb-style-grid">
+            {question.options.map((opt, idx) => {
+              const meta = (question.meta && question.meta[opt]) || {};
+              const image = resolveAudienceImage(meta, audience, idx);
+              const selected = (answers[question.id] || []).includes(opt);
+              return (
+                <button
+                  key={opt}
+                  type="button"
+                  className={`onb-style-card ${selected ? "selected" : ""}`}
+                  onClick={() => toggleMulti(opt)}
+                >
+                  <img className="onb-style-image onb-lifestyle-image" src={image} alt={tOpt(opt)} loading="lazy" />
+                  <div className="onb-style-copy">
+                    <div className="onb-style-title">{tOpt(opt)}</div>
+                    {meta.descKey && <div className="onb-style-desc">{t(meta.descKey)}</div>}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {question.type === "visual" && (
+          <div className={`onb-visual-grid ${question.options.length === 3 ? "onb-visual-grid-3" : ""}`}>
+            {question.options.map((opt, idx) => {
+              const meta = (question.meta && question.meta[opt]) || {};
+              const image = resolveAudienceImage(meta, audience, idx);
+              return (
+                <button
+                  key={opt}
+                  type="button"
+                  className={`onb-visual-card ${answers[question.id] === opt ? "selected" : ""}`}
+                  onClick={() => selectSingle(opt)}
+                >
+                  <img className="onb-visual-image" src={image} alt={tOpt(opt)} loading="lazy" />
+                  <span className="onb-visual-label">{tOpt(opt)}</span>
                 </button>
               );
             })}
@@ -730,33 +1798,110 @@ function OccasionScreen({ onSubmit, onSkip }) {
   );
 }
 
-// ==================== MODEL HERO ====================
-// AI-generated model photos wearing the suggested pieces.
-// Swaps pick the closest matching pre-rendered look.
-function ModelHero({ itemKeys, gender }) {
-  const src = resolveModelImage(itemKeys, gender);
+// ==================== OUTFIT HERO ====================
+// Hero is built from the exact catalog images in the outfit list —
+// so what you see is what you can tap to shop.
+function OutfitHero({ itemKeys, palette = [] }) {
+  const { tName } = useLang();
+  const items = (itemKeys || []).map((k) => CATALOG[k]).filter(Boolean);
+  const outer = items.find((i) => i.type === "blazer");
+  const top = items.find((i) => i.type === "shirt");
+  const bottom = items.find((i) => i.type === "trouser");
+  const shoe = items.find((i) => i.type === "shoe");
+  const acc = items.find((i) => i.type === "accessory");
+  const swatches = (palette || [])
+    .map((label) => (COLOR_OPTIONS.find((c) => c.label === label) || {}).hex)
+    .filter(Boolean)
+    .slice(0, 4);
+  const accent = swatches[0] || (outer || top || bottom)?.color || "#3E4228";
+
   return (
-    <div className="model-wrap">
-      <img
-        className="model-photo"
-        src={src}
-        alt="Outfit on model"
-        loading="lazy"
-        decoding="async"
-        sizes="(max-width: 767px) 100vw, (max-width: 1023px) 42vw, 340px"
-      />
+    <div className="model-wrap outfit-hero-wrap" style={{ "--hero-accent": accent }}>
+      <div className="outfit-hero-stage">
+        {swatches.length > 0 && (
+          <div className="outfit-hero-swatches" aria-hidden="true">
+            {swatches.map((hex) => <span key={hex} style={{ background: hex }} />)}
+          </div>
+        )}
+        <div className={`outfit-hero-figure ${outer ? "has-outer" : "no-outer"} ${shoe ? "has-shoe" : "no-shoe"}`}>
+          {outer && (
+            <img className="hero-layer hero-outer" src={outer.image} alt={tName(outer)} loading="lazy" />
+          )}
+          {top && (
+            <img className={`hero-layer hero-top ${outer ? "with-outer" : ""}`} src={top.image} alt={tName(top)} loading="lazy" />
+          )}
+          {bottom && (
+            <img className="hero-layer hero-bottom" src={bottom.image} alt={tName(bottom)} loading="lazy" />
+          )}
+          {shoe && (
+            <img className="hero-layer hero-shoe" src={shoe.image} alt={tName(shoe)} loading="lazy" />
+          )}
+          {acc && (
+            <img className="hero-layer hero-acc" src={acc.image} alt={tName(acc)} loading="lazy" />
+          )}
+        </div>
+      </div>
     </div>
   );
 }
 
 // ==================== SHOP ACROSS STORES ====================
-function ShopSheet({ item, onClose, favoriteStores = [] }) {
-  const { t, tName } = useLang();
+function ShopSheet({ item, onClose, favoriteStores = [], palette = [], avoid = [] }) {
+  const { t, tName, tOpt } = useLang();
+  const [stock, setStock] = useState({ status: "loading", products: [], scannedAt: null });
+  const [showStores, setShowStores] = useState(false);
+
+  const searchQuery = buildItemSearchQuery(item, palette, avoid);
+  const paletteLabels = (palette || []).filter((p) => !(avoid || []).includes(p));
+
+  useEffect(() => {
+    if (!item) return undefined;
+    const key = catalogKeyForItem(item);
+    if (!key) {
+      setStock({ status: "empty", products: [], scannedAt: null });
+      return undefined;
+    }
+    let cancelled = false;
+    setStock({ status: "loading", products: [], scannedAt: null });
+    fetch(`/stock/${key}.json`)
+      .then((res) => (res.ok ? res.json() : Promise.reject(new Error("missing"))))
+      .then((data) => {
+        if (cancelled) return;
+        const raw = Array.isArray(data.products) ? data.products : [];
+        const filtered = raw
+          .filter((p) => productMatchesPalette(p, palette, avoid))
+          .sort((a, b) => productPaletteRank(b, palette) - productPaletteRank(a, palette));
+        const hasPalette = (palette || []).some((p) => !(avoid || []).includes(p));
+        const precise = hasPalette
+          ? filtered.filter((p) => productPaletteRank(p, palette) > 0)
+          : filtered;
+        const products = precise.length ? precise : [];
+        setStock({
+          status: products.length ? "ready" : "empty",
+          products,
+          scannedAt: data.scannedAt || null,
+        });
+      })
+      .catch(() => {
+        if (!cancelled) setStock({ status: "empty", products: [], scannedAt: null });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [item, palette, avoid]);
+
   if (!item) return null;
-  const links = storeLinksForItem(item);
-  const shoppingUrl = googleShoppingUrl(item.searchQuery || item.name);
+  const links = storeLinksForItem(item, palette, avoid);
+  const shoppingUrl = googleShoppingUrl(searchQuery);
   const favSet = new Set(favoriteStores);
   const favoriteLinks = links.filter((s) => favSet.has(s.id));
+  const paletteHint = paletteLabels.slice(0, 4).map((l) => tOpt(l)).join(", ");
+
+  const productThumb = (product) => {
+    const src = product.image || "";
+    if (src && !src.startsWith("data:")) return src;
+    return item.image;
+  };
 
   return (
     <div className="shop-overlay" onClick={onClose} role="presentation">
@@ -769,43 +1914,64 @@ function ShopSheet({ item, onClose, favoriteStores = [] }) {
           <div className="shop-hero-copy">
             <div className="shop-hero-brand">{item.retailer}</div>
             <div className="shop-hero-name">{tName(item)}</div>
-            <div className="shop-hero-sub">{t("shopAcrossSub")}</div>
+            <div className="shop-hero-sub">{t("shopInStockSub")}</div>
+            {paletteHint ? (
+              <div className="shop-palette-hint">{t("shopPaletteFilter").replace("{colors}", paletteHint)}</div>
+            ) : null}
+            <div className="shop-search-hint">{t("shopSearchingAs").replace("{query}", searchQuery)}</div>
           </div>
         </div>
-        <a className="shop-google" href={shoppingUrl} target="_blank" rel="noopener noreferrer">
-          {t("shopOpenAll")} <ExternalLink size={13} />
-        </a>
-        {favoriteLinks.length > 0 && (
-          <div className="shop-tier">
-            <div className="shop-tier-label">{t("shopYourFavorites")}</div>
-            <div className="shop-store-grid">
-              {favoriteLinks.map((store) => (
+
+        <div className="shop-stock">
+          <div className="shop-tier-label">{t("shopInStock")}</div>
+          {stock.status === "loading" && <div className="shop-stock-status">{t("shopScanning")}</div>}
+          {stock.status === "empty" && <div className="shop-stock-status">{t("shopNoStock")}</div>}
+          {stock.status === "ready" && (
+            <div className="shop-stock-list">
+              {stock.products.map((product, idx) => (
                 <a
-                  key={`fav-${store.id}`}
-                  className="shop-store-link shop-store-link-fav"
-                  href={store.href}
+                  key={`${product.url}-${idx}`}
+                  className="shop-stock-card"
+                  href={product.url}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <span>{store.name}</span>
-                  <ExternalLink size={12} />
+                  <img className="shop-stock-image" src={productThumb(product)} alt="" loading="lazy" />
+                  <div className="shop-stock-info">
+                    <div className="shop-stock-merchant">{product.merchant || "Retailer"}</div>
+                    <div className="shop-stock-title">{product.title}</div>
+                    <div className="shop-stock-meta">
+                      <span className="shop-stock-price">{product.price}</span>
+                      <span className="shop-stock-badge">{product.availability || t("shopInStockBadge")}</span>
+                    </div>
+                  </div>
+                  <span className="shop-stock-buy">
+                    {t("shopBuyAt")} <ExternalLink size={12} />
+                  </span>
                 </a>
               ))}
             </div>
-          </div>
-        )}
-        <div className="shop-tiers">
-          {STORE_TIERS.map((tier) => {
-            const stores = links.filter((s) => s.tier === tier.id);
-            if (!stores.length) return null;
-            return (
-              <div key={tier.id} className="shop-tier">
-                <div className="shop-tier-label">{t(tier.labelKey)}</div>
+          )}
+        </div>
+
+        <a className="shop-google" href={shoppingUrl} target="_blank" rel="noopener noreferrer">
+          {t("shopOpenAll")} <ExternalLink size={13} />
+        </a>
+
+        <button type="button" className="shop-more-toggle" onClick={() => setShowStores((v) => !v)}>
+          {t("shopMoreStores")} {showStores ? "−" : "+"}
+        </button>
+
+        {showStores && (
+          <>
+            {favoriteLinks.length > 0 && (
+              <div className="shop-tier">
+                <div className="shop-tier-label">{t("shopYourFavorites")}</div>
                 <div className="shop-store-grid">
-                  {stores.map((store) => (
+                  {favoriteLinks.map((store) => (
                     <a
-                      key={store.id}
-                      className={`shop-store-link ${favSet.has(store.id) ? "shop-store-link-fav" : ""}`}
+                      key={`fav-${store.id}`}
+                      className="shop-store-link shop-store-link-fav"
                       href={store.href}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -816,21 +1982,46 @@ function ShopSheet({ item, onClose, favoriteStores = [] }) {
                   ))}
                 </div>
               </div>
-            );
-          })}
-        </div>
+            )}
+            <div className="shop-tiers">
+              {STORE_TIERS.map((tier) => {
+                const stores = links.filter((s) => s.tier === tier.id);
+                if (!stores.length) return null;
+                return (
+                  <div key={tier.id} className="shop-tier">
+                    <div className="shop-tier-label">{t(tier.labelKey)}</div>
+                    <div className="shop-store-grid">
+                      {stores.map((store) => (
+                        <a
+                          key={store.id}
+                          className={`shop-store-link ${favSet.has(store.id) ? "shop-store-link-fav" : ""}`}
+                          href={store.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <span>{store.name}</span>
+                          <ExternalLink size={12} />
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
 }
 
 // ==================== OUTFIT CARD ====================
-function OutfitCard({ outfit, onSwap, onSave, saved, modelGender, onModelGenderChange, favoriteStores }) {
+function OutfitCard({ outfit, onSwap, onSave, saved, modelGender, onModelGenderChange, favoriteStores, optionLabel, palette = [], avoid = [] }) {
   const { t, tName } = useLang();
   const [shopItem, setShopItem] = useState(null);
   return (
     <div className="card">
-      <div className="eyebrow gold">{t("stylistSuggests")}</div>
+      <div className="eyebrow gold">{optionLabel || t("stylistSuggests")}</div>
       <div className="model-gender-row">
         <span className="model-gender-label">{t("modelLabel")}</span>
         <div className="model-gender-switch">
@@ -851,10 +2042,11 @@ function OutfitCard({ outfit, onSwap, onSave, saved, modelGender, onModelGenderC
         </div>
       </div>
       <div className="outfit-visual">
-        <ModelHero itemKeys={outfit.items} gender={modelGender} />
+        <OutfitHero itemKeys={outfit.items} palette={palette} />
         <div className="item-list">
           {outfit.items.map((key) => {
             const item = CATALOG[key];
+            if (!item) return null;
             return (
               <div key={item.id} className="item-row">
                 <button
@@ -867,7 +2059,7 @@ function OutfitCard({ outfit, onSwap, onSave, saved, modelGender, onModelGenderC
                   <div className="item-row-info">
                     <div className="item-row-brand">{item.retailer}</div>
                     <div className="item-row-name">{tName(item)}</div>
-                    <div className="item-row-meta">${item.price} · {t("shopAcross")}</div>
+                    <div className="item-row-meta">${item.price} · {t("shopInStock")}</div>
                   </div>
                   <span className="link-btn-sm" aria-hidden="true">
                     <ExternalLink size={11} />
@@ -895,6 +2087,8 @@ function OutfitCard({ outfit, onSwap, onSave, saved, modelGender, onModelGenderC
           item={shopItem}
           onClose={() => setShopItem(null)}
           favoriteStores={favoriteStores}
+          palette={palette}
+          avoid={avoid}
         />
       )}
     </div>
@@ -912,7 +2106,7 @@ function HomeScreen({ profile, onPrompt, homeInput, setHomeInput }) {
   return (
     <div className="screen">
       <div className="eyebrow muted">{t("goodEvening")}</div>
-      <h1 className="home-name">Alex</h1>
+      <h1 className="home-name">{profile.name || DEFAULT_PROFILE.name}</h1>
       <div className="dna-card">
         <div className="eyebrow gold-on-dark">{t("styleDnaLabel")}</div>
         <div className="dna-title">{tOpt(profile.archetype)}</div>
@@ -933,10 +2127,12 @@ function HomeScreen({ profile, onPrompt, homeInput, setHomeInput }) {
   );
 }
 
-function ChatScreen({ messages, onSend, input, setInput, onSwap, onSave, savedIds, pending, modelGender, onModelGenderChange, favoriteStores }) {
+function ChatScreen({ messages, onSend, input, setInput, onSwap, onSave, savedIds, pending, modelGender, onModelGenderChange, favoriteStores, palette = [], avoid = [] }) {
   const { t } = useLang();
   const endRef = useRef(null);
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, pending]);
+  const refineKeys = ["chipMoreCasual", "chipAddBlazer", "chipUnder200", "chipDifferentBelt"];
+  const hasLooks = messages.some((m) => m.outfits?.length || m.outfit);
 
   return (
     <div className="chat-wrap">
@@ -945,17 +2141,41 @@ function ChatScreen({ messages, onSend, input, setInput, onSwap, onSave, savedId
         {messages.length === 0 && <div className="chat-empty">{t("chatEmpty")}</div>}
         {messages.map((m, i) => {
           if (m.role === "user") return <div key={i} className="bubble-user">{m.text}</div>;
+          if (m.outfits?.length) {
+            return (
+              <div key={i} className="bubble-assistant bubble-assistant-stack">
+                <div className="stylist-picks-intro">{m.text || t("stylistPicksIntro")}</div>
+                {m.outfits.map((outfit, oi) => (
+                  <OutfitCard
+                    key={outfit.id || oi}
+                    outfit={outfit}
+                    optionLabel={`${t("stylistLook")} ${outfit.option || oi + 1}`}
+                    onSwap={(key) => onSwap(i, oi, key)}
+                    onSave={() => onSave(i, oi)}
+                    saved={savedIds.has(`${i}:${oi}`)}
+                    modelGender={modelGender}
+                    onModelGenderChange={onModelGenderChange}
+                    favoriteStores={favoriteStores}
+                    palette={palette}
+                    avoid={avoid}
+                  />
+                ))}
+              </div>
+            );
+          }
           if (m.outfit) {
             return (
               <div key={i} className="bubble-assistant">
                 <OutfitCard
                   outfit={m.outfit}
-                  onSwap={(key) => onSwap(i, key)}
-                  onSave={() => onSave(i)}
-                  saved={savedIds.has(i)}
+                  onSwap={(key) => onSwap(i, 0, key)}
+                  onSave={() => onSave(i, 0)}
+                  saved={savedIds.has(`${i}:0`) || savedIds.has(i)}
                   modelGender={modelGender}
                   onModelGenderChange={onModelGenderChange}
                   favoriteStores={favoriteStores}
+                  palette={palette}
+                  avoid={avoid}
                 />
               </div>
             );
@@ -963,6 +2183,16 @@ function ChatScreen({ messages, onSend, input, setInput, onSwap, onSave, savedId
           return <div key={i} className="bubble-assistant-text">{m.text}</div>;
         })}
         {pending && <div className="typing"><span className="dot" />{t("composing")}</div>}
+        {hasLooks && !pending && (
+          <div className="refine-block">
+            <div className="refine-label">{t("refineLooks")}</div>
+            <div className="chip-row">
+              {refineKeys.map((k) => (
+                <button key={k} type="button" className="chip" onClick={() => onSend(t(k))}>{t(k)}</button>
+              ))}
+            </div>
+          </div>
+        )}
         <div ref={endRef} />
       </div>
       <form className="chat-input-row" onSubmit={(e) => { e.preventDefault(); onSend(); }}>
@@ -973,7 +2203,7 @@ function ChatScreen({ messages, onSend, input, setInput, onSwap, onSave, savedId
   );
 }
 
-function WardrobeScreen({ savedOutfits, modelGender, onModelGenderChange, favoriteStores }) {
+function WardrobeScreen({ savedOutfits, modelGender, onModelGenderChange, favoriteStores, palette = [], avoid = [] }) {
   const { t } = useLang();
   return (
     <div className="screen">
@@ -992,6 +2222,8 @@ function WardrobeScreen({ savedOutfits, modelGender, onModelGenderChange, favori
               modelGender={modelGender}
               onModelGenderChange={onModelGenderChange}
               favoriteStores={favoriteStores}
+              palette={palette}
+              avoid={avoid}
             />
           ))}
         </div>
@@ -1000,7 +2232,7 @@ function WardrobeScreen({ savedOutfits, modelGender, onModelGenderChange, favori
   );
 }
 
-function BagScreen({ savedOutfits, favoriteStores }) {
+function BagScreen({ savedOutfits, favoriteStores, palette = [], avoid = [] }) {
   const { t, tName } = useLang();
   const [shopItem, setShopItem] = useState(null);
   const allItems = savedOutfits.flatMap((o) => o.items.map((k) => CATALOG[k]));
@@ -1030,7 +2262,7 @@ function BagScreen({ savedOutfits, favoriteStores }) {
                 <div className="bag-info">
                   <div className="bag-brand">{item.retailer}</div>
                   <div className="bag-name">{tName(item)}</div>
-                  <div className="bag-price">${item.price} · {t("shopAcross")}</div>
+                  <div className="bag-price">${item.price} · {t("shopInStock")}</div>
                 </div>
                 <ExternalLink size={13} color="#8b877a" />
               </button>
@@ -1043,6 +2275,8 @@ function BagScreen({ savedOutfits, favoriteStores }) {
           item={shopItem}
           onClose={() => setShopItem(null)}
           favoriteStores={favoriteStores}
+          palette={palette}
+          avoid={avoid}
         />
       )}
     </div>
@@ -1055,9 +2289,13 @@ function ProfileScreen({ profile, onToggleFavoriteStore }) {
   const favSet = new Set(favorites);
   const budgetLabel = tOpt((BUDGET_OPTIONS.find((b) => b.key === profile.budget) || {}).label || "Balanced");
   const rows = [
+    [t("nameLabel"), profile.name || DEFAULT_PROFILE.name],
+    [t("dressingForLabel"), tOpt(profile.audience || DEFAULT_PROFILE.audience)],
     [t("styleArchetypeLabel"), tOpt(profile.archetype)],
     [t("fitPreferenceLabel"), tOpt(profile.fit)],
+    [t("lifestyleLabel"), tOpt(profile.lifestyle || DEFAULT_PROFILE.lifestyle)],
     [t("paletteLabel"), (profile.palette || []).map(tOpt).join(", ")],
+    [t("colorsToAvoidLabel"), (profile.avoid || []).map(tOpt).join(", ") || "—"],
     [t("budgetLabel"), budgetLabel],
     [t("dressesForLabel"), (profile.occasions || []).map(tOpt).join(", ") || "—"],
   ];
@@ -1119,38 +2357,113 @@ function ProfileScreen({ profile, onToggleFavoriteStore }) {
 }
 
 // ==================== ROOT APP ====================
-export default function VestraPrototype() {
-  const [lang, setLang] = useState("en");
-  const [stage, setStage] = useState("welcome"); // welcome | signup | onboarding | reveal | occasion | app
-  const [step, setStep] = useState(0);
-  const [answers, setAnswers] = useState({ lifestyle: null, archetype: null, fit: null, palette: [], avoid: [], budget: null, occasions: [], sizes: {} });
-  const [profile, setProfile] = useState(DEFAULT_PROFILE);
+const STORAGE_KEY = "vestra.profile.v1";
 
-  const [tab, setTab] = useState("home");
-  const [messages, setMessages] = useState([]);
+function loadStoredState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+export default function VestraPrototype() {
+  const stored = typeof window !== "undefined" ? loadStoredState() : null;
+  const [lang, setLang] = useState(stored?.lang || "en");
+  const [stage, setStage] = useState(stored?.stage === "app" && stored?.profile?.name ? "app" : "welcome");
+  const [step, setStep] = useState(0);
+  const [answers, setAnswers] = useState({ name: "", audience: null, lifestyle: null, archetype: null, fit: null, palette: [], avoid: [], budget: null, occasions: [], sizes: {} });
+  const [profile, setProfile] = useState(stored?.profile || DEFAULT_PROFILE);
+
+  const [tab, setTab] = useState(stored?.tab || "home");
+  const [messages, setMessages] = useState(stored?.messages || []);
   const [input, setInput] = useState("");
   const [homeInput, setHomeInput] = useState("");
   const [pending, setPending] = useState(false);
   const [savedIds, setSavedIds] = useState(new Set());
-  const [savedOutfits, setSavedOutfits] = useState([]);
+  const [savedOutfits, setSavedOutfits] = useState(stored?.savedOutfits || []);
 
   const t = (key) => (UI[lang] && UI[lang][key]) || UI.en[key] || key;
   const tOpt = (value) => (OPTIONS_I18N[lang] && OPTIONS_I18N[lang][value]) || value;
   const tName = (item) => (PRODUCT_NAMES_I18N[lang] && PRODUCT_NAMES_I18N[lang][item.id]) || item.name;
 
-  function sendMessage(text) {
+  useEffect(() => {
+    try {
+      const payload = {
+        lang,
+        stage,
+        tab,
+        profile,
+        savedOutfits: savedOutfits.slice(-20),
+        messages: messages.slice(-30),
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    } catch {
+      /* ignore quota */
+    }
+  }, [lang, stage, tab, profile, savedOutfits, messages]);
+
+  async function sendMessage(text, profileOverride) {
     const finalText = text ?? input;
     if (!finalText.trim()) return;
+    const activeProfile = profileOverride || profile;
+    const priorOutfits = [...messages].reverse().find((m) => m.outfits?.length || m.outfit);
+    const revision = detectRevisionRequest(finalText);
     setMessages((m) => [...m, { role: "user", text: finalText }]);
     setInput("");
     setPending(true);
-    setTimeout(() => {
-      const idx = pickOutfitIndex(finalText);
-      const template = OUTFIT_TEMPLATES[idx];
-      const rationale = (RATIONALES_I18N[lang] && RATIONALES_I18N[lang][idx]) || template.rationale;
-      setMessages((m) => [...m, { role: "assistant", outfit: { items: [...template.items], rationale } }]);
-      setPending(false);
-    }, 1100);
+
+    // Piece revisions stay local and instant
+    if (revision && priorOutfits) {
+      const base = priorOutfits.outfits?.length
+        ? priorOutfits.outfits
+        : priorOutfits.outfit
+          ? [priorOutfits.outfit]
+          : [];
+      if (base.length) {
+        await new Promise((r) => setTimeout(r, 450));
+        stylistTurn += 1;
+        const outfits = reviseOutfits(base, revision, activeProfile, lang);
+        const labels = ITEM_LABELS[lang] || ITEM_LABELS.en;
+        const itemLabel = revision.targets.map((f) => labels[f] || f).join(", ");
+        const introKey = revisionIntroKey(revision);
+        const intro = ((UI[lang] && UI[lang][introKey]) || UI.en[introKey] || "").replace("{item}", itemLabel);
+        setMessages((m) => [...m, { role: "assistant", text: intro, outfits, revision: true }]);
+        setPending(false);
+        return;
+      }
+    }
+
+    // Try live Claude stylist (Netlify function / custom endpoint), else local composer
+    const live = await fetchStylistLooks({
+      prompt: finalText,
+      profile: activeProfile,
+      lang,
+      catalogKeys: Object.keys(CATALOG),
+    });
+    if (live?.outfits?.length) {
+      const outfits = live.outfits.map((o, i) => ({
+        ...o,
+        option: o.option || i + 1,
+        items: (o.items || []).filter((k) => CATALOG[k]),
+      })).filter((o) => o.items.length >= 3);
+      if (outfits.length) {
+        setMessages((m) => [...m, {
+          role: "assistant",
+          text: live.source === "claude" ? t("stylistLive") : undefined,
+          outfits,
+        }]);
+        setPending(false);
+        return;
+      }
+    }
+
+    await new Promise((r) => setTimeout(r, 500));
+    const outfits = composeOutfits(finalText, activeProfile, lang, 3);
+    setMessages((m) => [...m, { role: "assistant", outfits }]);
+    setPending(false);
   }
 
   function handlePrompt(p) {
@@ -1159,33 +2472,61 @@ export default function VestraPrototype() {
     sendMessage(p);
   }
 
-  function handleSwap(msgIndex, key) {
-    const nextKey = ALT_MAP[key] || ALT_MAP_REV[key];
-    if (!nextKey) return;
+  function handleSwap(msgIndex, outfitIndex, key) {
+    const nextKey = nextVariantInFamily(key);
+    if (!nextKey || nextKey === key) {
+      // fall back to classic alt toggle
+      const fallback = ALT_MAP[key] || ALT_MAP_REV[key];
+      if (!fallback) return;
+      applyItemSwap(msgIndex, outfitIndex, key, fallback);
+      return;
+    }
+    applyItemSwap(msgIndex, outfitIndex, key, nextKey);
+  }
+
+  function applyItemSwap(msgIndex, outfitIndex, key, nextKey) {
     setMessages((m) =>
       m.map((msg, i) => {
-        if (i !== msgIndex || msg.role !== "assistant" || !msg.outfit) return msg;
-        const newItems = msg.outfit.items.map((k) => (k === key ? nextKey : k));
-        return { ...msg, outfit: { ...msg.outfit, items: newItems } };
+        if (i !== msgIndex || msg.role !== "assistant") return msg;
+        if (msg.outfits?.length) {
+          const outfits = msg.outfits.map((outfit, oi) => {
+            if (oi !== outfitIndex) return outfit;
+            return { ...outfit, items: outfit.items.map((k) => (k === key ? nextKey : k)) };
+          });
+          return { ...msg, outfits };
+        }
+        if (msg.outfit) {
+          const newItems = msg.outfit.items.map((k) => (k === key ? nextKey : k));
+          return { ...msg, outfit: { ...msg.outfit, items: newItems } };
+        }
+        return msg;
       })
     );
   }
 
-  function handleSave(msgIndex) {
-    setSavedIds((s) => new Set(s).add(msgIndex));
-    const outfit = messages[msgIndex].outfit;
+  function handleSave(msgIndex, outfitIndex = 0) {
+    const msg = messages[msgIndex];
+    const outfit = msg?.outfits?.[outfitIndex] || msg?.outfit;
+    if (!outfit) return;
+    setSavedIds((s) => new Set(s).add(`${msgIndex}:${outfitIndex}`));
     setSavedOutfits((prev) => [...prev, outfit]);
   }
 
   function finishOnboarding(occasionText) {
     const archetypeShortEn = answers.archetype.replace(" & ", " ");
+    const audience = answers.audience || DEFAULT_PROFILE.audience;
+    const audienceMeta = AUDIENCE_META[audience] || AUDIENCE_META.Ladies;
     const built = {
+      name: answers.name || profile.name || DEFAULT_PROFILE.name,
+      audience,
       archetype: archetypeShortEn,
       fit: answers.fit,
+      lifestyle: answers.lifestyle || DEFAULT_PROFILE.lifestyle,
       palette: answers.palette.length ? answers.palette : DEFAULT_PROFILE.palette,
+      avoid: answers.avoid || [],
       budget: answers.budget,
       occasions: answers.occasions,
-      modelGender: profile.modelGender || DEFAULT_PROFILE.modelGender,
+      modelGender: audienceMeta.modelGender || DEFAULT_PROFILE.modelGender,
       favoriteStores: profile.favoriteStores || DEFAULT_PROFILE.favoriteStores,
     };
     setProfile(built);
@@ -1195,7 +2536,7 @@ export default function VestraPrototype() {
     setMessages([{ role: "assistant", text: greeting }]);
     if (occasionText) {
       setTab("chat");
-      sendMessage(occasionText);
+      sendMessage(occasionText, built);
     } else {
       setTab("home");
     }
@@ -1236,9 +2577,10 @@ export default function VestraPrototype() {
           .tabbar{ padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px)); }
           .lang-switcher-corner{ top: calc(12px + env(safe-area-inset-top, 0px)); }
           .outfit-visual{ flex-direction:column; }
-          .model-wrap{ width:100%; max-width:none; aspect-ratio:3/4; max-height:min(52vh, 420px); }
+          .model-wrap{ width:100%; max-width:none; aspect-ratio:3/4; max-height:min(58vh, 520px); }
           .bubble-assistant{ max-width:100%; }
           .card{ padding:14px; }
+          .item-row-image{ width:64px; height:64px; }
         }
 
         /* Tablet */
@@ -1246,12 +2588,13 @@ export default function VestraPrototype() {
           .app-outer{ padding:0; }
           .phone{ height:100dvh; }
           .outfit-visual{ gap:16px; }
-          .model-wrap{ width:42%; max-width:300px; }
+          .model-wrap{ width:46%; max-width:340px; }
           .bubble-assistant{ max-width:100%; }
           .screen{ padding:28px 32px 100px; max-width:820px; width:100%; margin:0 auto; }
           .chat-body{ padding:20px 28px; }
           .home-name{ font-size:32px; }
           .onb-screen{ max-width:560px; margin:0 auto; }
+          .item-row-image{ width:68px; height:68px; }
         }
 
         /* Desktop / PC — real website layout */
@@ -1354,7 +2697,8 @@ export default function VestraPrototype() {
         .home-ask-row{ display:flex; gap:8px; align-items:center; margin-bottom:12px; }
         .home-ask-input{ flex:1; font-size:13px; background:#fff; border:1px solid #e6e0d2; border-radius:4px; padding:13px 14px; outline:none; font-family:'Inter',sans-serif; }
         .home-ask-input:focus{ border-color:#C6A567; box-shadow:0 0 0 2px rgba(198,165,103,0.25); }
-        .chip-row{ display:flex; flex-wrap:wrap; gap:8px; }
+        .refine-block{ padding:8px 4px 16px; }
+        .refine-label{ font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:#8b877a; margin-bottom:8px; }
         .chip{ font-size:11.5px; color:#5b5748; background:#fff; border:1px solid #e6e0d2; border-radius:999px; padding:8px 14px; cursor:pointer; font-family:'Inter',sans-serif; transition:all .2s; }
         .chip:hover{ border-color:#C6A567; color:#0B0B0C; }
 
@@ -1364,6 +2708,8 @@ export default function VestraPrototype() {
         .chat-empty{ text-align:center; font-size:12px; color:#8b877a; font-weight:300; margin-top:40px; padding:0 24px; }
         .bubble-user{ align-self:flex-end; background:#0B0B0C; color:#F6F1E7; font-size:13px; border-radius:4px; padding:10px 14px; max-width:80%; }
         .bubble-assistant{ align-self:flex-start; max-width:94%; width:100%; }
+        .bubble-assistant-stack{ display:flex; flex-direction:column; gap:14px; }
+        .stylist-picks-intro{ font-size:12.5px; color:#5b5748; font-weight:300; line-height:1.45; padding:0 2px 2px; }
         .bubble-assistant-text{ align-self:flex-start; max-width:85%; background:#fff; border:1px solid #e6e0d2; color:#0B0B0C; font-size:13px; font-weight:300; line-height:1.5; border-radius:4px; padding:10px 14px; }
         .typing{ align-self:flex-start; font-size:12px; color:#8b877a; display:flex; align-items:center; gap:6px; padding:0 4px; }
         .dot{ width:6px; height:6px; background:#C6A567; border-radius:50%; display:inline-block; animation:pulse 1.2s infinite; }
@@ -1375,8 +2721,23 @@ export default function VestraPrototype() {
 
         .card{ background:#0B0B0C; border:1px solid #2a2a26; border-radius:4px; padding:16px; color:#F6F1E7; }
         .outfit-visual{ display:flex; gap:12px; margin-bottom:14px; align-items:stretch; }
-        .model-wrap{ width:118px; flex-shrink:0; border-radius:4px; overflow:hidden; background:#151513; aspect-ratio:3/4; }
-        .model-photo{ width:100%; height:100%; object-fit:cover; object-position:center top; display:block; }
+        .model-wrap{ width:148px; flex-shrink:0; border-radius:6px; overflow:hidden; background:#151513; aspect-ratio:3/4; }
+        .model-photo{ width:100%; height:100%; object-fit:cover; object-position:center top; display:block; image-rendering:auto; -webkit-backface-visibility:hidden; transform:translateZ(0); }
+        .outfit-hero-wrap{ background:linear-gradient(165deg, #1a1916 0%, #0e0e0c 55%, #1c1812 100%); position:relative; }
+        .outfit-hero-stage{ position:relative; width:100%; height:100%; padding:10px 8px 12px; box-sizing:border-box; display:flex; flex-direction:column; }
+        .outfit-hero-swatches{ display:flex; gap:4px; margin-bottom:8px; }
+        .outfit-hero-swatches span{ width:12px; height:12px; border-radius:50%; border:1px solid rgba(255,255,255,0.25); flex-shrink:0; }
+        .outfit-hero-figure{ position:relative; flex:1; min-height:0; display:grid; grid-template-columns:1.15fr 0.85fr; grid-template-rows:1.1fr 1fr 0.55fr; gap:6px; }
+        .hero-layer{ width:100%; height:100%; object-fit:cover; border-radius:4px; background:#222; display:block; box-shadow:0 2px 10px rgba(0,0,0,0.35); }
+        .hero-outer{ grid-column:1; grid-row:1 / span 2; }
+        .hero-top{ grid-column:2; grid-row:1; }
+        .hero-top.with-outer{ opacity:0.98; }
+        .hero-bottom{ grid-column:2; grid-row:2; }
+        .hero-shoe{ grid-column:1; grid-row:3; }
+        .hero-acc{ grid-column:2; grid-row:3; }
+        .outfit-hero-figure.no-outer .hero-top{ grid-column:1; grid-row:1 / span 2; }
+        .outfit-hero-figure.no-outer .hero-bottom{ grid-column:2; grid-row:1 / span 2; }
+        .outfit-hero-figure.no-shoe .hero-acc{ grid-column:1 / -1; }
         .model-gender-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px; }
         .model-gender-label{ font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#8b877a; }
         .model-gender-switch{ display:flex; gap:4px; }
@@ -1386,7 +2747,7 @@ export default function VestraPrototype() {
         .item-row{ display:flex; align-items:center; gap:8px; background:#151513; border:1px solid #2a2a26; border-radius:4px; padding:6px; color:inherit; }
         .item-row:hover{ border-color:#C6A567; }
         .item-row-shop{ flex:1; min-width:0; display:flex; align-items:center; gap:10px; background:none; border:none; padding:2px; cursor:pointer; text-align:left; color:inherit; font-family:'Inter',sans-serif; }
-        .item-row-image{ width:52px; height:52px; border-radius:4px; object-fit:cover; flex-shrink:0; background:#1c1c19; }
+        .item-row-image{ width:60px; height:60px; border-radius:5px; object-fit:cover; flex-shrink:0; background:#1c1c19; }
         .item-row-info{ flex:1; min-width:0; display:block; }
         .item-row-brand{ font-size:9.5px; letter-spacing:0.08em; text-transform:uppercase; color:#C6A567; margin-bottom:2px; }
         .item-row-name{ font-size:11.5px; line-height:1.3; color:#F6F1E7; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -1399,11 +2760,26 @@ export default function VestraPrototype() {
         .shop-sheet{ width:min(560px, 100%); max-height:min(88vh, 760px); overflow:auto; background:#F6F1E7; border-radius:16px 16px 12px 12px; padding:20px 18px 24px; position:relative; box-shadow:0 24px 60px rgba(0,0,0,0.35); }
         .shop-close{ position:absolute; top:14px; right:14px; background:#fff; border:1px solid #e6e0d2; border-radius:999px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:#0B0B0C; }
         .shop-hero{ display:flex; gap:14px; align-items:center; padding-right:36px; margin-bottom:16px; }
-        .shop-hero-image{ width:84px; height:84px; border-radius:8px; object-fit:cover; background:#fff; flex-shrink:0; }
+        .shop-hero-image{ width:104px; height:104px; border-radius:10px; object-fit:cover; background:#fff; flex-shrink:0; }
         .shop-hero-brand{ font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:#A8895C; margin-bottom:4px; }
         .shop-hero-name{ font-family:'Fraunces',serif; font-size:20px; color:#0B0B0C; line-height:1.25; margin-bottom:6px; }
         .shop-hero-sub{ font-size:12.5px; color:#5b5748; font-weight:300; }
-        .shop-google{ display:flex; align-items:center; justify-content:center; gap:8px; width:100%; box-sizing:border-box; background:#0B0B0C; color:#C6A567; text-decoration:none; border-radius:6px; padding:12px 14px; font-size:12px; letter-spacing:0.04em; text-transform:uppercase; font-weight:600; margin-bottom:18px; }
+        .shop-palette-hint{ font-size:11.5px; color:#0B0B0C; font-weight:500; margin-top:6px; }
+        .shop-search-hint{ font-size:11px; color:#8b877a; font-weight:300; margin-top:4px; font-style:italic; }
+        .shop-google{ display:flex; align-items:center; justify-content:center; gap:8px; width:100%; box-sizing:border-box; background:#0B0B0C; color:#C6A567; text-decoration:none; border-radius:6px; padding:12px 14px; font-size:12px; letter-spacing:0.04em; text-transform:uppercase; font-weight:600; margin-bottom:12px; }
+        .shop-more-toggle{ width:100%; background:transparent; border:none; color:#5b5748; font-size:11px; letter-spacing:0.1em; text-transform:uppercase; padding:8px 0 14px; cursor:pointer; text-align:left; }
+        .shop-stock{ margin-bottom:16px; }
+        .shop-stock-status{ font-size:13px; color:#5b5748; font-weight:300; padding:8px 0 4px; }
+        .shop-stock-list{ display:flex; flex-direction:column; gap:8px; }
+        .shop-stock-card{ display:grid; grid-template-columns:64px 1fr auto; gap:10px; align-items:center; background:#fff; border:1px solid #e6e0d2; border-radius:8px; padding:10px; text-decoration:none; color:#0B0B0C; transition:border-color .15s; }
+        .shop-stock-card:hover{ border-color:#C6A567; }
+        .shop-stock-image{ width:64px; height:64px; object-fit:cover; border-radius:6px; background:#f0ebe0; }
+        .shop-stock-merchant{ font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#A8895C; margin-bottom:2px; }
+        .shop-stock-title{ font-size:12.5px; line-height:1.3; color:#0B0B0C; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+        .shop-stock-meta{ display:flex; align-items:center; gap:8px; margin-top:6px; flex-wrap:wrap; }
+        .shop-stock-price{ font-size:13px; font-weight:600; color:#0B0B0C; }
+        .shop-stock-badge{ font-size:10px; letter-spacing:0.06em; text-transform:uppercase; color:#2f6b45; background:#e8f3eb; padding:3px 7px; border-radius:4px; }
+        .shop-stock-buy{ display:inline-flex; align-items:center; gap:4px; font-size:11px; letter-spacing:0.04em; text-transform:uppercase; color:#8b877a; white-space:nowrap; }
         .shop-tiers{ display:flex; flex-direction:column; gap:16px; }
         .shop-tier-label{ font-size:10px; letter-spacing:0.12em; text-transform:uppercase; color:#8b877a; margin-bottom:8px; }
         .shop-store-grid{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
@@ -1427,7 +2803,7 @@ export default function VestraPrototype() {
         .retailer-group{ margin-bottom:20px; }
         .bag-row{ display:flex; align-items:center; gap:12px; width:100%; box-sizing:border-box; background:#fff; border:1px solid #e6e0d2; border-radius:4px; padding:10px; margin-bottom:8px; text-decoration:none; color:inherit; transition:border-color .2s; cursor:pointer; font-family:'Inter',sans-serif; text-align:left; }
         .bag-row:hover{ border-color:#C6A567; }
-        .bag-image{ width:56px; height:56px; border-radius:4px; object-fit:cover; flex-shrink:0; background:#f4efe4; }
+        .bag-image{ width:72px; height:72px; border-radius:6px; object-fit:cover; flex-shrink:0; background:#f4efe4; }
         .bag-info{ flex:1; min-width:0; }
         .bag-brand{ font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#A8895C; margin-bottom:2px; }
         .bag-name{ font-size:13px; color:#0B0B0C; }
@@ -1487,37 +2863,61 @@ export default function VestraPrototype() {
         .onb-card-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
         .onb-option-card{ text-align:left; font-size:12.5px; color:#0B0B0C; background:#fff; border:1.5px solid #e6e0d2; border-radius:4px; padding:16px 12px; cursor:pointer; font-family:'Inter',sans-serif; line-height:1.35; transition:all .15s; }
         .onb-option-card.selected{ border-color:#C6A567; background:#faf6ec; }
-        .onb-style-grid{ display:grid; grid-template-columns:1fr; gap:12px; padding-bottom:12px; }
+        .onb-style-grid{ display:grid; grid-template-columns:1fr; gap:14px; padding-bottom:12px; }
         .onb-style-card{
-          display:flex; gap:12px; align-items:stretch; text-align:left;
-          background:#fff; border:1.5px solid #e6e0d2; border-radius:10px; padding:10px;
+          display:flex; gap:14px; align-items:stretch; text-align:left;
+          background:#fff; border:1.5px solid #e6e0d2; border-radius:12px; padding:10px;
           cursor:pointer; font-family:'Inter',sans-serif; transition:all .15s; color:#0B0B0C;
         }
         .onb-style-card.selected{ border-color:#C6A567; background:#faf6ec; box-shadow:0 0 0 1px #C6A567; }
-        .onb-style-image{ width:88px; height:118px; object-fit:cover; border-radius:6px; flex-shrink:0; background:#efe9da; }
+        .onb-style-image{ width:112px; height:150px; object-fit:cover; border-radius:8px; flex-shrink:0; background:#efe9da; }
+        .onb-lifestyle-image{ width:120px; height:160px; }
         .onb-style-copy{ display:flex; flex-direction:column; justify-content:center; min-width:0; padding-right:4px; }
-        .onb-style-title{ font-family:'Fraunces',serif; font-size:16px; margin-bottom:6px; line-height:1.25; }
-        .onb-style-desc{ font-size:12px; color:#5b5748; font-weight:300; line-height:1.45; }
+        .onb-style-title{ font-family:'Fraunces',serif; font-size:17px; margin-bottom:6px; line-height:1.25; }
+        .onb-style-desc{ font-size:12.5px; color:#5b5748; font-weight:300; line-height:1.45; }
         @media (min-width: 768px) {
-          .onb-style-grid{ grid-template-columns:1fr 1fr; gap:14px; }
-          .onb-style-image{ width:100px; height:132px; }
-          .onb-style-title{ font-size:17px; }
-          .onb-style-desc{ font-size:12.5px; }
+          .onb-style-grid{ grid-template-columns:1fr 1fr; gap:16px; }
+          .onb-style-image{ width:128px; height:170px; }
+          .onb-lifestyle-image{ width:140px; height:186px; }
+          .onb-style-title{ font-size:18px; }
+          .onb-style-desc{ font-size:13px; }
         }
         @media (min-width: 1024px) {
-          .onb-style-grid{ grid-template-columns:1fr 1fr; max-width:720px; }
+          .onb-style-grid{ grid-template-columns:1fr 1fr; max-width:760px; }
         }
         .onb-budget-list{ display:flex; flex-direction:column; gap:10px; }
         .onb-budget-card{ text-align:left; background:#fff; border:1.5px solid #e6e0d2; border-radius:4px; padding:14px 16px; cursor:pointer; font-family:'Inter',sans-serif; transition:all .15s; }
         .onb-budget-card.selected{ border-color:#C6A567; background:#faf6ec; }
         .onb-budget-label{ font-size:13.5px; color:#0B0B0C; margin-bottom:2px; }
         .onb-budget-sub{ font-size:11px; color:#8b877a; }
-        .onb-swatch-grid{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:14px; }
-        .onb-swatch-card{ display:flex; flex-direction:column; align-items:center; gap:6px; background:#fff; border:1.5px solid #e6e0d2; border-radius:4px; padding:10px 4px; cursor:pointer; font-family:'Inter',sans-serif; transition:all .15s; }
-        .onb-swatch-card.selected{ border-color:#C6A567; background:#faf6ec; }
-        .onb-swatch-card.avoid.selected{ border-color:#a85832; background:#fbf1ec; }
-        .onb-swatch-dot{ width:22px; height:22px; border-radius:50%; border:1px solid rgba(0,0,0,0.12); }
-        .onb-swatch-label{ font-size:9.5px; color:#5b5748; text-align:center; line-height:1.25; }
+        .onb-visual-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; padding-bottom:12px; }
+        .onb-visual-grid-3{ grid-template-columns:1fr 1fr 1fr; gap:10px; }
+        .onb-visual-card{
+          display:flex; flex-direction:column; gap:10px; text-align:left;
+          background:#fff; border:1.5px solid #e6e0d2; border-radius:12px; padding:8px 8px 12px;
+          cursor:pointer; font-family:'Inter',sans-serif; transition:all .15s; overflow:hidden;
+        }
+        .onb-visual-card.selected{ border-color:#C6A567; background:#faf6ec; box-shadow:0 0 0 1px #C6A567; }
+        .onb-visual-image{ width:100%; aspect-ratio:3/4; object-fit:cover; border-radius:8px; background:#efe9da; display:block; }
+        .onb-visual-label{ font-family:'Fraunces',serif; font-size:14px; line-height:1.3; color:#0B0B0C; padding:0 4px; }
+        .onb-visual-grid-3 .onb-visual-label{ font-size:12.5px; text-align:center; padding:0 2px; }
+        @media (min-width:720px){
+          .onb-visual-grid{ grid-template-columns:1fr 1fr; gap:16px; max-width:680px; }
+          .onb-visual-grid-3{ grid-template-columns:1fr 1fr 1fr; max-width:780px; }
+          .onb-visual-label{ font-size:15px; }
+          .onb-visual-grid-3 .onb-visual-label{ font-size:14px; }
+        }
+        .onb-swatch-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px; }
+        .onb-swatch-card{ display:flex; flex-direction:column; align-items:center; gap:10px; background:#fff; border:1.5px solid #e6e0d2; border-radius:10px; padding:14px 10px 12px; cursor:pointer; font-family:'Inter',sans-serif; transition:all .15s; }
+        .onb-swatch-card.selected{ border-color:#C6A567; background:#faf6ec; box-shadow:0 0 0 1px #C6A567; }
+        .onb-swatch-card.avoid.selected{ border-color:#a85832; background:#fbf1ec; box-shadow:0 0 0 1px #a85832; }
+        .onb-swatch-dot{ width:56px; height:56px; border-radius:14px; border:1px solid rgba(0,0,0,0.1); box-shadow:inset 0 0 0 1px rgba(255,255,255,0.25); flex-shrink:0; }
+        .onb-swatch-label{ font-size:12px; color:#5b5748; text-align:center; line-height:1.3; font-weight:500; }
+        @media (min-width:720px){
+          .onb-swatch-grid{ grid-template-columns:1fr 1fr 1fr; gap:14px; }
+          .onb-swatch-dot{ width:64px; height:64px; border-radius:16px; }
+          .onb-swatch-label{ font-size:12.5px; }
+        }
         .onb-link{ background:none; border:none; color:#8b877a; font-size:11.5px; text-decoration:underline; cursor:pointer; font-family:'Inter',sans-serif; padding:0; margin-bottom:8px; }
         .onb-mini-label{ font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:#a85832; margin-bottom:10px; }
         .onb-sizes{ display:flex; flex-direction:column; gap:14px; }
@@ -1554,7 +2954,16 @@ export default function VestraPrototype() {
         )}
         <div className="phone-body">
           {stage === "welcome" && <WelcomeScreen onStart={() => setStage("signup")} onSkip={skipToApp} />}
-          {stage === "signup" && <SignupScreen onContinue={() => setStage("onboarding")} onBack={() => setStage("welcome")} />}
+          {stage === "signup" && (
+            <SignupScreen
+              onContinue={({ name, email }) => {
+                setAnswers((a) => ({ ...a, name, email }));
+                setProfile((p) => ({ ...p, name }));
+                setStage("onboarding");
+              }}
+              onBack={() => setStage("welcome")}
+            />
+          )}
           {stage === "onboarding" && (
             <OnboardingScreen
               step={step}
@@ -1576,7 +2985,7 @@ export default function VestraPrototype() {
                   messages={messages}
                   input={input}
                   setInput={setInput}
-                  onSend={() => sendMessage()}
+                  onSend={(text) => sendMessage(text)}
                   onSwap={handleSwap}
                   onSave={handleSave}
                   savedIds={savedIds}
@@ -1584,6 +2993,8 @@ export default function VestraPrototype() {
                   modelGender={profile.modelGender || "woman"}
                   onModelGenderChange={(g) => setProfile((p) => ({ ...p, modelGender: g }))}
                   favoriteStores={profile.favoriteStores || []}
+                  palette={profile.palette || []}
+                  avoid={profile.avoid || []}
                 />
               )}
               {tab === "wardrobe" && (
@@ -1592,12 +3003,16 @@ export default function VestraPrototype() {
                   modelGender={profile.modelGender || "woman"}
                   onModelGenderChange={(g) => setProfile((p) => ({ ...p, modelGender: g }))}
                   favoriteStores={profile.favoriteStores || []}
+                  palette={profile.palette || []}
+                  avoid={profile.avoid || []}
                 />
               )}
               {tab === "bag" && (
                 <BagScreen
                   savedOutfits={savedOutfits}
                   favoriteStores={profile.favoriteStores || []}
+                  palette={profile.palette || []}
+                  avoid={profile.avoid || []}
                 />
               )}
               {tab === "profile" && (

@@ -1,40 +1,55 @@
 # Deploy Vestra to wearvestra.com
 
-## Live on GitHub
+## Live on GitHub Pages (current)
 
 - **Repo:** https://github.com/ivanodonato7/wearvestra
 - **Pages branch:** `gh-pages` (built site)
-- **GitHub Pages:** custom domain set to `wearvestra.com`
+- **Domain:** https://wearvestra.com
 
-## Point DNS (Porkbun) — required
-
-The domain still shows Porkbun’s parking page until DNS points at GitHub Pages.
-
-1. Log in to [Porkbun](https://porkbun.com) → Domain Management → **wearvestra.com** → **DNS Records**
-2. Delete existing parking / link **A** (and ALIAS/CNAME) records for `@` and `www`
-3. Add:
-
-| Type | Host | Answer |
-|------|------|--------|
-| A | *(blank)* | `185.199.108.153` |
-| A | *(blank)* | `185.199.109.153` |
-| A | *(blank)* | `185.199.110.153` |
-| A | *(blank)* | `185.199.111.153` |
-| CNAME | `www` | `ivanodonato7.github.io` |
-
-4. Wait a few minutes, then open https://wearvestra.com
-5. In GitHub → Settings → Pages, click **Check again** if needed, then enable **Enforce HTTPS**
-
-## Redeploy after code changes
+### Redeploy static site
 
 ```bash
 npm run build
-# Publish the contents of dist/ to the gh-pages branch
+# publish dist/ to the gh-pages branch
 ```
 
-## Install as an app
+```bash
+npm run scan:stock   # refresh in-stock retailer listings (Bing Shopping)
+```
 
-Once HTTPS works on wearvestra.com:
+---
+
+## Live Claude stylist on Netlify (recommended)
+
+GitHub Pages cannot keep an API key secret. Netlify runs the stylist function server-side.
+
+### One-time setup (~5 minutes)
+
+1. Create a free site at [app.netlify.com](https://app.netlify.com) → **Add new site** → **Import** the `wearvestra` repo (or create empty and link later).
+2. Copy the **Site ID** (Site configuration → Site details).
+3. Create a [Netlify personal access token](https://app.netlify.com/user/applications#personal-access-tokens).
+4. Create an [Anthropic API key](https://console.anthropic.com/).
+5. In GitHub → **Settings → Secrets and variables → Actions**, add:
+   - `NETLIFY_AUTH_TOKEN`
+   - `NETLIFY_SITE_ID`
+   - `ANTHROPIC_API_KEY`
+6. Copy `deploy/github-action-deploy-netlify.yml` → `.github/workflows/deploy-netlify.yml`, commit, then run **Actions → Deploy Netlify (live stylist) → Run workflow**.
+
+Or locally after `npx netlify-cli login` and `npx netlify-cli link`:
+
+```bash
+export ANTHROPIC_API_KEY=sk-ant-...
+npm run netlify:env
+npm run deploy:netlify
+```
+
+Point `wearvestra.com` DNS at Netlify (or keep Pages for static and use a Netlify subdomain like `app.wearvestra.com` for the live stylist). The app calls `/api/stylist` first.
+
+Without the key, Vestra still works with the on-device composer (profile + palette aware).
+
+---
+
+## Install as an app
 
 - iPhone: Safari → Share → **Add to Home Screen**
 - Android: Chrome → **Install app**
