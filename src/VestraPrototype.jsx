@@ -99,7 +99,12 @@ const UI = {
     lifestyleLabel: "Day-to-day",
     dressingForLabel: "Dressing for",
     paletteLabel: "Palette", budgetLabel: "Budget", dressesForLabel: "Dresses For",
-    prototypeNote: "This is a click-through prototype — no real account exists yet.", languageLabel: "Language",
+    prototypeNote: "Your Style DNA is saved on this device. Delete it anytime to start over.", languageLabel: "Language",
+    deleteProfileLabel: "Start over",
+    deleteProfileTitle: "Delete your style profile?",
+    deleteProfileBody: "This clears your Style DNA, saved outfits, bag, and stylist chat so you can retake the quiz. Style changes — start fresh whenever you want.",
+    deleteProfileConfirm: "Delete & start over",
+    deleteProfileCancel: "Keep my profile",
     navHome: "Home", navStylist: "Stylist", navWardrobe: "Wardrobe", navBag: "Bag", navProfile: "Profile",
     viewProduct: "Shop this item", swapItem: "Swap this item",
     modelOnHer: "Her", modelOnHim: "Him", modelLabel: "Shown on",
@@ -206,7 +211,12 @@ const UI = {
     lifestyleLabel: "Día a día",
     dressingForLabel: "Vestuario para",
     paletteLabel: "Paleta", budgetLabel: "Presupuesto", dressesForLabel: "Se Viste Para",
-    prototypeNote: "Esto es un prototipo interactivo — aún no existe ninguna cuenta real.", languageLabel: "Idioma",
+    prototypeNote: "Tu ADN de estilo se guarda en este dispositivo. Puedes borrarlo cuando quieras para empezar de nuevo.", languageLabel: "Idioma",
+    deleteProfileLabel: "Empezar de nuevo",
+    deleteProfileTitle: "¿Borrar tu perfil de estilo?",
+    deleteProfileBody: "Esto borra tu ADN de estilo, looks guardados, bolsa y chat del estilista para que puedas repetir el cuestionario. El estilo cambia — empieza de cero cuando quieras.",
+    deleteProfileConfirm: "Borrar y empezar de nuevo",
+    deleteProfileCancel: "Conservar mi perfil",
     navHome: "Inicio", navStylist: "Estilista", navWardrobe: "Armario", navBag: "Bolsa", navProfile: "Perfil",
     viewProduct: "Comprar esta prenda", swapItem: "Cambiar esta prenda",
     modelOnHer: "Ella", modelOnHim: "Él", modelLabel: "Mostrado en",
@@ -313,7 +323,12 @@ const UI = {
     lifestyleLabel: "Quotidien",
     dressingForLabel: "S'habille pour",
     paletteLabel: "Palette", budgetLabel: "Budget", dressesForLabel: "S'habille Pour",
-    prototypeNote: "Ceci est un prototype interactif — aucun compte réel n'existe encore.", languageLabel: "Langue",
+    prototypeNote: "Votre ADN Style est enregistré sur cet appareil. Supprimez-le quand vous voulez pour recommencer.", languageLabel: "Langue",
+    deleteProfileLabel: "Recommencer",
+    deleteProfileTitle: "Supprimer votre profil de style ?",
+    deleteProfileBody: "Cela efface votre ADN Style, tenues enregistrées, panier et chat styliste pour refaire le quiz. Le style évolue — recommencez quand vous voulez.",
+    deleteProfileConfirm: "Supprimer et recommencer",
+    deleteProfileCancel: "Garder mon profil",
     navHome: "Accueil", navStylist: "Styliste", navWardrobe: "Garde-robe", navBag: "Panier", navProfile: "Profil",
     viewProduct: "Acheter cet article", swapItem: "Changer cet article",
     modelOnHer: "Elle", modelOnHim: "Lui", modelLabel: "Porté par",
@@ -3404,8 +3419,9 @@ function BagScreen({ savedOutfits, favoriteStores, palette = [], avoid = [] }) {
   );
 }
 
-function ProfileScreen({ profile, onToggleFavoriteStore }) {
+function ProfileScreen({ profile, onToggleFavoriteStore, onDeleteProfile }) {
   const { t, tOpt } = useLang();
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const favorites = profile.favoriteStores || [];
   const favSet = new Set(favorites);
   const budgetLabel = tOpt((BUDGET_OPTIONS.find((b) => b.key === profile.budget) || {}).label || "Balanced");
@@ -3472,7 +3488,33 @@ function ProfileScreen({ profile, onToggleFavoriteStore }) {
         <span className="muted">{t("languageLabel")}</span>
         <LanguageSwitcher />
       </div>
-      <p className="empty-note" style={{ marginTop: 16 }}>{t("prototypeNote")}</p>
+
+      <div className="profile-reset-block">
+        <p className="empty-note">{t("prototypeNote")}</p>
+        {!confirmDelete ? (
+          <button type="button" className="profile-reset-btn" onClick={() => setConfirmDelete(true)}>
+            {t("deleteProfileLabel")}
+          </button>
+        ) : (
+          <div className="profile-reset-confirm">
+            <div className="profile-reset-title">{t("deleteProfileTitle")}</div>
+            <p className="profile-reset-body">{t("deleteProfileBody")}</p>
+            <button
+              type="button"
+              className="profile-reset-btn profile-reset-btn-danger"
+              onClick={() => {
+                setConfirmDelete(false);
+                onDeleteProfile?.();
+              }}
+            >
+              {t("deleteProfileConfirm")}
+            </button>
+            <button type="button" className="profile-reset-cancel" onClick={() => setConfirmDelete(false)}>
+              {t("deleteProfileCancel")}
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -3703,6 +3745,27 @@ export default function VestraPrototype() {
   function skipToApp() {
     setProfile(DEFAULT_PROFILE);
     setStage("app");
+  }
+
+  function deleteProfileAndRestart() {
+    const keepLang = lang;
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch {
+      /* ignore */
+    }
+    setLang(keepLang);
+    setStage("welcome");
+    setStep(0);
+    setAnswers({ name: "", audience: null, lifestyle: null, archetype: null, fit: null, palette: [], avoid: [], budget: null, occasions: [], sizes: {} });
+    setProfile(DEFAULT_PROFILE);
+    setTab("home");
+    setMessages([]);
+    setInput("");
+    setHomeInput("");
+    setPending(false);
+    setSavedIds(new Set());
+    setSavedOutfits([]);
   }
 
   const tabs = [
@@ -3983,6 +4046,24 @@ export default function VestraPrototype() {
         .profile-row span:last-child{ text-align:right; }
         .profile-row:last-child{ border-bottom:none; }
         .profile-lang-row{ display:flex; align-items:center; justify-content:space-between; margin-top:16px; font-size:12.5px; }
+        .profile-reset-block{ margin-top:28px; padding-top:20px; border-top:1px solid #e6e0d2; }
+        .profile-reset-block .empty-note{ margin:0 0 14px; }
+        .profile-reset-btn{
+          width:100%; box-sizing:border-box; font-size:11px; letter-spacing:0.06em; text-transform:uppercase;
+          color:#5b5748; background:#fff; border:1px solid #d4cec0; border-radius:4px; padding:12px 14px;
+          cursor:pointer; font-family:'Inter',sans-serif; transition:all .2s;
+        }
+        .profile-reset-btn:hover{ border-color:#0B0B0C; color:#0B0B0C; }
+        .profile-reset-btn-danger{ background:#0B0B0C; color:#C6A567; border-color:#0B0B0C; margin-bottom:10px; }
+        .profile-reset-btn-danger:hover{ background:#1a1a1c; color:#d4b87a; }
+        .profile-reset-confirm{ display:flex; flex-direction:column; gap:0; }
+        .profile-reset-title{ font-family:'Fraunces',serif; font-size:18px; color:#0B0B0C; margin-bottom:8px; }
+        .profile-reset-body{ font-size:13px; color:#5b5748; font-weight:300; line-height:1.45; margin:0 0 16px; }
+        .profile-reset-cancel{
+          width:100%; box-sizing:border-box; font-size:11px; letter-spacing:0.06em; text-transform:uppercase;
+          color:#8b877a; background:none; border:none; padding:10px; cursor:pointer; font-family:'Inter',sans-serif;
+        }
+        .profile-reset-cancel:hover{ color:#0B0B0C; }
         .muted{ color:#8b877a; }
         .fav-stores-block{ margin-top:28px; }
         .fav-stores-hint{ font-size:12.5px; color:#5b5748; font-weight:300; margin:0 0 14px; }
@@ -4225,6 +4306,7 @@ export default function VestraPrototype() {
                       return { ...p, favoriteStores: next };
                     });
                   }}
+                  onDeleteProfile={deleteProfileAndRestart}
                 />
               )}
             </>
