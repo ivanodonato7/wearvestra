@@ -17,6 +17,17 @@ const UI = {
   en: {
     welcomeEyebrow: "Vestra", welcomeTitleLine1: "Let's get you", welcomeTitleLine2: "dressed properly.",
     welcomeSub: "Streetwear to classy to sexy — a few quick questions, then meet your stylist.", getStarted: "Get Started", skipTesting: "Skip for testing → see the app",
+    downloadAppLabel: "Get the app",
+    downloadIos: "Download for iPhone",
+    downloadAndroid: "Download for Android",
+    downloadIosTitle: "Install Vestra on iPhone",
+    downloadAndroidTitle: "Install Vestra on Android",
+    downloadIosSteps: "1. Open this page in Safari\n2. Tap the Share button\n3. Tap “Add to Home Screen”\n4. Tap Add — Vestra installs like an app",
+    downloadAndroidSteps: "1. Open this page in Chrome\n2. Tap “Install” or the menu (⋮)\n3. Tap “Install app” / “Add to Home screen”\n4. Open Vestra from your home screen",
+    downloadInstallNow: "Install now",
+    downloadGotIt: "Got it",
+    downloadOpenStore: "Open store",
+    downloadUnavailable: "Store listing coming soon — install to your home screen for the full app.",
     createAccountEyebrow: "Create Your Account", whereReachYouLine1: "What should we", whereReachYouLine2: "call you?",
     namePlaceholder: "Your first name", emailPlaceholder: "your@email.com", continueBtn: "Continue",
     signupEmailLabel: "Email (optional)", signupNote: "This is a prototype — no account is actually created.",
@@ -113,6 +124,17 @@ const UI = {
   es: {
     welcomeEyebrow: "Vestra", welcomeTitleLine1: "Vamos a vestirte", welcomeTitleLine2: "como es debido.",
     welcomeSub: "Streetwear, clásico, sexy — unas preguntas rápidas y luego conoces a tu estilista.", getStarted: "Empezar", skipTesting: "Saltar para probar → ver la app",
+    downloadAppLabel: "Consigue la app",
+    downloadIos: "Descargar para iPhone",
+    downloadAndroid: "Descargar para Android",
+    downloadIosTitle: "Instala Vestra en iPhone",
+    downloadAndroidTitle: "Instala Vestra en Android",
+    downloadIosSteps: "1. Abre esta página en Safari\n2. Toca el botón Compartir\n3. Toca “Añadir a pantalla de inicio”\n4. Toca Añadir — Vestra se instala como una app",
+    downloadAndroidSteps: "1. Abre esta página en Chrome\n2. Toca “Instalar” o el menú (⋮)\n3. Toca “Instalar app” / “Añadir a pantalla de inicio”\n4. Abre Vestra desde tu pantalla de inicio",
+    downloadInstallNow: "Instalar ahora",
+    downloadGotIt: "Entendido",
+    downloadOpenStore: "Abrir tienda",
+    downloadUnavailable: "La ficha en la tienda llega pronto — instálala en tu pantalla de inicio.",
     createAccountEyebrow: "Crea tu cuenta", whereReachYouLine1: "¿Cómo te", whereReachYouLine2: "llamamos?",
     namePlaceholder: "Tu nombre", emailPlaceholder: "tu@email.com", continueBtn: "Continuar",
     signupEmailLabel: "Email (opcional)", signupNote: "Esto es un prototipo — no se crea ninguna cuenta real.",
@@ -209,6 +231,17 @@ const UI = {
   fr: {
     welcomeEyebrow: "Vestra", welcomeTitleLine1: "Habillons-vous", welcomeTitleLine2: "comme il se doit.",
     welcomeSub: "Streetwear, classique, sexy — quelques questions rapides, puis votre styliste.", getStarted: "Commencer", skipTesting: "Passer pour tester → voir l'app",
+    downloadAppLabel: "Télécharger l'app",
+    downloadIos: "Télécharger pour iPhone",
+    downloadAndroid: "Télécharger pour Android",
+    downloadIosTitle: "Installer Vestra sur iPhone",
+    downloadAndroidTitle: "Installer Vestra sur Android",
+    downloadIosSteps: "1. Ouvrez cette page dans Safari\n2. Appuyez sur Partager\n3. Appuyez sur « Sur l'écran d'accueil »\n4. Appuyez sur Ajouter — Vestra s'installe comme une app",
+    downloadAndroidSteps: "1. Ouvrez cette page dans Chrome\n2. Appuyez sur « Installer » ou le menu (⋮)\n3. Appuyez sur « Installer l'application »\n4. Ouvrez Vestra depuis l'écran d'accueil",
+    downloadInstallNow: "Installer maintenant",
+    downloadGotIt: "Compris",
+    downloadOpenStore: "Ouvrir le store",
+    downloadUnavailable: "Fiche store bientôt disponible — installez sur l'écran d'accueil.",
     createAccountEyebrow: "Créez votre compte", whereReachYouLine1: "Comment devons-nous", whereReachYouLine2: "vous appeler ?",
     namePlaceholder: "Votre prénom", emailPlaceholder: "votre@email.com", continueBtn: "Continuer",
     signupEmailLabel: "Email (optionnel)", signupNote: "Ceci est un prototype — aucun compte n'est réellement créé.",
@@ -2326,9 +2359,126 @@ const DEFAULT_PROFILE = {
   favoriteStores: ["zara", "uniqlo", "nordstrom", "suitsupply"],
 };
 
+// ==================== APP DOWNLOAD / INSTALL ====================
+/** Optional public store listings — set via Vite env when published. */
+const APP_STORE_URL =
+  (typeof import.meta !== "undefined" && import.meta.env?.VITE_APP_STORE_URL)
+    ? String(import.meta.env.VITE_APP_STORE_URL)
+    : "";
+const PLAY_STORE_URL =
+  (typeof import.meta !== "undefined" && import.meta.env?.VITE_PLAY_STORE_URL)
+    ? String(import.meta.env.VITE_PLAY_STORE_URL)
+    : "";
+
+function detectMobilePlatform() {
+  if (typeof navigator === "undefined") return "other";
+  const ua = navigator.userAgent || "";
+  if (/iPhone|iPad|iPod/i.test(ua)) return "ios";
+  if (/Android/i.test(ua)) return "android";
+  return "other";
+}
+
+function AppleMark() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
+      <path d="M16.365 1.43c0 1.14-.42 2.2-1.24 3.02-.9.9-2.1 1.42-3.2 1.34-.1-1.2.46-2.42 1.28-3.24.9-.9 2.28-1.54 3.16-1.12zm3.5 16.94c-.64 1.48-.94 2.14-1.76 3.46-1.14 1.74-2.76 3.9-4.76 3.92-1.78.02-2.24-1.16-4.66-1.14-2.42.02-2.92 1.16-4.7 1.14-2-.02-3.52-1.98-4.66-3.72C-2.3 18.3-1.1 11.8 1.7 8.3c1.56-1.96 3.6-3.12 5.66-3.12 2.12 0 3.46 1.16 5.22 1.16 1.7 0 2.74-1.16 5.2-1.16 1.74 0 3.58.94 4.9 2.56-4.3 2.36-3.6 8.52.18 10.63z" />
+    </svg>
+  );
+}
+
+function PlayMark() {
+  return (
+    <svg width="16" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
+      <path d="M3.6 2.3c-.4.2-.6.7-.6 1.3v16.8c0 .6.2 1.1.6 1.3l.1.1 9.4-9.5v-.2L3.7 2.2l-.1.1zm11.2 6.4L11.3 12l3.5 3.3 4.3-2.5c.7-.4.7-1.1 0-1.5l-4.3-2.6zM4.2 21.5l8.3-8.3-1.8-1.7L3.5 20c.1.6.4 1 .7 1.5zm8.3-10.7L4.2 2.5c-.3.4-.6.9-.7 1.5l7.2 7.1 1.8-1.7z" />
+    </svg>
+  );
+}
+
+function InstallSheet({ platform, onClose, deferredPrompt, onPromptInstall }) {
+  const { t } = useLang();
+  const isIos = platform === "ios";
+  const storeUrl = isIos ? APP_STORE_URL : PLAY_STORE_URL;
+  const canNativeInstall = !isIos && deferredPrompt;
+
+  return (
+    <div className="install-overlay" onClick={onClose} role="presentation">
+      <div className="install-sheet" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+        <button type="button" className="shop-close" onClick={onClose} aria-label={t("shopClose")}>
+          <X size={16} />
+        </button>
+        <div className="install-sheet-icon">{isIos ? <AppleMark /> : <PlayMark />}</div>
+        <h3 className="install-sheet-title">{isIos ? t("downloadIosTitle") : t("downloadAndroidTitle")}</h3>
+        <p className="install-sheet-steps">
+          {(isIos ? t("downloadIosSteps") : t("downloadAndroidSteps")).split("\n").map((line) => (
+            <span key={line} className="install-step-line">{line}</span>
+          ))}
+        </p>
+        {!storeUrl && <p className="install-sheet-note">{t("downloadUnavailable")}</p>}
+        <div className="install-sheet-actions">
+          {canNativeInstall && (
+            <button type="button" className="onb-primary-btn" onClick={onPromptInstall}>
+              {t("downloadInstallNow")}
+            </button>
+          )}
+          {storeUrl ? (
+            <a className="install-store-link" href={storeUrl} target="_blank" rel="noopener noreferrer">
+              {t("downloadOpenStore")} <ExternalLink size={12} />
+            </a>
+          ) : null}
+          <button type="button" className="onb-skip-link" onClick={onClose}>{t("downloadGotIt")}</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ==================== ONBOARDING SCREENS ====================
 function WelcomeScreen({ onStart, onSkip }) {
   const { t } = useLang();
+  const [installPlatform, setInstallPlatform] = useState(null);
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+
+  useEffect(() => {
+    const onBip = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+    window.addEventListener("beforeinstallprompt", onBip);
+    return () => window.removeEventListener("beforeinstallprompt", onBip);
+  }, []);
+
+  async function promptAndroidInstall() {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    try {
+      await deferredPrompt.userChoice;
+    } catch {
+      /* ignore */
+    }
+    setDeferredPrompt(null);
+    setInstallPlatform(null);
+  }
+
+  function handleDownload(platform) {
+    const detected = detectMobilePlatform();
+    // Prefer native Chrome install when available on Android
+    if (platform === "android" && deferredPrompt && (detected === "android" || detected === "other")) {
+      promptAndroidInstall();
+      return;
+    }
+    // Open published store listing when configured
+    if (platform === "ios" && APP_STORE_URL) {
+      window.open(APP_STORE_URL, "_blank", "noopener,noreferrer");
+      return;
+    }
+    if (platform === "android" && PLAY_STORE_URL && !deferredPrompt) {
+      // Still show install sheet so users on web get PWA steps + store link
+      setInstallPlatform("android");
+      return;
+    }
+    setInstallPlatform(platform);
+  }
+
   return (
     <div className="onb-screen onb-center">
       <LanguageSwitcher corner />
@@ -2336,7 +2486,37 @@ function WelcomeScreen({ onStart, onSkip }) {
       <h1 className="onb-hero-title">{t("welcomeTitleLine1")}<br />{t("welcomeTitleLine2")}</h1>
       <p className="onb-hero-sub">{t("welcomeSub")}</p>
       <button className="onb-primary-btn" onClick={onStart}>{t("getStarted")}</button>
+
+      <div className="download-block">
+        <div className="download-label">{t("downloadAppLabel")}</div>
+        <div className="download-row">
+          <button type="button" className="download-badge download-badge-ios" onClick={() => handleDownload("ios")}>
+            <AppleMark />
+            <span className="download-badge-text">
+              <span className="download-badge-tiny">iPhone</span>
+              <span className="download-badge-main">{t("downloadIos")}</span>
+            </span>
+          </button>
+          <button type="button" className="download-badge download-badge-android" onClick={() => handleDownload("android")}>
+            <PlayMark />
+            <span className="download-badge-text">
+              <span className="download-badge-tiny">Android</span>
+              <span className="download-badge-main">{t("downloadAndroid")}</span>
+            </span>
+          </button>
+        </div>
+      </div>
+
       <button className="onb-skip-link" onClick={onSkip}>{t("skipTesting")}</button>
+
+      {installPlatform && (
+        <InstallSheet
+          platform={installPlatform}
+          onClose={() => setInstallPlatform(null)}
+          deferredPrompt={deferredPrompt}
+          onPromptInstall={promptAndroidInstall}
+        />
+      )}
     </div>
   );
 }
@@ -3837,6 +4017,36 @@ export default function VestraPrototype() {
         .onb-primary-btn{ background:#0B0B0C; color:#C6A567; border:none; border-radius:4px; padding:15px 32px; font-size:12.5px; letter-spacing:0.06em; text-transform:uppercase; font-weight:600; cursor:pointer; font-family:'Inter',sans-serif; width:100%; max-width:280px; }
         .onb-primary-btn:disabled{ opacity:0.35; cursor:default; }
         .onb-skip-link{ margin-top:18px; background:none; border:none; color:#8b877a; font-size:11.5px; cursor:pointer; font-family:'Inter',sans-serif; text-decoration:underline; }
+        .download-block{ width:100%; max-width:340px; margin-top:28px; }
+        .download-label{ font-size:10px; letter-spacing:0.16em; text-transform:uppercase; color:#A8895C; font-weight:600; margin-bottom:12px; text-align:center; }
+        .download-row{ display:flex; flex-direction:column; gap:10px; width:100%; }
+        @media (min-width: 480px) {
+          .download-row{ flex-direction:row; }
+        }
+        .download-badge{
+          flex:1; display:flex; align-items:center; gap:12px; text-align:left;
+          background:#0B0B0C; color:#F6F1E7; border:1px solid #2a2a26; border-radius:10px;
+          padding:12px 14px; cursor:pointer; font-family:'Inter',sans-serif; transition:border-color .15s, transform .15s;
+        }
+        .download-badge:hover{ border-color:#C6A567; transform:translateY(-1px); }
+        .download-badge-text{ display:flex; flex-direction:column; gap:2px; min-width:0; }
+        .download-badge-tiny{ font-size:9px; letter-spacing:0.08em; text-transform:uppercase; color:#8b877a; }
+        .download-badge-main{ font-size:12.5px; font-weight:500; color:#F6F1E7; line-height:1.25; }
+        .download-badge-ios{ color:#F6F1E7; }
+        .download-badge-android{ color:#F6F1E7; }
+        .install-overlay{ position:fixed; inset:0; background:rgba(11,11,12,0.55); z-index:90; display:flex; align-items:flex-end; justify-content:center; padding:16px; box-sizing:border-box; }
+        .install-sheet{ width:min(440px, 100%); background:#F6F1E7; border-radius:16px 16px 12px 12px; padding:28px 22px 24px; position:relative; box-shadow:0 24px 60px rgba(0,0,0,0.35); }
+        .install-sheet-icon{ width:44px; height:44px; border-radius:12px; background:#0B0B0C; color:#C6A567; display:flex; align-items:center; justify-content:center; margin-bottom:14px; }
+        .install-sheet-title{ font-family:'Fraunces',serif; font-size:22px; color:#0B0B0C; margin:0 0 14px; font-weight:400; }
+        .install-sheet-steps{ display:flex; flex-direction:column; gap:8px; margin:0 0 14px; }
+        .install-step-line{ font-size:13px; color:#5b5748; font-weight:300; line-height:1.45; }
+        .install-sheet-note{ font-size:12px; color:#8b877a; font-weight:300; margin:0 0 16px; }
+        .install-sheet-actions{ display:flex; flex-direction:column; align-items:center; gap:10px; }
+        .install-store-link{ display:inline-flex; align-items:center; gap:6px; color:#0B0B0C; font-size:12.5px; font-weight:600; text-decoration:none; border-bottom:1px solid #C6A567; padding-bottom:2px; }
+        @media (min-width: 768px) {
+          .install-overlay{ align-items:center; }
+          .install-sheet{ border-radius:14px; }
+        }
         .onb-input{ width:100%; max-width:280px; font-size:14px; padding:14px 16px; border:1px solid #e6e0d2; border-radius:4px; outline:none; font-family:'Inter',sans-serif; box-sizing:border-box; }
         .onb-input:focus{ border-color:#C6A567; }
         .onb-fine-print{ font-size:11px; color:#a39d8c; margin-top:14px; }
