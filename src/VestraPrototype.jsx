@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, createContext, useContext } from "react";
 import { Home, MessageCircle, Bookmark, ShoppingBag, User, Send, RefreshCw, Check, Sparkles, ArrowLeft, ExternalLink, X } from "lucide-react";
 import { fetchStylistLooks, isWeekPlanPrompt } from "./stylistApi";
-import { clearHeroCache, fetchHeroTryOn, getCachedHero, setCachedHero } from "./heroApi";
+import { clearHeroCache } from "./heroApi";
 
 // ==================== LANGUAGE / i18n ====================
 // A real backend barely needs any of this — Claude already answers fluently
@@ -110,6 +110,7 @@ const UI = {
     viewProduct: "Shop this item", swapItem: "Swap this item",
     modelOnHer: "Her", modelOnHim: "Him", modelLabel: "Shown on",
     heroGenerating: "Dressing the model…",
+    heroInspiration: "Style inspiration",
     shopAcross: "Shop across stores", shopAcrossSub: "Search this piece from budget to luxury",
     shopClose: "Close", shopTierBudget: "Budget", shopTierMarketplace: "Marketplaces", shopTierHighStreet: "High street", shopTierPremium: "Premium", shopTierLuxury: "Luxury", shopTierOutlet: "Outlet & resale",
     shopOpenAll: "Open Google Shopping",
@@ -223,6 +224,7 @@ const UI = {
     viewProduct: "Comprar esta prenda", swapItem: "Cambiar esta prenda",
     modelOnHer: "Ella", modelOnHim: "Él", modelLabel: "Mostrado en",
     heroGenerating: "Vistiendo al modelo…",
+    heroInspiration: "Inspiración de estilo",
     shopAcross: "Buscar en tiendas", shopAcrossSub: "Desde low-cost hasta lujo",
     shopClose: "Cerrar", shopTierBudget: "Económico", shopTierMarketplace: "Marketplaces", shopTierHighStreet: "High street", shopTierPremium: "Premium", shopTierLuxury: "Lujo", shopTierOutlet: "Outlet y segunda mano",
     shopOpenAll: "Abrir Google Shopping",
@@ -336,6 +338,7 @@ const UI = {
     viewProduct: "Acheter cet article", swapItem: "Changer cet article",
     modelOnHer: "Elle", modelOnHim: "Lui", modelLabel: "Porté par",
     heroGenerating: "Habillage du mannequin…",
+    heroInspiration: "Inspiration style",
     shopAcross: "Chercher en boutiques", shopAcrossSub: "Du abordable au luxe",
     shopClose: "Fermer", shopTierBudget: "Budget", shopTierMarketplace: "Marketplaces", shopTierHighStreet: "High street", shopTierPremium: "Premium", shopTierLuxury: "Luxe", shopTierOutlet: "Outlet & seconde main",
     shopOpenAll: "Ouvrir Google Shopping",
@@ -1564,6 +1567,54 @@ function detectStyleMoods(text) {
   return hits;
 }
 
+/** Stock hero photo slugs in /public/heroes/{him|her}-{slug}.jpg */
+const HERO_OCCASION_SLUGS = new Set(["date-night", "casual", "wedding", "default"]);
+
+/**
+ * Map look tags (occasion ids, styleFamily, free text) → hero filename slug.
+ * Exact stock set: date-night | casual | wedding | default.
+ */
+function resolveHeroOccasionSlug({ occasion, styleFamily, occasions = [], prompt = "" } = {}) {
+  const tokens = [
+    occasion,
+    styleFamily,
+    ...(occasions || []),
+    prompt,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  if (!tokens.trim()) return "default";
+  if (HERO_OCCASION_SLUGS.has(String(occasion || "").toLowerCase())) {
+    return String(occasion).toLowerCase();
+  }
+  if (/\b(wedding|formal|gala|black\s*tie|ceremony|boda|mariage)\b/.test(tokens)
+    || occasions.includes("wedding")
+    || occasions.includes("event")) {
+    return "wedding";
+  }
+  if (/\b(date[\s-]?night|dinner|sexy|evening|romantic|night\s*out|cena|dîner|rendez)\b/.test(tokens)
+    || occasions.includes("dinner")
+    || occasions.includes("sexy")
+    || styleFamily === "sexy"
+    || styleFamily === "romantic") {
+    return "date-night";
+  }
+  if (/\b(casual|weekend|everyday|street|travel|work|office|modern|minimal|relaxed|edgy|bold|classy|trip)\b/.test(tokens)
+    || ["weekend", "everyday", "street", "travel", "work"].some((id) => occasions.includes(id))
+    || ["streetwear", "modern", "minimal", "relaxed", "edgy", "bold", "classy"].includes(styleFamily)) {
+    return "casual";
+  }
+  return "default";
+}
+
+function heroStockUrl(gender, occasionSlug) {
+  const who = gender === "man" ? "him" : "her";
+  const slug = HERO_OCCASION_SLUGS.has(occasionSlug) ? occasionSlug : "default";
+  return assetUrl(`/heroes/${who}-${slug}.jpg`);
+}
+
 function normalizeArchetype(archetype) {
   return String(archetype || "").replace(/\s*&\s*/g, " ").replace(/\s+/g, " ").trim();
 }
@@ -1929,6 +1980,11 @@ function composeOutfits(prompt, profile, lang = "en", count = 3) {
       rationale: buildRationale(row.recipe, occasions, lang, profile),
       recipeId: row.recipe.id,
       styleFamily: fam,
+      occasion: resolveHeroOccasionSlug({
+        styleFamily: fam,
+        occasions: promptOccasions,
+        prompt,
+      }),
       score: row.score,
     });
     return true;
@@ -2084,6 +2140,11 @@ function composeWeekPlan(prompt, profile, lang = "en") {
       recipeId: row.recipe.id,
       silhouette: tunedSil,
       styleFamily: fam,
+      occasion: resolveHeroOccasionSlug({
+        styleFamily: fam,
+        occasions: dayIndex === 4 ? ["dinner", "sexy"] : promptOccasions,
+        prompt: workPrompt,
+      }),
     });
     if (picked.length >= 5) break;
   }
@@ -2110,6 +2171,7 @@ function composeWeekPlan(prompt, profile, lang = "en") {
     const sil = silhouetteKey(items, row.recipe);
     if (usedSilhouettes.has(sil)) continue;
     usedSilhouettes.add(sil);
+    const fam = row.styleFamily || row.recipe.styleFamily || "modern";
     picked.push({
       id: `week-fill-${stylistTurn}-${dayIndex}`,
       option: dayIndex + 1,
@@ -2118,6 +2180,12 @@ function composeWeekPlan(prompt, profile, lang = "en") {
       rationale: buildRationale(row.recipe, occasions, lang, profile),
       recipeId: row.recipe.id,
       silhouette: sil,
+      styleFamily: fam,
+      occasion: resolveHeroOccasionSlug({
+        styleFamily: fam,
+        occasions: dayIndex === 4 ? ["dinner", "sexy"] : promptOccasions,
+        prompt: workPrompt,
+      }),
     });
   }
 
@@ -2876,69 +2944,38 @@ function OccasionScreen({ onSubmit, onSkip }) {
 }
 
 // ==================== OUTFIT HERO ====================
-// Prefer AI try-on (FASHN) when available; otherwise collage of catalog images.
-function OutfitHero({ itemKeys, palette = [], aiImage = null, loading = false }) {
-  const { t, tName } = useLang();
-  const items = (itemKeys || []).map((k) => CATALOG[k]).filter(Boolean);
-  const outer = items.find((i) => i.type === "blazer");
-  const top = items.find((i) => i.type === "shirt");
-  const bottom = items.find((i) => i.type === "trouser");
-  const shoe = items.find((i) => i.type === "shoe");
-  const acc = items.find((i) => i.type === "accessory");
+// Static stock mood photo by occasion + Her/Him (not a literal product shot).
+function OutfitHero({ gender = "woman", occasion = "default", palette = [] }) {
+  const { t } = useLang();
+  const slug = HERO_OCCASION_SLUGS.has(occasion)
+    ? occasion
+    : resolveHeroOccasionSlug({ occasion });
+  const src = heroStockUrl(gender, slug);
+  const fallback = heroStockUrl(gender, "default");
   const swatches = (palette || [])
     .map((label) => (COLOR_OPTIONS.find((c) => c.label === label) || {}).hex)
     .filter(Boolean)
     .slice(0, 4);
-  const accent = swatches[0] || (outer || top || bottom)?.color || "#3E4228";
-
-  if (aiImage) {
-    return (
-      <div className="model-wrap outfit-hero-wrap outfit-hero-ai" style={{ "--hero-accent": accent }}>
-        {swatches.length > 0 && (
-          <div className="outfit-hero-swatches outfit-hero-swatches-overlay" aria-hidden="true">
-            {swatches.map((hex) => <span key={hex} style={{ background: hex }} />)}
-          </div>
-        )}
-        <img className="model-photo" src={aiImage} alt="" loading="lazy" />
-      </div>
-    );
-  }
-
-  if (loading) {
-    return (
-      <div className="model-wrap outfit-hero-wrap outfit-hero-skeleton" style={{ "--hero-accent": accent }} aria-busy="true">
-        <div className="hero-skeleton-shimmer" />
-        <div className="hero-skeleton-label">{t("heroGenerating")}</div>
-      </div>
-    );
-  }
 
   return (
-    <div className="model-wrap outfit-hero-wrap" style={{ "--hero-accent": accent }}>
-      <div className="outfit-hero-stage">
-        {swatches.length > 0 && (
-          <div className="outfit-hero-swatches" aria-hidden="true">
-            {swatches.map((hex) => <span key={hex} style={{ background: hex }} />)}
-          </div>
-        )}
-        <div className={`outfit-hero-figure ${outer ? "has-outer" : "no-outer"} ${shoe ? "has-shoe" : "no-shoe"}`}>
-          {outer && (
-            <img className="hero-layer hero-outer" src={outer.image} alt={tName(outer)} loading="lazy" />
-          )}
-          {top && (
-            <img className={`hero-layer hero-top ${outer ? "with-outer" : ""}`} src={top.image} alt={tName(top)} loading="lazy" />
-          )}
-          {bottom && (
-            <img className="hero-layer hero-bottom" src={bottom.image} alt={tName(bottom)} loading="lazy" />
-          )}
-          {shoe && (
-            <img className="hero-layer hero-shoe" src={shoe.image} alt={tName(shoe)} loading="lazy" />
-          )}
-          {acc && (
-            <img className="hero-layer hero-acc" src={acc.image} alt={tName(acc)} loading="lazy" />
-          )}
+    <div className="model-wrap outfit-hero-wrap outfit-hero-stock">
+      {swatches.length > 0 && (
+        <div className="outfit-hero-swatches outfit-hero-swatches-overlay" aria-hidden="true">
+          {swatches.map((hex) => <span key={hex} style={{ background: hex }} />)}
         </div>
-      </div>
+      )}
+      <img
+        className="model-photo"
+        src={src}
+        alt=""
+        loading="lazy"
+        onError={(e) => {
+          if (e.currentTarget.dataset.fallback === "1") return;
+          e.currentTarget.dataset.fallback = "1";
+          e.currentTarget.src = fallback;
+        }}
+      />
+      <div className="hero-inspiration-caption">{t("heroInspiration")}</div>
     </div>
   );
 }
@@ -3127,53 +3164,19 @@ function ShopSheet({ item, onClose, favoriteStores = [], palette = [], avoid = [
 }
 
 // ==================== OUTFIT CARD ====================
-function OutfitCard({ outfit, onSwap, onSave, saved, modelGender, onModelGenderChange, favoriteStores, optionLabel, palette = [], avoid = [], audience = null }) {
+function OutfitCard({ outfit, onSwap, onSave, saved, modelGender, onModelGenderChange, favoriteStores, optionLabel, palette = [], avoid = [], audience = null, promptHint = "" }) {
   const { lang, t, tName } = useLang();
   const [shopItem, setShopItem] = useState(null);
-  const itemKey = (outfit.items || []).join("|");
-  const [heroImage, setHeroImage] = useState(() => getCachedHero(outfit.items, modelGender));
-  const [heroLoading, setHeroLoading] = useState(() => !getCachedHero(outfit.items, modelGender));
   const styleFamily = outfit.styleFamily || null;
   const genreLabel = styleFamilyLabel(styleFamily, t);
   const audienceForShop = audience || (modelGender === "man" ? "Gentlemen" : "Ladies");
   const header = [optionLabel, genreLabel].filter(Boolean).join(" · ") || t("stylistSuggests");
   const rationale = humanizeRationale(outfit.rationale, lang);
-
-  useEffect(() => {
-    const cached = getCachedHero(outfit.items, modelGender);
-    if (cached) {
-      setHeroImage(cached);
-      setHeroLoading(false);
-      return undefined;
-    }
-    setHeroImage(null);
-    setHeroLoading(true);
-    const controller = new AbortController();
-    let cancelled = false;
-    fetchHeroTryOn({
-      itemKeys: outfit.items,
-      gender: modelGender,
-      catalog: CATALOG,
-      signal: controller.signal,
-    })
-      .then((img) => {
-        if (cancelled) return;
-        if (img) {
-          setCachedHero(outfit.items, modelGender, img);
-          setHeroImage(img);
-        }
-      })
-      .catch(() => {
-        /* keep collage fallback */
-      })
-      .finally(() => {
-        if (!cancelled) setHeroLoading(false);
-      });
-    return () => {
-      cancelled = true;
-      controller.abort();
-    };
-  }, [itemKey, modelGender]);
+  const heroOccasion = resolveHeroOccasionSlug({
+    occasion: outfit.occasion,
+    styleFamily,
+    prompt: promptHint,
+  });
 
   return (
     <div className="card">
@@ -3199,10 +3202,9 @@ function OutfitCard({ outfit, onSwap, onSave, saved, modelGender, onModelGenderC
       </div>
       <div className="outfit-visual">
         <OutfitHero
-          itemKeys={outfit.items}
+          gender={modelGender}
+          occasion={heroOccasion}
           palette={palette}
-          aiImage={heroImage}
-          loading={heroLoading && !heroImage}
         />
         <div className="item-list">
           {outfit.items.map((key) => {
@@ -3356,6 +3358,8 @@ function ChatScreen({ messages, onSend, input, setInput, onSwap, onSave, savedId
           if (m.outfits?.length) {
             const moodSet = new Set(m.outfits.map((o) => o.styleFamily).filter(Boolean));
             const moodIntro = m.styleMood || (moodSet.size === 1 ? t("stylistMoodIntro") : null);
+            const priorUser = [...messages.slice(0, i)].reverse().find((x) => x.role === "user");
+            const promptHint = priorUser?.text || m.styleMood || "";
             return (
               <div key={i} className="bubble-assistant bubble-assistant-stack">
                 <div className="stylist-picks-intro">{m.text || (m.weekPlan ? t("weekPlanIntro") : (moodIntro || t("stylistPicksIntro")))}</div>
@@ -3373,6 +3377,7 @@ function ChatScreen({ messages, onSend, input, setInput, onSwap, onSave, savedId
                     palette={palette}
                     avoid={avoid}
                     audience={audience}
+                    promptHint={promptHint}
                   />
                 ))}
                 {m.weekPlan && (
@@ -3701,14 +3706,24 @@ export default function VestraPrototype() {
     if (live?.outfits?.length) {
       const dayLabels = WEEK_DAY_KEYS.map((k) => (UI[lang] && UI[lang][k]) || UI.en[k]);
       const isWeek = weekPlan || live.mode === "week";
-      const outfits = live.outfits.map((o, i) => ({
-        ...o,
-        option: o.option || i + 1,
-        day: isWeek ? (o.day || dayLabels[i]) : o.day,
-        styleFamily: o.styleFamily || primaryMood || undefined,
-        items: (o.items || []).filter((k) => CATALOG[k]),
-        rationale: humanizeRationale(o.rationale, lang),
-      })).filter((o) => o.items.length >= 3);
+      const promptOccasions = detectOccasions(finalText);
+      const outfits = live.outfits.map((o, i) => {
+        const styleFamily = o.styleFamily || primaryMood || undefined;
+        return {
+          ...o,
+          option: o.option || i + 1,
+          day: isWeek ? (o.day || dayLabels[i]) : o.day,
+          styleFamily,
+          items: (o.items || []).filter((k) => CATALOG[k]),
+          rationale: humanizeRationale(o.rationale, lang),
+          occasion: resolveHeroOccasionSlug({
+            occasion: o.occasion,
+            styleFamily,
+            occasions: isWeek && i === 4 ? ["dinner", "sexy"] : promptOccasions,
+            prompt: finalText,
+          }),
+        };
+      }).filter((o) => o.items.length >= 3);
       if (outfits.length) {
         const shoppingList = isWeek
           ? (Array.isArray(live.shoppingList) && live.shoppingList.length
@@ -4045,16 +4060,17 @@ export default function VestraPrototype() {
         .model-wrap{ width:148px; flex-shrink:0; border-radius:6px; overflow:hidden; background:#151513; aspect-ratio:3/4; }
         .model-photo{ width:100%; height:100%; object-fit:cover; object-position:center top; display:block; image-rendering:auto; -webkit-backface-visibility:hidden; transform:translateZ(0); }
         .outfit-hero-wrap{ background:linear-gradient(165deg, #1a1916 0%, #0e0e0c 55%, #1c1812 100%); position:relative; }
-        .outfit-hero-ai .model-photo{ width:100%; height:100%; object-fit:cover; object-position:center top; display:block; }
-        .outfit-hero-swatches-overlay{ position:absolute; top:8px; left:8px; z-index:2; margin:0; }
-        .outfit-hero-skeleton{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:12px; }
-        .hero-skeleton-shimmer{
-          width:72%; height:78%; border-radius:8px;
-          background:linear-gradient(110deg, #1a1916 20%, #2a2824 40%, #1a1916 60%);
-          background-size:200% 100%; animation:heroShimmer 1.4s ease-in-out infinite;
+        .outfit-hero-stock{ display:flex; flex-direction:column; background:#151513; border:1px solid #2a2a26; }
+        .outfit-hero-stock .model-photo{
+          width:100%; flex:1; min-height:0; object-fit:cover; object-position:center top; display:block;
+          filter:saturate(0.92) contrast(1.02);
         }
-        .hero-skeleton-label{ font-size:10px; letter-spacing:0.06em; text-transform:uppercase; color:#8b877a; text-align:center; }
-        @keyframes heroShimmer{ 0%{ background-position:100% 0; } 100%{ background-position:-100% 0; } }
+        .hero-inspiration-caption{
+          flex-shrink:0; padding:7px 8px 8px; text-align:center;
+          font-size:9px; letter-spacing:0.14em; text-transform:uppercase;
+          color:#8b877a; background:#0B0B0C; border-top:1px solid #2a2a26;
+        }
+        .outfit-hero-swatches-overlay{ position:absolute; top:8px; left:8px; z-index:2; margin:0; }
         .outfit-hero-stage{ position:relative; width:100%; height:100%; padding:10px 8px 12px; box-sizing:border-box; display:flex; flex-direction:column; }
         .outfit-hero-swatches{ display:flex; gap:4px; margin-bottom:8px; }
         .outfit-hero-swatches span{ width:12px; height:12px; border-radius:50%; border:1px solid rgba(255,255,255,0.25); flex-shrink:0; }
