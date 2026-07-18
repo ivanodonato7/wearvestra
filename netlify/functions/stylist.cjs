@@ -13,11 +13,12 @@ Rules:
 - Exactly 3 outfits.
 - The 3 outfits MUST use THREE DIFFERENT styleFamily values from: streetwear, classy, sexy, modern, edgy, romantic, minimal, bold, relaxed.
 - If the user asks for a specific mood (streetwear, classy, sexy, modern, edgy…), make option 1 match that mood strongly; still vary options 2–3 into adjacent but distinct families.
-- Streetwear: no stiff boardroom vibe — prefer Alt/easy pieces, sunglasses, often no blazer or a soft blazerAlt.
-- Classy/elegant: tailored blazer + clean shirt + straight trousers + refined shoe/belt or scarf.
-- Sexy/evening: darker keys (blazerBlack, trouserBlack, shoeBlack, scarfBurgundy), sharper lines, date/night energy.
-- Modern: crisp structured shapes, navy/black accents, intentional and contemporary.
-- Edgy: high contrast, black-forward, attitude without costume.
+- Streetwear: no stiff boardroom vibe — prefer Alt/easy pieces, sunglasses, often no blazer or a soft blazerAlt. Tag styleFamily "streetwear".
+- Classy/elegant: tailored blazer + clean shirt + straight trousers + refined shoe/belt or scarf. Tag styleFamily "classy".
+- Sexy/evening: darker keys (blazerBlack, trouserBlack, shoeBlack, scarfBurgundy), sharper lines, date/night energy. Tag styleFamily "sexy".
+- Modern: crisp structured shapes, navy/black accents, intentional and contemporary. Tag styleFamily "modern".
+- Edgy: high contrast, black-forward, attitude without costume. Tag styleFamily "edgy".
+- When the user names a mood, ALL 3 outfits should use that styleFamily (vary silhouettes within the genre).
 - Each items array uses ONLY keys from the catalog list.
 - Include at most one key per garment family (blazer*, shirt*, trouser*, shoe*, and one accessory family).
 - Honor the user's palette colors — never choose olive/green pieces unless Olive or Forest Green is in their palette. Sexy/edgy may lean black/navy when those fit the palette or prompt.

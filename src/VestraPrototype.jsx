@@ -72,9 +72,13 @@ const UI = {
     chatInputPlaceholder: "e.g. streetwear, sexy dinner, classy event…",
     stylistSuggests: "Your Stylist Suggests", stylistLook: "Look", saveOutfit: "Save Outfit", savedLabel: "Saved",
     stylistPicksIntro: "Three different style directions — tap any piece to shop what's in stock.",
+    stylistMoodIntro: "Three looks in this style — each piece shops the matching genre, not a generic dress code.",
     weekPlanIntro: "Your Mon–Fri plan — five looks, no repeat silhouettes, one shopping list.",
     weekShoppingList: "Week shopping list",
     weekDayMon: "Monday", weekDayTue: "Tuesday", weekDayWed: "Wednesday", weekDayThu: "Thursday", weekDayFri: "Friday",
+    styleFamilyStreetwear: "Streetwear", styleFamilyClassy: "Classy", styleFamilySexy: "Sexy",
+    styleFamilyModern: "Modern", styleFamilyEdgy: "Edgy", styleFamilyRomantic: "Romantic",
+    styleFamilyMinimal: "Minimal", styleFamilyBold: "Bold", styleFamilyRelaxed: "Relaxed",
     stylistRevisionIntro: "Updated — I changed the {item}. Everything else stays.",
     stylistRevisionMulti: "Updated — I swapped the pieces you flagged. Everything else stays.",
     stylistRevisionRemoved: "Updated — I dropped the {item} and finished the look differently.",
@@ -163,9 +167,13 @@ const UI = {
     chatInputPlaceholder: "ej. streetwear, cena sexy, evento elegante…",
     stylistSuggests: "Tu Estilista Sugiere", stylistLook: "Look", saveOutfit: "Guardar Look", savedLabel: "Guardado",
     stylistPicksIntro: "Tres direcciones de estilo distintas — toca cualquier prenda para ver stock.",
+    stylistMoodIntro: "Tres looks de este estilo — cada prenda busca el género correcto, no un código genérico.",
     weekPlanIntro: "Tu plan de lunes a viernes — cinco looks, sin siluetas repetidas, una lista de compras.",
     weekShoppingList: "Lista de compras de la semana",
     weekDayMon: "Lunes", weekDayTue: "Martes", weekDayWed: "Miércoles", weekDayThu: "Jueves", weekDayFri: "Viernes",
+    styleFamilyStreetwear: "Streetwear", styleFamilyClassy: "Clásico", styleFamilySexy: "Sexy",
+    styleFamilyModern: "Moderno", styleFamilyEdgy: "Edgy", styleFamilyRomantic: "Romántico",
+    styleFamilyMinimal: "Minimal", styleFamilyBold: "Audaz", styleFamilyRelaxed: "Relajado",
     stylistRevisionIntro: "Listo — cambié el {item}. El resto se queda.",
     stylistRevisionMulti: "Listo — cambié las piezas que mencionaste. El resto se queda.",
     stylistRevisionRemoved: "Listo — quité el {item} y cerré el look de otra forma.",
@@ -254,9 +262,13 @@ const UI = {
     chatInputPlaceholder: "ex. streetwear, dîner sexy, événement élégant…",
     stylistSuggests: "Votre Styliste Suggère", stylistLook: "Look", saveOutfit: "Enregistrer la Tenue", savedLabel: "Enregistré",
     stylistPicksIntro: "Trois directions de style différentes — touchez une pièce pour voir le stock.",
+    stylistMoodIntro: "Trois looks dans ce style — chaque pièce cherche le bon genre, pas un code générique.",
     weekPlanIntro: "Votre plan lun–ven — cinq looks, aucune silhouette répétée, une liste de courses.",
     weekShoppingList: "Liste de courses de la semaine",
     weekDayMon: "Lundi", weekDayTue: "Mardi", weekDayWed: "Mercredi", weekDayThu: "Jeudi", weekDayFri: "Vendredi",
+    styleFamilyStreetwear: "Streetwear", styleFamilyClassy: "Classique", styleFamilySexy: "Sexy",
+    styleFamilyModern: "Moderne", styleFamilyEdgy: "Edgy", styleFamilyRomantic: "Romantique",
+    styleFamilyMinimal: "Minimal", styleFamilyBold: "Audacieux", styleFamilyRelaxed: "Détendu",
     stylistRevisionIntro: "C’est noté — j’ai changé le {item}. Le reste reste.",
     stylistRevisionMulti: "C’est noté — j’ai changé les pièces que vous avez signalées. Le reste reste.",
     stylistRevisionRemoved: "C’est noté — j’ai retiré le {item} et fini autrement.",
@@ -521,14 +533,150 @@ function tuneItemsToPalette(itemKeys, palette = [], avoid = []) {
   });
 }
 
-/** Build a shopping query that forces the user's palette colors. */
-function buildItemSearchQuery(item, palette = [], avoid = []) {
+/**
+ * Per-style shopping targets — the catalog photos are shared stubs, but search + labels
+ * must resolve to real streetwear / classy / sexy / modern products.
+ */
+const STYLE_GENRE_ITEMS = {
+  streetwear: {
+    blazer: { name: "Oversized Street Blazer", noun: "oversized streetwear blazer jacket" },
+    shirt: {
+      name: "Relaxed Hoodie / Crew",
+      noun: "oversized streetwear hoodie crewneck",
+      nameWoman: "Oversized Street Hoodie",
+      nounWoman: "oversized streetwear hoodie women",
+      nameMan: "Oversized Street Hoodie",
+      nounMan: "oversized streetwear hoodie men",
+    },
+    trouser: { name: "Baggy Cargo Pants", noun: "baggy cargo pants streetwear" },
+    shoe: { name: "Chunky Street Sneakers", noun: "chunky sneakers streetwear" },
+    belt: { name: "Utility Belt", noun: "utility belt streetwear" },
+    scarf: { name: "Street Bandana", noun: "streetwear bandana" },
+    sunglasses: { name: "Chunky Street Shades", noun: "chunky black sunglasses streetwear" },
+  },
+  classy: {
+    blazer: { name: "Tailored Wool Blazer", noun: "tailored wool blazer elegant" },
+    shirt: { name: "Crisp Dress Shirt", noun: "crisp cotton dress shirt elegant" },
+    trouser: { name: "Tailored Dress Trousers", noun: "tailored dress trousers elegant" },
+    shoe: { name: "Leather Oxford / Derby", noun: "leather oxford dress shoes" },
+    belt: { name: "Leather Dress Belt", noun: "leather dress belt elegant" },
+    scarf: { name: "Fine Wool Scarf", noun: "fine wool scarf elegant" },
+    sunglasses: { name: "Classic Acetate Sunglasses", noun: "classic acetate sunglasses" },
+  },
+  sexy: {
+    blazer: { name: "Fitted Evening Blazer", noun: "fitted black evening blazer sexy" },
+    shirt: {
+      nameWoman: "Silk Camisole / Fitted Top",
+      nounWoman: "silk camisole fitted top sexy",
+      nameMan: "Slim Black Turtleneck",
+      nounMan: "slim fitted black turtleneck sexy",
+      name: "Fitted Evening Top",
+      noun: "fitted black evening top sexy",
+    },
+    trouser: { name: "Slim High-Waist Trousers", noun: "high waist slim black trousers sexy" },
+    shoe: {
+      nameWoman: "Pointed Heel Boots",
+      nounWoman: "black pointed heel boots sexy",
+      nameMan: "Sleek Black Dress Shoes",
+      nounMan: "sleek black leather dress shoes",
+      name: "Sleek Evening Shoes",
+      noun: "sleek black evening shoes",
+    },
+    belt: { name: "Slim Black Belt", noun: "slim black leather belt" },
+    scarf: { name: "Silk Evening Scarf", noun: "silk scarf evening sexy" },
+    sunglasses: { name: "Cat-Eye / Slim Shades", noun: "slim black sunglasses evening" },
+  },
+  modern: {
+    blazer: { name: "Sharp Modern Blazer", noun: "modern structured blazer contemporary" },
+    shirt: { name: "Clean Modern Knit / Shirt", noun: "modern minimal shirt contemporary" },
+    trouser: { name: "Straight Modern Trousers", noun: "modern straight trousers contemporary" },
+    shoe: { name: "Minimal Leather Sneaker / Derby", noun: "minimal leather sneakers modern" },
+    belt: { name: "Minimal Leather Belt", noun: "minimal leather belt modern" },
+    scarf: { name: "Architectural Scarf", noun: "modern wool scarf minimal" },
+    sunglasses: { name: "Geometric Sunglasses", noun: "geometric modern sunglasses" },
+  },
+  edgy: {
+    blazer: { name: "Hard-Edge Black Blazer", noun: "black edgy blazer leather trim" },
+    shirt: { name: "Dark Fitted Layer", noun: "black fitted shirt edgy" },
+    trouser: { name: "Black Slim / Wide Contrast", noun: "black edgy trousers slim" },
+    shoe: { name: "Black Combat / Chelsea", noun: "black chelsea combat boots edgy" },
+    belt: { name: "Black Hardware Belt", noun: "black belt silver hardware edgy" },
+    scarf: { name: "Dark Contrast Scarf", noun: "black scarf edgy" },
+    sunglasses: { name: "Wrap / Narrow Black Shades", noun: "narrow black sunglasses edgy" },
+  },
+  romantic: {
+    blazer: { name: "Soft Unstructured Blazer", noun: "soft linen blazer romantic" },
+    shirt: { name: "Soft Knit / Blouse", noun: "soft romantic blouse knit" },
+    trouser: { name: "Fluid Wide Trousers", noun: "fluid wide leg trousers romantic" },
+    shoe: { name: "Soft Suede Boot / Flat", noun: "suede boots romantic" },
+    belt: { name: "Soft Leather Belt", noun: "soft leather belt" },
+    scarf: { name: "Soft Wool Scarf", noun: "soft wool scarf romantic" },
+    sunglasses: { name: "Soft Round Sunglasses", noun: "round sunglasses soft" },
+  },
+  minimal: {
+    blazer: { name: "Quiet Luxury Blazer", noun: "minimal tailored blazer quiet luxury" },
+    shirt: { name: "Clean Essential Tee / Shirt", noun: "minimal essential shirt" },
+    trouser: { name: "Clean Straight Trousers", noun: "minimal straight trousers" },
+    shoe: { name: "Minimal Leather Shoe", noun: "minimal leather shoes" },
+    belt: { name: "Thin Minimal Belt", noun: "thin minimal leather belt" },
+    scarf: { name: "Quiet Scarf", noun: "minimal wool scarf" },
+    sunglasses: { name: "Minimal Black Sunglasses", noun: "minimal black sunglasses" },
+  },
+  bold: {
+    blazer: { name: "Statement Blazer", noun: "statement color blazer bold" },
+    shirt: { name: "Bold Knit / Shirt", noun: "bold color sweater shirt" },
+    trouser: { name: "Statement Trousers", noun: "bold wide trousers" },
+    shoe: { name: "Statement Boots", noun: "bold boots statement" },
+    belt: { name: "Statement Belt", noun: "bold belt" },
+    scarf: { name: "Statement Scarf", noun: "bold color scarf" },
+    sunglasses: { name: "Statement Sunglasses", noun: "bold sunglasses" },
+  },
+  relaxed: {
+    blazer: { name: "Easy Soft Blazer", noun: "unstructured soft blazer casual" },
+    shirt: { name: "Easy Knit / Tee", noun: "relaxed knit sweater casual" },
+    trouser: { name: "Easy Wide Trousers", noun: "relaxed wide trousers casual" },
+    shoe: { name: "Easy Suede Boot / Trainer", noun: "casual suede boots sneakers" },
+    belt: { name: "Casual Leather Belt", noun: "casual leather belt" },
+    scarf: { name: "Easy Scarf", noun: "casual wool scarf" },
+    sunglasses: { name: "Everyday Sunglasses", noun: "casual sunglasses" },
+  },
+};
+
+function styleGenreEntry(styleFamily, garmentFamily, audience) {
+  const table = STYLE_GENRE_ITEMS[styleFamily];
+  if (!table || !garmentFamily) return null;
+  const entry = table[garmentFamily];
+  if (!entry) return null;
+  const men = audience === "Gentlemen";
+  return {
+    name: (men ? entry.nameMan : entry.nameWoman) || entry.name,
+    noun: (men ? entry.nounMan : entry.nounWoman) || entry.noun,
+  };
+}
+
+/** Overlay genre-specific name + search noun onto a catalog stub. */
+function styleAwareItem(item, styleFamily, audience) {
+  if (!item) return item;
+  const garmentFam = familyOfKey(item.key) || (item.type !== "accessory" ? item.type : null);
+  const g = styleGenreEntry(styleFamily, garmentFam, audience);
+  if (!g) return { ...item, styleFamily };
+  return {
+    ...item,
+    name: g.name || item.name,
+    searchNoun: g.noun || item.searchNoun,
+    searchQuery: g.noun || item.searchQuery,
+    styleFamily,
+  };
+}
+
+/** Build a shopping query: palette color + style-genre garment (not always "dress blazer"). */
+function buildItemSearchQuery(item, palette = [], avoid = [], styleFamily = null, audience = null) {
   if (!item) return "";
+  const styled = styleFamily ? styleAwareItem(item, styleFamily, audience) : item;
   const preferred = (palette || []).filter((p) => !(avoid || []).includes(p));
   const tags = item.paletteTags || [];
   let colorLabel = preferred.find((p) => tags.includes(p));
   if (!colorLabel && preferred.length) {
-    // Map garment type to a sensible palette pick when catalog photo color differs
     if (item.type === "shirt") {
       colorLabel = preferred.find((p) => ["Ivory / Cream", "White", "Black", "Grey / Charcoal", "Navy", "Blush / Dusty Pink"].includes(p)) || preferred[0];
     } else if (item.type === "shoe" || item.key?.includes("belt") || item.key?.includes("Belt")) {
@@ -536,16 +684,21 @@ function buildItemSearchQuery(item, palette = [], avoid = []) {
     } else if (item.key?.includes("sunglasses")) {
       colorLabel = preferred.find((p) => ["Black", "Camel / Tan", "Ivory / Cream"].includes(p)) || preferred[0];
     } else {
-      // Outer/trouser/scarf — prefer non-basics first so navy/olive/burgundy win over black
       colorLabel = preferred.find((p) => !["Black", "Ivory / Cream", "White"].includes(p)) || preferred[0];
     }
   }
-  // If still no palette, fall back to the garment's own tagged color
   if (!colorLabel && tags.length) colorLabel = tags[0];
+  // Sexy / edgy / streetwear lean darker when palette allows
+  if (styleFamily === "sexy" || styleFamily === "edgy") {
+    colorLabel = preferred.find((p) => p === "Black" || p === "Burgundy" || p === "Navy") || colorLabel || "Black";
+  }
+  if (styleFamily === "streetwear") {
+    colorLabel = preferred.find((p) => ["Black", "Grey / Charcoal", "Navy", "Olive", "Sand / Beige"].includes(p)) || colorLabel;
+  }
   const colorPhrase = colorLabel ? (COLOR_SEARCH_TERMS[colorLabel] || [colorLabel.toLowerCase()])[0] : null;
-  const noun = item.searchNoun || item.name;
+  const noun = styled.searchNoun || styled.name;
   if (colorPhrase) return `${colorPhrase} ${noun}`.replace(/\s+/g, " ").trim();
-  return item.searchQuery || item.name;
+  return styled.searchQuery || styled.name;
 }
 
 function productMatchesPalette(product, palette = [], avoid = []) {
@@ -610,8 +763,8 @@ function googleShoppingUrl(query) {
   return `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(query)}`;
 }
 
-function storeLinksForItem(item, palette = [], avoid = []) {
-  const q = buildItemSearchQuery(item, palette, avoid);
+function storeLinksForItem(item, palette = [], avoid = [], styleFamily = null, audience = null) {
+  const q = buildItemSearchQuery(item, palette, avoid, styleFamily, audience);
   return STORE_DIRECTORY.map((store) => ({
     ...store,
     href: store.url(q),
@@ -875,6 +1028,16 @@ const OUTFIT_RECIPES = [
     styleFamily: "modern",
     archetypes: ["Modern Sharp", "Minimal Directional", "Quiet Tailored"],
     lifestyles: ["Office / client-facing", "Creative or flexible workplace", "On the move — travel, events, varied"],
+    structure: "structured",
+  },
+  {
+    id: "modern-open-column",
+    outer: null, top: "shirtAlt", bottom: "trouserNavy", shoe: "shoeBlack", acc: "beltAlt",
+    occasions: ["everyday", "work", "dinner", "weekend"],
+    vibe: ["modern", "minimal", "polished"],
+    styleFamily: "modern",
+    archetypes: ["Modern Sharp", "Minimal Directional", "Edgy Contemporary"],
+    lifestyles: ["Creative or flexible workplace", "Remote, mostly at home", "Office / client-facing"],
     structure: "structured",
   },
   {
@@ -1185,14 +1348,23 @@ function recipeItems(recipe) {
   return [recipe.outer, recipe.top, recipe.bottom, recipe.shoe, recipe.acc].filter(Boolean);
 }
 
-/** Pick the best color variant per family using palette first, then fit + style mood. */
-function tuneItemsToProfile(itemKeys, profile, styleMoods = []) {
+/** Pick the best color variant per family using palette first, then fit + style mood.
+ *  Genre recipes pin intentional keys — do not collapse them back to the same tailored defaults. */
+function tuneItemsToProfile(itemKeys, profile, styleMoods = [], styleFamily = null) {
   const palette = profile?.palette || [];
   const avoid = profile?.avoid || [];
   const fit = fitSignals(profile?.fit);
   const life = lifestyleSignals(profile?.lifestyle);
   const vibes = archetypeVibes(profile?.archetype);
   const moods = styleMoods || [];
+  const family = styleFamily || moods[0] || null;
+  const genreLocked = family && ["streetwear", "sexy", "edgy", "classy", "modern"].includes(family);
+
+  // Keep the recipe's chosen silhouette/color keys for strong style genres
+  if (genreLocked) {
+    return itemKeys.map((key) => (CATALOG[key] ? key : key));
+  }
+
   const wantStreetOrEdgy = moods.some((m) => ["streetwear", "edgy", "bold"].includes(m))
     || vibes.some((v) => ["street", "edgy"].includes(v));
   const wantSexy = moods.includes("sexy") || vibes.includes("sexy");
@@ -1212,7 +1384,6 @@ function tuneItemsToProfile(itemKeys, profile, styleMoods = []) {
   return itemKeys.map((key) => {
     const fam = familyOfKey(key);
     if (!fam) return key;
-    // Street/sexy recipes may already pin black/navy keys — keep those when in catalog
     if ((wantSexy || wantStreetOrEdgy) && CATALOG[key] && (String(key).includes("Black") || String(key).includes("Navy") || String(key).includes("Alt"))) {
       return key;
     }
@@ -1335,7 +1506,7 @@ function composeOutfits(prompt, profile, lang = "en", count = 3) {
 
   const scored = OUTFIT_RECIPES.map((recipe, i) => {
     let items = recipeItems(recipe);
-    items = tuneItemsToProfile(items, profile, styleMoods);
+    items = tuneItemsToProfile(items, profile, styleMoods, recipe.styleFamily);
     let score = (seed + i * 31) % 11; // light shuffle only
 
     // --- Archetype (important, but not absolute — leave room for other styles) ---
@@ -1445,15 +1616,19 @@ function composeOutfits(prompt, profile, lang = "en", count = 3) {
     return { recipe, score, items, styleFamily: recipe.styleFamily || "modern" };
   }).sort((a, b) => b.score - a.score);
 
-  // Diversity pass: prefer distinct style families so 3 looks don't feel identical
+  // Diversity pass:
+  // - mood chip (streetwear/sexy/…) → stay IN that genre, vary silhouettes
+  // - open ask → span different style families
   const picked = [];
   const usedSigs = new Set();
   const usedRecipeIds = new Set();
   const usedFamilies = new Set();
+  const primaryMood = styleMoods[0] || null;
 
-  const tryTake = (row, requireNewFamily) => {
+  const tryTake = (row, mode) => {
     const fam = row.styleFamily || row.recipe.styleFamily || "modern";
-    if (requireNewFamily && usedFamilies.has(fam) && usedFamilies.size < count) return false;
+    if (mode === "newFamily" && usedFamilies.has(fam) && usedFamilies.size < count) return false;
+    if (mode === "sameMood" && primaryMood && fam !== primaryMood && !styleMoods.includes(fam)) return false;
     const sig = outfitSignature(row.items);
     const core = row.items.filter((k) => !ACCESSORY_KEYS.has(k)).join("+");
     if (usedSigs.has(sig) || usedSigs.has(`core:${core}`) || usedRecipeIds.has(row.recipe.id)) return false;
@@ -1473,15 +1648,20 @@ function composeOutfits(prompt, profile, lang = "en", count = 3) {
     return true;
   };
 
-  // Pass 1: unique style families
-  for (const row of scored) {
-    if (picked.length >= count) break;
-    tryTake(row, true);
+  if (moodDriven && primaryMood) {
+    for (const row of scored) {
+      if (picked.length >= count) break;
+      tryTake(row, "sameMood");
+    }
+  } else {
+    for (const row of scored) {
+      if (picked.length >= count) break;
+      tryTake(row, "newFamily");
+    }
   }
-  // Pass 2: fill remaining with best scores
   for (const row of scored) {
     if (picked.length >= count) break;
-    tryTake(row, false);
+    tryTake(row, "any");
   }
 
   while (picked.length < count && scored[picked.length]) {
@@ -1564,7 +1744,7 @@ function composeWeekPlan(prompt, profile, lang = "en") {
   ].join("|"));
 
   const scored = OUTFIT_RECIPES.map((recipe, i) => {
-    let items = tuneItemsToProfile(recipeItems(recipe), profile, []);
+    let items = tuneItemsToProfile(recipeItems(recipe), profile, [], recipe.styleFamily);
     let score = (seed + i * 31) % 7;
     const recipeArch = (recipe.archetypes || []).map(normalizeArchetype);
     if (arch && recipeArch.includes(arch)) score += 28;
@@ -2309,17 +2489,30 @@ function OutfitHero({ itemKeys, palette = [] }) {
   );
 }
 
-// ==================== SHOP ACROSS STORES ====================
-function ShopSheet({ item, onClose, favoriteStores = [], palette = [], avoid = [] }) {
-  const { t, tName, tOpt } = useLang();
-  const [stock, setStock] = useState({ status: "loading", products: [], scannedAt: null });
-  const [showStores, setShowStores] = useState(false);
+function styleFamilyLabel(styleFamily, t) {
+  if (!styleFamily) return "";
+  const key = `styleFamily${styleFamily.charAt(0).toUpperCase()}${styleFamily.slice(1)}`;
+  return t(key) !== key ? t(key) : styleFamily;
+}
 
-  const searchQuery = buildItemSearchQuery(item, palette, avoid);
+// ==================== SHOP ACROSS STORES ====================
+function ShopSheet({ item, onClose, favoriteStores = [], palette = [], avoid = [], styleFamily = null, audience = null }) {
+  const { t, tOpt } = useLang();
+  const [stock, setStock] = useState({ status: "loading", products: [], scannedAt: null });
+  // Genre shops open store search immediately — catalog stock stubs are dress-code only
+  const genreShop = styleFamily && ["streetwear", "sexy", "edgy", "modern", "classy"].includes(styleFamily);
+  const [showStores, setShowStores] = useState(!!genreShop);
+
+  const styled = styleAwareItem(item, styleFamily, audience);
+  const searchQuery = buildItemSearchQuery(item, palette, avoid, styleFamily, audience);
   const paletteLabels = (palette || []).filter((p) => !(avoid || []).includes(p));
 
   useEffect(() => {
     if (!item) return undefined;
+    if (genreShop) {
+      setStock({ status: "empty", products: [], scannedAt: null });
+      return undefined;
+    }
     const key = catalogKeyForItem(item);
     if (!key) {
       setStock({ status: "empty", products: [], scannedAt: null });
@@ -2352,14 +2545,15 @@ function ShopSheet({ item, onClose, favoriteStores = [], palette = [], avoid = [
     return () => {
       cancelled = true;
     };
-  }, [item, palette, avoid]);
+  }, [item, palette, avoid, genreShop]);
 
   if (!item) return null;
-  const links = storeLinksForItem(item, palette, avoid);
+  const links = storeLinksForItem(item, palette, avoid, styleFamily, audience);
   const shoppingUrl = googleShoppingUrl(searchQuery);
   const favSet = new Set(favoriteStores);
   const favoriteLinks = links.filter((s) => favSet.has(s.id));
   const paletteHint = paletteLabels.slice(0, 4).map((l) => tOpt(l)).join(", ");
+  const genreLabel = styleFamilyLabel(styleFamily, t);
 
   const productThumb = (product) => {
     const src = product.image || "";
@@ -2374,10 +2568,10 @@ function ShopSheet({ item, onClose, favoriteStores = [], palette = [], avoid = [
           <X size={16} />
         </button>
         <div className="shop-hero">
-          <img className="shop-hero-image" src={item.image} alt={tName(item)} />
+          <img className="shop-hero-image" src={item.image} alt={styled.name} />
           <div className="shop-hero-copy">
-            <div className="shop-hero-brand">{item.retailer}</div>
-            <div className="shop-hero-name">{tName(item)}</div>
+            <div className="shop-hero-brand">{genreLabel || item.retailer}</div>
+            <div className="shop-hero-name">{styled.name}</div>
             <div className="shop-hero-sub">{t("shopInStockSub")}</div>
             {paletteHint ? (
               <div className="shop-palette-hint">{t("shopPaletteFilter").replace("{colors}", paletteHint)}</div>
@@ -2480,12 +2674,16 @@ function ShopSheet({ item, onClose, favoriteStores = [], palette = [], avoid = [
 }
 
 // ==================== OUTFIT CARD ====================
-function OutfitCard({ outfit, onSwap, onSave, saved, modelGender, onModelGenderChange, favoriteStores, optionLabel, palette = [], avoid = [] }) {
-  const { t, tName } = useLang();
+function OutfitCard({ outfit, onSwap, onSave, saved, modelGender, onModelGenderChange, favoriteStores, optionLabel, palette = [], avoid = [], audience = null }) {
+  const { t } = useLang();
   const [shopItem, setShopItem] = useState(null);
+  const styleFamily = outfit.styleFamily || null;
+  const genreLabel = styleFamilyLabel(styleFamily, t);
+  const audienceForShop = audience || (modelGender === "man" ? "Gentlemen" : "Ladies");
+  const header = [optionLabel, genreLabel].filter(Boolean).join(" · ") || t("stylistSuggests");
   return (
     <div className="card">
-      <div className="eyebrow gold">{optionLabel || t("stylistSuggests")}</div>
+      <div className="eyebrow gold">{header}</div>
       <div className="model-gender-row">
         <span className="model-gender-label">{t("modelLabel")}</span>
         <div className="model-gender-switch">
@@ -2511,6 +2709,7 @@ function OutfitCard({ outfit, onSwap, onSave, saved, modelGender, onModelGenderC
           {outfit.items.map((key) => {
             const item = CATALOG[key];
             if (!item) return null;
+            const styled = styleAwareItem(item, styleFamily, audienceForShop);
             return (
               <div key={item.id} className="item-row">
                 <button
@@ -2519,10 +2718,10 @@ function OutfitCard({ outfit, onSwap, onSave, saved, modelGender, onModelGenderC
                   onClick={() => setShopItem(item)}
                   title={t("viewProduct")}
                 >
-                  <img className="item-row-image" src={item.image} alt={tName(item)} loading="lazy" />
+                  <img className="item-row-image" src={item.image} alt={styled.name} loading="lazy" />
                   <div className="item-row-info">
-                    <div className="item-row-brand">{item.retailer}</div>
-                    <div className="item-row-name">{tName(item)}</div>
+                    <div className="item-row-brand">{genreLabel || item.retailer}</div>
+                    <div className="item-row-name">{styled.name}</div>
                     <div className="item-row-meta">${item.price} · {t("shopInStock")}</div>
                   </div>
                   <span className="link-btn-sm" aria-hidden="true">
@@ -2553,6 +2752,8 @@ function OutfitCard({ outfit, onSwap, onSave, saved, modelGender, onModelGenderC
           favoriteStores={favoriteStores}
           palette={palette}
           avoid={avoid}
+          styleFamily={styleFamily}
+          audience={audienceForShop}
         />
       )}
     </div>
@@ -2636,7 +2837,7 @@ function WeekShoppingList({ shoppingList, favoriteStores, palette = [], avoid = 
   );
 }
 
-function ChatScreen({ messages, onSend, input, setInput, onSwap, onSave, savedIds, pending, modelGender, onModelGenderChange, favoriteStores, palette = [], avoid = [] }) {
+function ChatScreen({ messages, onSend, input, setInput, onSwap, onSave, savedIds, pending, modelGender, onModelGenderChange, favoriteStores, palette = [], avoid = [], audience = null }) {
   const { t } = useLang();
   const endRef = useRef(null);
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, pending]);
@@ -2654,9 +2855,11 @@ function ChatScreen({ messages, onSend, input, setInput, onSwap, onSave, savedId
         {messages.map((m, i) => {
           if (m.role === "user") return <div key={i} className="bubble-user">{m.text}</div>;
           if (m.outfits?.length) {
+            const moodSet = new Set(m.outfits.map((o) => o.styleFamily).filter(Boolean));
+            const moodIntro = m.styleMood || (moodSet.size === 1 ? t("stylistMoodIntro") : null);
             return (
               <div key={i} className="bubble-assistant bubble-assistant-stack">
-                <div className="stylist-picks-intro">{m.text || (m.weekPlan ? t("weekPlanIntro") : t("stylistPicksIntro"))}</div>
+                <div className="stylist-picks-intro">{m.text || (m.weekPlan ? t("weekPlanIntro") : (moodIntro || t("stylistPicksIntro")))}</div>
                 {m.outfits.map((outfit, oi) => (
                   <OutfitCard
                     key={outfit.id || oi}
@@ -2670,6 +2873,7 @@ function ChatScreen({ messages, onSend, input, setInput, onSwap, onSave, savedId
                     favoriteStores={favoriteStores}
                     palette={palette}
                     avoid={avoid}
+                    audience={audience}
                   />
                 ))}
                 {m.weekPlan && (
@@ -2957,6 +3161,8 @@ export default function VestraPrototype() {
     }
 
     const weekPlan = isWeekPlanPrompt(finalText);
+    const styleMoods = detectStyleMoods(finalText);
+    const primaryMood = styleMoods[0] || null;
 
     // Try live Claude stylist (Netlify function / custom endpoint), else local composer
     const live = await fetchStylistLooks({
@@ -2973,6 +3179,7 @@ export default function VestraPrototype() {
         ...o,
         option: o.option || i + 1,
         day: isWeek ? (o.day || dayLabels[i]) : o.day,
+        styleFamily: o.styleFamily || primaryMood || undefined,
         items: (o.items || []).filter((k) => CATALOG[k]),
       })).filter((o) => o.items.length >= 3);
       if (outfits.length) {
@@ -2985,11 +3192,12 @@ export default function VestraPrototype() {
         setMessages((m) => [...m, {
           role: "assistant",
           text: live.source === "claude"
-            ? (isWeek ? `${t("weekPlanIntro")} ${t("stylistLive")}` : t("stylistLive"))
+            ? (isWeek ? `${t("weekPlanIntro")} ${t("stylistLive")}` : (primaryMood ? `${t("stylistMoodIntro")} ${t("stylistLive")}` : t("stylistLive")))
             : (isWeek ? t("weekPlanIntro") : undefined),
           outfits,
           shoppingList,
           weekPlan: isWeek,
+          styleMood: primaryMood,
         }]);
         setPending(false);
         return;
@@ -3008,7 +3216,12 @@ export default function VestraPrototype() {
       }]);
     } else {
       const outfits = composeOutfits(finalText, activeProfile, lang, 3);
-      setMessages((m) => [...m, { role: "assistant", outfits }]);
+      setMessages((m) => [...m, {
+        role: "assistant",
+        text: primaryMood ? t("stylistMoodIntro") : undefined,
+        outfits,
+        styleMood: primaryMood,
+      }]);
     }
     setPending(false);
   }
@@ -3552,6 +3765,7 @@ export default function VestraPrototype() {
                   favoriteStores={profile.favoriteStores || []}
                   palette={profile.palette || []}
                   avoid={profile.avoid || []}
+                  audience={profile.audience || null}
                 />
               )}
               {tab === "wardrobe" && (
