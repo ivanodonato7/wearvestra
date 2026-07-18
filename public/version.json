@@ -1,5 +1,5 @@
 {
   "name": "vestra",
-  "build": "deletable-profile-2026-07-18",
-  "features": ["weekwardrobe", "streetwear", "classy", "sexy", "modern", "edgy", "genre-shopping", "200-plus-stores", "app-download", "deletable-profile"]
+  "build": "fix-labels-rationale-2026-07-18",
+  "features": ["weekwardrobe", "streetwear", "classy", "sexy", "modern", "edgy", "genre-shopping", "200-plus-stores", "app-download", "deletable-profile", "honest-labels"]
 }

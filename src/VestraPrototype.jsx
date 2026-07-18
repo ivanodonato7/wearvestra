@@ -705,7 +705,11 @@ function styleGenreEntry(styleFamily, garmentFamily, audience) {
   };
 }
 
-/** Overlay genre-specific name + search noun onto a catalog stub. */
+/**
+ * Overlay genre-specific shopping nouns onto a catalog stub.
+ * Display name/image stay catalog-true (hoodie labels must not sit on shirt photos).
+ * Genre nouns only drive store/Google search queries.
+ */
 function styleAwareItem(item, styleFamily, audience) {
   if (!item) return item;
   const garmentFam = familyOfKey(item.key) || (item.type !== "accessory" ? item.type : null);
@@ -713,11 +717,24 @@ function styleAwareItem(item, styleFamily, audience) {
   if (!g) return { ...item, styleFamily };
   return {
     ...item,
-    name: g.name || item.name,
     searchNoun: g.noun || item.searchNoun,
     searchQuery: g.noun || item.searchQuery,
+    shopAsName: g.name || null,
     styleFamily,
   };
+}
+
+/** Replace catalog keys (shirtAlt, trouserAlt…) with human product names in stylist copy. */
+function humanizeRationale(text, lang = "en") {
+  if (!text) return "";
+  let out = String(text);
+  const keys = Object.keys(CATALOG).sort((a, b) => b.length - a.length);
+  for (const key of keys) {
+    const item = CATALOG[key];
+    const name = (PRODUCT_NAMES_I18N[lang] && PRODUCT_NAMES_I18N[lang][item.id]) || item.name;
+    out = out.replace(new RegExp(`\\b${key}\\b`, "g"), name);
+  }
+  return out;
 }
 
 /** Build a shopping query: palette color + style-genre garment (not always "dress blazer"). */
@@ -2909,13 +2926,12 @@ function styleFamilyLabel(styleFamily, t) {
 
 // ==================== SHOP ACROSS STORES ====================
 function ShopSheet({ item, onClose, favoriteStores = [], palette = [], avoid = [], styleFamily = null, audience = null }) {
-  const { t, tOpt } = useLang();
+  const { t, tOpt, tName } = useLang();
   const [stock, setStock] = useState({ status: "loading", products: [], scannedAt: null });
   // Genre shops skip catalog stock stubs — open the full store directory immediately
   const genreShop = styleFamily && ["streetwear", "sexy", "edgy", "modern", "classy"].includes(styleFamily);
   const [showStores, setShowStores] = useState(true);
 
-  const styled = styleAwareItem(item, styleFamily, audience);
   const searchQuery = buildItemSearchQuery(item, palette, avoid, styleFamily, audience);
   const paletteLabels = (palette || []).filter((p) => !(avoid || []).includes(p));
 
@@ -2980,10 +2996,10 @@ function ShopSheet({ item, onClose, favoriteStores = [], palette = [], avoid = [
           <X size={16} />
         </button>
         <div className="shop-hero">
-          <img className="shop-hero-image" src={item.image} alt={styled.name} />
+          <img className="shop-hero-image" src={item.image} alt={tName(item)} />
           <div className="shop-hero-copy">
             <div className="shop-hero-brand">{genreLabel || item.retailer}</div>
-            <div className="shop-hero-name">{styled.name}</div>
+            <div className="shop-hero-name">{tName(item)}</div>
             <div className="shop-hero-sub">{t("shopInStockSub")}</div>
             {paletteHint ? (
               <div className="shop-palette-hint">{t("shopPaletteFilter").replace("{colors}", paletteHint)}</div>
@@ -3087,12 +3103,13 @@ function ShopSheet({ item, onClose, favoriteStores = [], palette = [], avoid = [
 
 // ==================== OUTFIT CARD ====================
 function OutfitCard({ outfit, onSwap, onSave, saved, modelGender, onModelGenderChange, favoriteStores, optionLabel, palette = [], avoid = [], audience = null }) {
-  const { t } = useLang();
+  const { lang, t, tName } = useLang();
   const [shopItem, setShopItem] = useState(null);
   const styleFamily = outfit.styleFamily || null;
   const genreLabel = styleFamilyLabel(styleFamily, t);
   const audienceForShop = audience || (modelGender === "man" ? "Gentlemen" : "Ladies");
   const header = [optionLabel, genreLabel].filter(Boolean).join(" · ") || t("stylistSuggests");
+  const rationale = humanizeRationale(outfit.rationale, lang);
   return (
     <div className="card">
       <div className="eyebrow gold">{header}</div>
@@ -3121,7 +3138,6 @@ function OutfitCard({ outfit, onSwap, onSave, saved, modelGender, onModelGenderC
           {outfit.items.map((key) => {
             const item = CATALOG[key];
             if (!item) return null;
-            const styled = styleAwareItem(item, styleFamily, audienceForShop);
             return (
               <div key={item.id} className="item-row">
                 <button
@@ -3130,10 +3146,10 @@ function OutfitCard({ outfit, onSwap, onSave, saved, modelGender, onModelGenderC
                   onClick={() => setShopItem(item)}
                   title={t("viewProduct")}
                 >
-                  <img className="item-row-image" src={item.image} alt={styled.name} loading="lazy" />
+                  <img className="item-row-image" src={item.image} alt={tName(item)} loading="lazy" />
                   <div className="item-row-info">
                     <div className="item-row-brand">{genreLabel || item.retailer}</div>
-                    <div className="item-row-name">{styled.name}</div>
+                    <div className="item-row-name">{tName(item)}</div>
                     <div className="item-row-meta">${item.price} · {t("shopInStock")}</div>
                   </div>
                   <span className="link-btn-sm" aria-hidden="true">
@@ -3153,7 +3169,7 @@ function OutfitCard({ outfit, onSwap, onSave, saved, modelGender, onModelGenderC
           })}
         </div>
       </div>
-      <p className="rationale">{outfit.rationale}</p>
+      <p className="rationale">{rationale}</p>
       <button className="save-btn" onClick={onSave} disabled={saved}>
         {saved ? <><Check size={12} /> {t("savedLabel")}</> : t("saveOutfit")}
       </button>
@@ -3208,7 +3224,7 @@ function HomeScreen({ profile, onPrompt, homeInput, setHomeInput }) {
 }
 
 function WeekShoppingList({ shoppingList, favoriteStores, palette = [], avoid = [] }) {
-  const { t, tName } = useLang();
+  const { lang, t, tName } = useLang();
   const [shopItem, setShopItem] = useState(null);
   if (!shoppingList?.length) return null;
   return (
@@ -3218,6 +3234,7 @@ function WeekShoppingList({ shoppingList, favoriteStores, palette = [], avoid = 
         {shoppingList.map((row) => {
           const item = CATALOG[row.key];
           if (!item) return null;
+          const reason = humanizeRationale(row.reason || "", lang);
           return (
             <button
               key={row.key}
@@ -3229,7 +3246,7 @@ function WeekShoppingList({ shoppingList, favoriteStores, palette = [], avoid = 
               <div className="week-shop-info">
                 <div className="week-shop-brand">{item.retailer}</div>
                 <div className="week-shop-name">{tName(item)}</div>
-                <div className="week-shop-meta">${item.price}{row.reason ? ` · ${row.reason}` : ""}</div>
+                <div className="week-shop-meta">${item.price}{reason ? ` · ${reason}` : ""}</div>
               </div>
               <ExternalLink size={12} />
             </button>
@@ -3620,12 +3637,15 @@ export default function VestraPrototype() {
         day: isWeek ? (o.day || dayLabels[i]) : o.day,
         styleFamily: o.styleFamily || primaryMood || undefined,
         items: (o.items || []).filter((k) => CATALOG[k]),
+        rationale: humanizeRationale(o.rationale, lang),
       })).filter((o) => o.items.length >= 3);
       if (outfits.length) {
         const shoppingList = isWeek
           ? (Array.isArray(live.shoppingList) && live.shoppingList.length
             ? live.shoppingList.filter((row) => CATALOG[row.key || row])
-              .map((row) => (typeof row === "string" ? { key: row, reason: "" } : { key: row.key, reason: row.reason || "" }))
+              .map((row) => (typeof row === "string"
+                ? { key: row, reason: "" }
+                : { key: row.key, reason: humanizeRationale(row.reason || "", lang) }))
             : buildShoppingList(outfits))
           : undefined;
         setMessages((m) => [...m, {

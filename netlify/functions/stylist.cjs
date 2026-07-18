@@ -24,6 +24,7 @@ Rules:
 - Honor the user's palette colors — never choose olive/green pieces unless Olive or Forest Green is in their palette. Sexy/edgy may lean black/navy when those fit the palette or prompt.
 - Honor archetype, fit, lifestyle, budget, and occasions — but NEVER collapse every look into the same quiet-tailored uniform.
 - Rationale: 1–2 sentences, name the style family and their colors.
+- Rationale MUST use plain garment words (blazer, shirt, trousers, boots, sunglasses). NEVER write catalog keys like shirtAlt, trouserAlt, shoeAlt, blazerNavy, sunglassesAlt.
 - No markdown, no prose outside JSON.`;
 
 const SYSTEM_WEEK = `You are Vestra, a precise fashion stylist building a weekday wardrobe plan that still spans real style range (classy, modern, relaxed, sexy Friday, etc.).
@@ -41,6 +42,7 @@ Rules:
 - Bias toward workweek polish unless the prompt asks for streetwear/sexy/etc.
 - shoppingList: one consolidated list of UNIQUE catalog keys needed across the week (every key used in any outfit, each once), with a short reason.
 - Rationale: 1 sentence tying the day + style family to their profile.
+- Rationale MUST use plain garment words. NEVER write catalog keys like shirtAlt, trouserAlt, shoeAlt, blazerNavy.
 - No markdown, no prose outside JSON.`;
 
 function isWeekMode(body) {
