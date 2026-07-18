@@ -47,6 +47,14 @@ Point `wearvestra.com` DNS at Netlify (or keep Pages for static and use a Netlif
 
 Without the key, Vestra still works with the on-device composer (profile + palette aware).
 
+### AI outfit heroes (FASHN)
+
+1. Create an API key at [FASHN.ai](https://fashn.ai) / [docs.fashn.ai](https://docs.fashn.ai).
+2. In Netlify → **Environment variables**, add `FASHN_API_KEY`.
+3. Redeploy. Stylist looks call `/api/generate-hero` and cache results in the browser.
+
+Without the key, looks still show the catalog collage + item list (no blocking error).
+
 ---
 
 ## Install as an app

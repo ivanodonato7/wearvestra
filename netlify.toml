@@ -3,9 +3,17 @@
   publish = "dist"
   functions = "netlify/functions"
 
+[functions."generate-hero"]
+  timeout = 26
+
 [[redirects]]
   from = "/api/stylist"
   to = "/.netlify/functions/stylist"
+  status = 200
+
+[[redirects]]
+  from = "/api/generate-hero"
+  to = "/.netlify/functions/generate-hero"
   status = 200
 
 [[redirects]]

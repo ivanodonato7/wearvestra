@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, createContext, useContext } from "react";
 import { Home, MessageCircle, Bookmark, ShoppingBag, User, Send, RefreshCw, Check, Sparkles, ArrowLeft, ExternalLink, X } from "lucide-react";
 import { fetchStylistLooks, isWeekPlanPrompt } from "./stylistApi";
+import { clearHeroCache, fetchHeroTryOn, getCachedHero, setCachedHero } from "./heroApi";
 
 // ==================== LANGUAGE / i18n ====================
 // A real backend barely needs any of this — Claude already answers fluently
@@ -108,6 +109,7 @@ const UI = {
     navHome: "Home", navStylist: "Stylist", navWardrobe: "Wardrobe", navBag: "Bag", navProfile: "Profile",
     viewProduct: "Shop this item", swapItem: "Swap this item",
     modelOnHer: "Her", modelOnHim: "Him", modelLabel: "Shown on",
+    heroGenerating: "Dressing the model…",
     shopAcross: "Shop across stores", shopAcrossSub: "Search this piece from budget to luxury",
     shopClose: "Close", shopTierBudget: "Budget", shopTierMarketplace: "Marketplaces", shopTierHighStreet: "High street", shopTierPremium: "Premium", shopTierLuxury: "Luxury", shopTierOutlet: "Outlet & resale",
     shopOpenAll: "Open Google Shopping",
@@ -220,6 +222,7 @@ const UI = {
     navHome: "Inicio", navStylist: "Estilista", navWardrobe: "Armario", navBag: "Bolsa", navProfile: "Perfil",
     viewProduct: "Comprar esta prenda", swapItem: "Cambiar esta prenda",
     modelOnHer: "Ella", modelOnHim: "Él", modelLabel: "Mostrado en",
+    heroGenerating: "Vistiendo al modelo…",
     shopAcross: "Buscar en tiendas", shopAcrossSub: "Desde low-cost hasta lujo",
     shopClose: "Cerrar", shopTierBudget: "Económico", shopTierMarketplace: "Marketplaces", shopTierHighStreet: "High street", shopTierPremium: "Premium", shopTierLuxury: "Lujo", shopTierOutlet: "Outlet y segunda mano",
     shopOpenAll: "Abrir Google Shopping",
@@ -332,6 +335,7 @@ const UI = {
     navHome: "Accueil", navStylist: "Styliste", navWardrobe: "Garde-robe", navBag: "Panier", navProfile: "Profil",
     viewProduct: "Acheter cet article", swapItem: "Changer cet article",
     modelOnHer: "Elle", modelOnHim: "Lui", modelLabel: "Porté par",
+    heroGenerating: "Habillage du mannequin…",
     shopAcross: "Chercher en boutiques", shopAcrossSub: "Du abordable au luxe",
     shopClose: "Fermer", shopTierBudget: "Budget", shopTierMarketplace: "Marketplaces", shopTierHighStreet: "High street", shopTierPremium: "Premium", shopTierLuxury: "Luxe", shopTierOutlet: "Outlet & seconde main",
     shopOpenAll: "Ouvrir Google Shopping",
@@ -2872,10 +2876,9 @@ function OccasionScreen({ onSubmit, onSkip }) {
 }
 
 // ==================== OUTFIT HERO ====================
-// Hero is built from the exact catalog images in the outfit list —
-// so what you see is what you can tap to shop.
-function OutfitHero({ itemKeys, palette = [] }) {
-  const { tName } = useLang();
+// Prefer AI try-on (FASHN) when available; otherwise collage of catalog images.
+function OutfitHero({ itemKeys, palette = [], aiImage = null, loading = false }) {
+  const { t, tName } = useLang();
   const items = (itemKeys || []).map((k) => CATALOG[k]).filter(Boolean);
   const outer = items.find((i) => i.type === "blazer");
   const top = items.find((i) => i.type === "shirt");
@@ -2887,6 +2890,28 @@ function OutfitHero({ itemKeys, palette = [] }) {
     .filter(Boolean)
     .slice(0, 4);
   const accent = swatches[0] || (outer || top || bottom)?.color || "#3E4228";
+
+  if (aiImage) {
+    return (
+      <div className="model-wrap outfit-hero-wrap outfit-hero-ai" style={{ "--hero-accent": accent }}>
+        {swatches.length > 0 && (
+          <div className="outfit-hero-swatches outfit-hero-swatches-overlay" aria-hidden="true">
+            {swatches.map((hex) => <span key={hex} style={{ background: hex }} />)}
+          </div>
+        )}
+        <img className="model-photo" src={aiImage} alt="" loading="lazy" />
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="model-wrap outfit-hero-wrap outfit-hero-skeleton" style={{ "--hero-accent": accent }} aria-busy="true">
+        <div className="hero-skeleton-shimmer" />
+        <div className="hero-skeleton-label">{t("heroGenerating")}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="model-wrap outfit-hero-wrap" style={{ "--hero-accent": accent }}>
@@ -3105,11 +3130,51 @@ function ShopSheet({ item, onClose, favoriteStores = [], palette = [], avoid = [
 function OutfitCard({ outfit, onSwap, onSave, saved, modelGender, onModelGenderChange, favoriteStores, optionLabel, palette = [], avoid = [], audience = null }) {
   const { lang, t, tName } = useLang();
   const [shopItem, setShopItem] = useState(null);
+  const itemKey = (outfit.items || []).join("|");
+  const [heroImage, setHeroImage] = useState(() => getCachedHero(outfit.items, modelGender));
+  const [heroLoading, setHeroLoading] = useState(() => !getCachedHero(outfit.items, modelGender));
   const styleFamily = outfit.styleFamily || null;
   const genreLabel = styleFamilyLabel(styleFamily, t);
   const audienceForShop = audience || (modelGender === "man" ? "Gentlemen" : "Ladies");
   const header = [optionLabel, genreLabel].filter(Boolean).join(" · ") || t("stylistSuggests");
   const rationale = humanizeRationale(outfit.rationale, lang);
+
+  useEffect(() => {
+    const cached = getCachedHero(outfit.items, modelGender);
+    if (cached) {
+      setHeroImage(cached);
+      setHeroLoading(false);
+      return undefined;
+    }
+    setHeroImage(null);
+    setHeroLoading(true);
+    const controller = new AbortController();
+    let cancelled = false;
+    fetchHeroTryOn({
+      itemKeys: outfit.items,
+      gender: modelGender,
+      catalog: CATALOG,
+      signal: controller.signal,
+    })
+      .then((img) => {
+        if (cancelled) return;
+        if (img) {
+          setCachedHero(outfit.items, modelGender, img);
+          setHeroImage(img);
+        }
+      })
+      .catch(() => {
+        /* keep collage fallback */
+      })
+      .finally(() => {
+        if (!cancelled) setHeroLoading(false);
+      });
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [itemKey, modelGender]);
+
   return (
     <div className="card">
       <div className="eyebrow gold">{header}</div>
@@ -3133,7 +3198,12 @@ function OutfitCard({ outfit, onSwap, onSave, saved, modelGender, onModelGenderC
         </div>
       </div>
       <div className="outfit-visual">
-        <OutfitHero itemKeys={outfit.items} palette={palette} />
+        <OutfitHero
+          itemKeys={outfit.items}
+          palette={palette}
+          aiImage={heroImage}
+          loading={heroLoading && !heroImage}
+        />
         <div className="item-list">
           {outfit.items.map((key) => {
             const item = CATALOG[key];
@@ -3771,6 +3841,7 @@ export default function VestraPrototype() {
     const keepLang = lang;
     try {
       localStorage.removeItem(STORAGE_KEY);
+      clearHeroCache();
     } catch {
       /* ignore */
     }
@@ -3974,6 +4045,16 @@ export default function VestraPrototype() {
         .model-wrap{ width:148px; flex-shrink:0; border-radius:6px; overflow:hidden; background:#151513; aspect-ratio:3/4; }
         .model-photo{ width:100%; height:100%; object-fit:cover; object-position:center top; display:block; image-rendering:auto; -webkit-backface-visibility:hidden; transform:translateZ(0); }
         .outfit-hero-wrap{ background:linear-gradient(165deg, #1a1916 0%, #0e0e0c 55%, #1c1812 100%); position:relative; }
+        .outfit-hero-ai .model-photo{ width:100%; height:100%; object-fit:cover; object-position:center top; display:block; }
+        .outfit-hero-swatches-overlay{ position:absolute; top:8px; left:8px; z-index:2; margin:0; }
+        .outfit-hero-skeleton{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:12px; }
+        .hero-skeleton-shimmer{
+          width:72%; height:78%; border-radius:8px;
+          background:linear-gradient(110deg, #1a1916 20%, #2a2824 40%, #1a1916 60%);
+          background-size:200% 100%; animation:heroShimmer 1.4s ease-in-out infinite;
+        }
+        .hero-skeleton-label{ font-size:10px; letter-spacing:0.06em; text-transform:uppercase; color:#8b877a; text-align:center; }
+        @keyframes heroShimmer{ 0%{ background-position:100% 0; } 100%{ background-position:-100% 0; } }
         .outfit-hero-stage{ position:relative; width:100%; height:100%; padding:10px 8px 12px; box-sizing:border-box; display:flex; flex-direction:column; }
         .outfit-hero-swatches{ display:flex; gap:4px; margin-bottom:8px; }
         .outfit-hero-swatches span{ width:12px; height:12px; border-radius:50%; border:1px solid rgba(255,255,255,0.25); flex-shrink:0; }
