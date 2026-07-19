@@ -1,14 +1,12 @@
 /**
  * Optional live stylist backend.
- * Tries endpoints in order until one returns outfits:
- *   1. VITE_STYLIST_ENDPOINT
- *   2. /api/stylist          (Netlify redirect)
- *   3. /.netlify/functions/stylist
+ * Uses /api/stylist (Netlify rewrite → stylist function) once — do NOT also hit
+ * /.netlify/functions/stylist (same backend; doubles cold-start + Claude latency).
  * Falls back to null so the client composer can run.
  *
  * Modes:
  *   - "looks" (default): 3 outfit options
- *   - "week": Mon–Fri weekwardrobe plan (5 looks, no repeat silhouettes, shopping list)
+ *   - "week": Mon–Fri week wardrobe plan (5 looks, no repeat silhouettes, shopping list)
  */
 
 export function isWeekPlanPrompt(prompt) {
@@ -26,12 +24,12 @@ export function isWeekPlanPrompt(prompt) {
   );
 }
 
-function candidateEndpoints() {
+function stylistEndpoint() {
   const fromEnv =
     typeof import.meta !== "undefined" && import.meta.env?.VITE_STYLIST_ENDPOINT
-      ? String(import.meta.env.VITE_STYLIST_ENDPOINT)
+      ? String(import.meta.env.VITE_STYLIST_ENDPOINT).trim()
       : "";
-  return [fromEnv, "/api/stylist", "/.netlify/functions/stylist"].filter(Boolean);
+  return fromEnv || "/api/stylist";
 }
 
 async function postStylist(endpoint, payload, signal) {
@@ -53,26 +51,30 @@ export async function fetchStylistLooks({
   lang = "en",
   catalogKeys = [],
   mode,
+  avoidRecentItems = [],
+  avoidSilhouettes = [],
 }) {
   const resolvedMode = mode || (isWeekPlanPrompt(prompt) ? "week" : "looks");
-  const controller = new AbortController();
   const timeoutMs = resolvedMode === "week" ? 22000 : 14000;
+  const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
-  const payload = { prompt, profile, lang, catalogKeys, mode: resolvedMode };
+  const payload = {
+    prompt,
+    profile,
+    lang,
+    catalogKeys,
+    mode: resolvedMode,
+    avoidRecentItems: [...new Set(avoidRecentItems || [])].slice(0, 40),
+    avoidSilhouettes: [...new Set(avoidSilhouettes || [])].slice(0, 20),
+  };
   try {
-    for (const endpoint of candidateEndpoints()) {
-      try {
-        const data = await postStylist(endpoint, payload, controller.signal);
-        if (data) {
-          return {
-            ...data,
-            mode: data.mode || resolvedMode,
-          };
-        }
-      } catch {
-        // try next endpoint
-      }
-    }
+    const data = await postStylist(stylistEndpoint(), payload, controller.signal);
+    if (!data) return null;
+    return {
+      ...data,
+      mode: data.mode || resolvedMode,
+    };
+  } catch {
     return null;
   } finally {
     clearTimeout(timer);

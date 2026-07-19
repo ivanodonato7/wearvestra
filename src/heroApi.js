@@ -8,12 +8,13 @@ const HERO_CACHE_KEY = "vestra.heroCache.v1";
 const HERO_CACHE_MAX = 16;
 const STEP_TIMEOUT_MS = 55000;
 
-function candidateEndpoints() {
+function heroEndpoint() {
   const fromEnv =
     typeof import.meta !== "undefined" && import.meta.env?.VITE_HERO_ENDPOINT
-      ? String(import.meta.env.VITE_HERO_ENDPOINT)
+      ? String(import.meta.env.VITE_HERO_ENDPOINT).trim()
       : "";
-  return [fromEnv, "/api/generate-hero", "/.netlify/functions/generate-hero"].filter(Boolean);
+  // Single path — /api/generate-hero already rewrites to the Netlify function
+  return fromEnv || "/api/generate-hero";
 }
 
 /** Wear order for try-on layering: top → outer → bottom → shoes → accessories. */
@@ -105,27 +106,20 @@ function absoluteAssetUrl(path, origin) {
 }
 
 async function postHeroStep(payload, signal) {
-  let sawServiceUnavailable = false;
-  for (const endpoint of candidateEndpoints()) {
-    try {
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-        signal,
-      });
-      if (res.status === 503) {
-        sawServiceUnavailable = true;
-        continue;
-      }
-      if (!res.ok) continue;
-      const data = await res.json();
-      if (data?.image) return { image: String(data.image) };
-    } catch {
-      // try next
-    }
+  try {
+    const res = await fetch(heroEndpoint(), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      signal,
+    });
+    if (res.status === 503) return { unavailable: true };
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (data?.image) return { image: String(data.image) };
+  } catch {
+    /* network / abort */
   }
-  if (sawServiceUnavailable) return { unavailable: true };
   return null;
 }
 
