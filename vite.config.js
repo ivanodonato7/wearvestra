@@ -6,7 +6,10 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      registerType: 'autoUpdate',
+      // Destroy existing service workers on visit — stale navigateFallback shells
+      // were leaving first-time (and returning) users on a dead landing page.
+      selfDestroying: true,
+      injectRegister: null,
       includeAssets: ['favicon.svg', 'icons/*.png', 'icons/*.svg', 'version.json'],
       manifest: {
         name: 'Vestra',
@@ -38,13 +41,6 @@ export default defineConfig({
             purpose: 'maskable',
           },
         ],
-      },
-      workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,json}'],
-        navigateFallback: '/index.html',
-        cleanupOutdatedCaches: true,
-        clientsClaim: true,
-        skipWaiting: true,
       },
     }),
   ],

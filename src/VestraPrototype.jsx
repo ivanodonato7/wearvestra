@@ -2606,15 +2606,75 @@ const EMPTY_PROFILE = {
 };
 
 const APP_STAGES = new Set(["welcome", "signup", "onboarding", "reveal", "occasion", "app"]);
+const STORAGE_KEY = "vestra.profile.v1";
+
+function loadStoredState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+function stageFromHash() {
+  if (typeof window === "undefined") return null;
+  const h = String(window.location.hash || "").replace(/^#/, "").toLowerCase();
+  return APP_STAGES.has(h) ? h : null;
+}
+
+function setStageHash(stage) {
+  if (typeof window === "undefined") return;
+  try {
+    const next = `#${stage}`;
+    if (window.location.hash === next) return;
+    // Prefer hash assignment so a mid-click reload can still recover the stage
+    // even if localStorage write is delayed or blocked.
+    window.location.hash = stage;
+  } catch {
+    try {
+      window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}#${stage}`);
+    } catch {
+      /* ignore */
+    }
+  }
+}
 
 function initialStageFromStorage(stored) {
+  // Hash wins — CTA clicks write it synchronously so a remount can't lose the transition
+  const fromHash = stageFromHash();
+  if (fromHash) return fromHash;
   const stage = stored?.stage;
   if (!stage || !APP_STAGES.has(stage)) return "welcome";
-  // Only enter the main app when we have a real named profile
   if (stage === "app") {
     return stored?.profile?.name ? "app" : "welcome";
   }
   return stage;
+}
+
+/** Write enough state for a cold boot before React setState (beats SW/remount races). */
+function persistBootstrap({ stage, profile, lang = "en", tab = "home", step = 0, answers = null, messages = [] }) {
+  try {
+    const prev = loadStoredState() || {};
+    const payload = {
+      ...prev,
+      lang: lang || prev.lang || "en",
+      stage,
+      step,
+      tab,
+      profile: profile || prev.profile || EMPTY_PROFILE,
+      answers: answers || prev.answers || {
+        name: "", audience: null, lifestyle: null, archetype: null, fit: null, palette: [], avoid: [], budget: null, occasions: [], sizes: {},
+      },
+      savedOutfits: prev.savedOutfits || [],
+      messages,
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+  } catch {
+    /* ignore */
+  }
+  setStageHash(stage);
 }
 
 // ==================== APP DOWNLOAD / INSTALL ====================
@@ -3829,18 +3889,6 @@ function ProfileScreen({ profile, onToggleFavoriteStore, onDeleteProfile }) {
 }
 
 // ==================== ROOT APP ====================
-const STORAGE_KEY = "vestra.profile.v1";
-
-function loadStoredState() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    return JSON.parse(raw);
-  } catch {
-    return null;
-  }
-}
-
 export default function VestraPrototype() {
   const stored = typeof window !== "undefined" ? loadStoredState() : null;
   const [lang, setLang] = useState(stored?.lang || "en");
@@ -3864,7 +3912,8 @@ export default function VestraPrototype() {
   const tOpt = useCallback((value) => (OPTIONS_I18N[lang] && OPTIONS_I18N[lang][value]) || value, [lang]);
   const tName = useCallback((item) => (PRODUCT_NAMES_I18N[lang] && PRODUCT_NAMES_I18N[lang][item.id]) || item.name, [lang]);
 
-  // Debounce persistence so tab/toggle clicks don't sync-block the main thread
+  // Debounce persistence so tab/toggle clicks don't sync-block the main thread.
+  // Stage transitions that matter for cold boot also call persistBootstrap sync.
   useEffect(() => {
     const id = setTimeout(() => {
       try {
@@ -3885,6 +3934,22 @@ export default function VestraPrototype() {
     }, 250);
     return () => clearTimeout(id);
   }, [lang, stage, step, tab, profile, answers, savedOutfits, messages]);
+
+  // Hash is a reload-safe stage backup (see goToSignup / skipToApp).
+  useEffect(() => {
+    const onHash = () => {
+      const h = stageFromHash();
+      if (!h || h === stage) return;
+      if (h === "app") {
+        const s = loadStoredState();
+        if (s?.profile?.name) setStage("app");
+        return;
+      }
+      setStage(h);
+    };
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, [stage]);
 
   async function sendMessage(text, profileOverride) {
     const finalText = text ?? input;
@@ -4086,15 +4151,42 @@ export default function VestraPrototype() {
   }
 
   const goToSignup = useCallback(() => {
+    // Sync persist + hash BEFORE setState. A SW controllerchange reload used to
+    // land before the 250ms debounce wrote "signup", snapping first-time visitors
+    // back to welcome — buttons looked dead.
+    const safeProfile = profile?.modelGender ? profile : { ...EMPTY_PROFILE };
+    persistBootstrap({
+      stage: "signup",
+      profile: safeProfile,
+      lang: lang || "en",
+      tab: tab || "home",
+      step: Number.isFinite(step) ? step : 0,
+      answers: answers || {
+        name: "", audience: null, lifestyle: null, archetype: null, fit: null, palette: [], avoid: [], budget: null, occasions: [], sizes: {},
+      },
+      messages: messages || [],
+    });
     setStage("signup");
-  }, []);
+  }, [profile, lang, tab, step, answers, messages]);
 
   const skipToApp = useCallback(() => {
-    setProfile({ ...DEFAULT_PROFILE });
+    const nextProfile = { ...DEFAULT_PROFILE };
+    persistBootstrap({
+      stage: "app",
+      profile: nextProfile,
+      lang: lang || "en",
+      tab: "home",
+      step: 0,
+      answers: answers || {
+        name: "", audience: null, lifestyle: null, archetype: null, fit: null, palette: [], avoid: [], budget: null, occasions: [], sizes: {},
+      },
+      messages: [],
+    });
+    setProfile(nextProfile);
     setTab("home");
     setMessages([]);
     setStage("app");
-  }, []);
+  }, [lang, answers]);
 
   function deleteProfileAndRestart() {
     const keepLang = lang;
@@ -4106,9 +4198,10 @@ export default function VestraPrototype() {
     }
     setLang(keepLang);
     setStage("welcome");
+    setStageHash("welcome");
     setStep(0);
     setAnswers({ name: "", audience: null, lifestyle: null, archetype: null, fit: null, palette: [], avoid: [], budget: null, occasions: [], sizes: {} });
-    setProfile(DEFAULT_PROFILE);
+    setProfile({ ...EMPTY_PROFILE });
     setTab("home");
     setMessages([]);
     setInput("");

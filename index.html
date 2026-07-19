@@ -14,7 +14,7 @@
       content="Vestra — your AI stylist. Streetwear to classy to sexy — outfits, wardrobe, and shopping."
     />
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-    <meta name="vestra-build" content="fix-welcome-cta-2026-07-19" />
+    <meta name="vestra-build" content="welcome-cta-nuke-sw-2026-07-19" />
     <meta name="mobile-web-app-capable" content="yes" />
     <link rel="canonical" href="https://wearvestra.com/" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -27,6 +27,22 @@
   </head>
   <body>
     <div id="root"></div>
+    <!-- Kill stale Workbox shells before React boots (survives even if module fails). -->
+    <script>
+      (function () {
+        try {
+          if (!("serviceWorker" in navigator)) return;
+          navigator.serviceWorker.getRegistrations().then(function (regs) {
+            return Promise.all(regs.map(function (r) { return r.unregister(); }));
+          }).then(function () {
+            if (typeof caches === "undefined") return;
+            return caches.keys().then(function (keys) {
+              return Promise.all(keys.map(function (k) { return caches.delete(k); }));
+            });
+          }).catch(function () {});
+        } catch (e) {}
+      })();
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
