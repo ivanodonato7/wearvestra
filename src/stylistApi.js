@@ -57,9 +57,8 @@ export async function fetchStylistLooks({
   avoidSilhouettes = [],
 }) {
   const resolvedMode = mode || (isWeekPlanPrompt(prompt) ? "week" : "looks");
-  const controller = new AbortController();
-  const timeoutMs = resolvedMode === "week" ? 22000 : 14000;
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  const totalTimeoutMs = resolvedMode === "week" ? 22000 : 14000;
+  const deadline = Date.now() + totalTimeoutMs;
   const payload = {
     prompt,
     profile,
@@ -69,22 +68,26 @@ export async function fetchStylistLooks({
     avoidRecentItems: [...new Set(avoidRecentItems || [])].slice(0, 40),
     avoidSilhouettes: [...new Set(avoidSilhouettes || [])].slice(0, 20),
   };
-  try {
-    for (const endpoint of candidateEndpoints()) {
-      try {
-        const data = await postStylist(endpoint, payload, controller.signal);
-        if (data) {
-          return {
-            ...data,
-            mode: data.mode || resolvedMode,
-          };
-        }
-      } catch {
-        // try next endpoint
+
+  for (const endpoint of candidateEndpoints()) {
+    const remaining = deadline - Date.now();
+    if (remaining < 400) break;
+    // Fresh AbortController per endpoint so a hung first URL doesn't abort the rest
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), remaining);
+    try {
+      const data = await postStylist(endpoint, payload, controller.signal);
+      if (data) {
+        return {
+          ...data,
+          mode: data.mode || resolvedMode,
+        };
       }
+    } catch {
+      // try next endpoint
+    } finally {
+      clearTimeout(timer);
     }
-    return null;
-  } finally {
-    clearTimeout(timer);
   }
+  return null;
 }

@@ -1612,45 +1612,63 @@ const OUTFIT_RECIPES = [
 ];
 
 const OCCASION_KEYWORDS = [
-  { id: "wedding", keys: ["wedding", "formal", "gala", "black tie", "ceremony", "boda", "mariage", "formel", "guest"] },
-  { id: "dinner", keys: ["dinner", "date", "evening", "restaurant", "cena", "dîner", "soir", "rendez", "tonight", "first date", "primera cita"] },
-  { id: "work", keys: ["work", "office", "meeting", "client", "interview", "job interview", "entrevista", "trabajo", "bureau", "réunion", "work dinner", "cena de trabajo", "dîner professionnel", "professionnel"] },
+  { id: "wedding", keys: ["wedding", "wedding guest", "black tie", "ceremony", "boda", "mariage", "gala"] },
+  { id: "dinner", keys: ["dinner", "date night", "first date", "evening", "restaurant", "cena", "dîner", "tonight", "primera cita", "premier rendez"] },
+  { id: "work", keys: ["work", "office", "meeting", "client", "interview", "job interview", "entrevista", "trabajo", "bureau", "réunion", "work dinner", "cena de trabajo", "dîner professionnel"] },
   { id: "travel", keys: ["travel", "airport", "trip", "flight", "viaje", "voyage", "avion"] },
   { id: "weekend", keys: ["weekend", "casual", "brunch", "fin de semana", "week-end", "nothing fussy", "sin complicaciones", "sans prise"] },
   { id: "event", keys: ["event", "party", "celebration", "cocktail", "evento", "fête", "soirée"] },
   { id: "everyday", keys: ["everyday", "daily", "help me look", "look good", "diario", "quotidien", "no idea"] },
   { id: "street", keys: ["streetwear", "street", "urban", "hype", "sneaker", "urbano"] },
-  { id: "sexy", keys: ["sexy", "hot", "allure", "seductive", "club", "night out", "noche", "soirée sexy"] },
-  { id: "active", keys: ["gym", "workout", "athletic", "run", "sport", "ejercicio", "sportif", "active"] },
+  { id: "sexy", keys: ["sexy", "seductive", "club", "night out", "noche", "soirée sexy"] },
+  { id: "active", keys: ["gym", "workout", "athletic", "running", "sport", "ejercicio", "sportif", "active"] },
+  { id: "formal", keys: ["formal", "formel", "black tie"] },
 ];
 
 /** Style moods from free-text prompts — can override a quiet default profile. */
 const STYLE_MOOD_KEYWORDS = [
   { id: "streetwear", keys: ["streetwear", "street", "urban", "hype", "skate", "cool casual", "urbano", "streetwear vibes"] },
   { id: "classy", keys: ["classy", "elegant", "polished", "refined", "sophisticated", "clásico", "elegante", "classique"] },
-  { id: "sexy", keys: ["sexy", "hot", "seductive", "alluring", "night out", "date night", "sensual", "noche sexy"] },
+  { id: "sexy", keys: ["sexy", "seductive", "alluring", "night out", "date night", "sensual", "noche sexy"] },
   { id: "modern", keys: ["modern", "contemporary", "sharp", "sleek", "clean modern", "moderno", "moderne", "affûté"] },
-  { id: "edgy", keys: ["edgy", "edge", "dark", "attitude", "rebel", "grunge soft", "audaz", "edgy"] },
-  { id: "romantic", keys: ["romantic", "soft", "dreamy", "delicate", "romántico", "romantique"] },
-  { id: "minimal", keys: ["minimal", "simple", "clean", "quiet luxury", "minimalista", "minimaliste"] },
-  { id: "bold", keys: ["bold", "statement", "loud", "expressive", "color pop", "audaz", "audacieux"] },
+  { id: "edgy", keys: ["edgy", "attitude", "rebel", "grunge soft"] },
+  { id: "romantic", keys: ["romantic", "dreamy", "delicate", "romántico", "romantique"] },
+  { id: "minimal", keys: ["minimal", "simple", "quiet luxury", "minimalista", "minimaliste"] },
+  { id: "bold", keys: ["bold", "statement", "loud", "expressive", "color pop", "audacieux"] },
   { id: "relaxed", keys: ["relaxed", "easy", "nothing fussy", "chill", "laid back", "relajado", "détendu"] },
 ];
+
+/** Phrase or whole-word match — avoids "brunch"→run, "update"→date, "informal"→formal. */
+function textHasKeyword(lower, key) {
+  const k = String(key || "").toLowerCase().trim();
+  if (!k || !lower) return false;
+  if (k.includes(" ") || k.includes("-")) return lower.includes(k);
+  const escaped = k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return new RegExp(`(?:^|[^a-zà-ÿ0-9])${escaped}(?:$|[^a-zà-ÿ0-9])`, "i").test(lower);
+}
 
 function detectOccasions(text) {
   const lower = (text || "").toLowerCase();
   const hits = [];
   for (const row of OCCASION_KEYWORDS) {
-    if (row.keys.some((k) => lower.includes(k))) hits.push(row.id);
+    if (row.keys.some((k) => textHasKeyword(lower, k))) hits.push(row.id);
   }
-  return hits;
+  // Whole-word "date" only (not update/candidate/validate)
+  if (!hits.includes("dinner") && /(?:^|[^a-zà-ÿ0-9])date(?:$|[^a-zà-ÿ0-9])/i.test(lower)) {
+    hits.push("dinner");
+  }
+  // Whole-word "run" for gym (not brunch)
+  if (!hits.includes("active") && /(?:^|[^a-zà-ÿ0-9])run(?:ning)?(?:$|[^a-zà-ÿ0-9])/i.test(lower)) {
+    hits.push("active");
+  }
+  return [...new Set(hits)];
 }
 
 function detectStyleMoods(text) {
   const lower = (text || "").toLowerCase();
   const hits = [];
   for (const row of STYLE_MOOD_KEYWORDS) {
-    if (row.keys.some((k) => lower.includes(k))) hits.push(row.id);
+    if (row.keys.some((k) => textHasKeyword(lower, k))) hits.push(row.id);
   }
   return hits;
 }
@@ -1786,9 +1804,12 @@ function tuneItemsToProfile(itemKeys, profile, styleMoods = [], styleFamily = nu
   const vibes = archetypeVibes(profile?.archetype);
   const moods = styleMoods || [];
   const family = styleFamily || moods[0] || null;
-  const genreLocked = family && ["streetwear", "sexy", "edgy", "classy", "modern", "romantic", "relaxed"].includes(family);
+  // Only lock when the USER named this genre — not merely because the recipe has a styleFamily
+  const genreLocked = moods.length > 0 && styleFamily
+    && moods.includes(styleFamily)
+    && ["streetwear", "sexy", "edgy", "classy", "modern", "romantic", "relaxed"].includes(styleFamily);
 
-  // Occasion or strong genre: keep recipe keys; only dodge avoided colors
+  // Occasion or user-named genre: keep recipe keys; only dodge avoided colors
   if (genreLocked || occasionDriven) {
     return itemKeys.map((key) => {
       if (!CATALOG[key]) return key;
@@ -2064,24 +2085,27 @@ function composeOutfits(prompt, profile, lang = "en", count = 3, recentHistory =
   const usedFamilies = new Set();
   const primaryMood = styleMoods[0] || null;
 
-  const tryTake = (row, mode) => {
+  const tryTake = (row, mode, itemsOverride = null) => {
     const fam = row.styleFamily || row.recipe.styleFamily || "modern";
     if (mode === "newFamily" && usedFamilies.has(fam) && usedFamilies.size < count) return false;
     if (mode === "sameMood" && primaryMood && fam !== primaryMood && !styleMoods.includes(fam)) return false;
-    const sig = outfitSignature(row.items);
-    const core = row.items.filter((k) => !ACCESSORY_KEYS.has(k)).join("+");
+    const items = itemsOverride || row.items;
+    const sig = outfitSignature(items);
+    const core = items.filter((k) => !ACCESSORY_KEYS.has(k)).join("+");
     if (usedSigs.has(sig) || usedSigs.has(`core:${core}`) || usedRecipeIds.has(row.recipe.id)) return false;
     usedSigs.add(sig);
     usedSigs.add(`core:${core}`);
     usedRecipeIds.add(row.recipe.id);
     usedFamilies.add(fam);
+    const sil = row.silhouette || silhouetteKey(items, row.recipe);
     picked.push({
       id: `${row.recipe.id}-${stylistTurn}-${picked.length}`,
       option: picked.length + 1,
-      items: row.items,
+      items,
       rationale: buildRationale(row.recipe, occasions, lang, profile),
       recipeId: row.recipe.id,
       styleFamily: fam,
+      silhouette: sil,
       occasion: resolveHeroOccasionSlug({
         styleFamily: fam,
         occasions: promptOccasions,
@@ -2108,25 +2132,25 @@ function composeOutfits(prompt, profile, lang = "en", count = 3, recentHistory =
     tryTake(row, "any");
   }
 
-  while (picked.length < count && scored[picked.length]) {
-    const row = scored[picked.length];
-    const fam = row.styleFamily || row.recipe.styleFamily || "modern";
-    const items = [...row.items];
-    picked.push({
-      id: `${row.recipe.id}-fill-${picked.length}`,
-      option: picked.length + 1,
-      items,
-      rationale: buildRationale(row.recipe, occasions, lang, profile),
-      recipeId: row.recipe.id,
-      styleFamily: fam,
-      silhouette: silhouetteKey(items, row.recipe),
-      occasion: resolveHeroOccasionSlug({
-        styleFamily: fam,
-        occasions: promptOccasions,
-        prompt,
-      }),
-      score: row.score,
-    });
+  // Last resort: nudge accessory / outer to force a unique silhouette
+  if (picked.length < count) {
+    for (const row of scored) {
+      if (picked.length >= count) break;
+      if (usedRecipeIds.has(row.recipe.id)) continue;
+      const items = [...row.items];
+      const accIdx = items.findIndex((k) => ACCESSORY_FAMILIES.includes(familyOfKey(k)));
+      const accPool = ACCESSORY_FAMILIES.filter((f) => !items.some((k) => familyOfKey(k) === f));
+      if (accPool.length) {
+        const nextAcc = bestVariantInFamily(accPool[picked.length % accPool.length], palette, avoid, row.recipe.structure);
+        if (accIdx >= 0) items[accIdx] = nextAcc;
+        else items.push(nextAcc);
+      } else if (picked.length % 2 === 1) {
+        const blazerIdx = items.findIndex((k) => familyOfKey(k) === "blazer");
+        if (blazerIdx >= 0) items.splice(blazerIdx, 1);
+        else items.unshift(bestVariantInFamily("blazer", palette, avoid, row.recipe.structure));
+      }
+      tryTake({ ...row, silhouette: silhouetteKey(items, row.recipe) }, "any", items);
+    }
   }
   return picked;
 }
@@ -2192,6 +2216,7 @@ function composeWeekPlan(prompt, profile, lang = "en", recentHistory = []) {
   const avoid = profile?.avoid || [];
   const budget = profile?.budget || "balanced";
   const recentItems = new Set((recentHistory || []).flatMap((h) => h.items || []));
+  const recentSils = new Set((recentHistory || []).flatMap((h) => h.silhouettes || []));
   const seed = hashSeed([
     workPrompt, arch, profile?.fit, profile?.lifestyle, budget,
     palette.join(","), (avoid || []).join(","), "weekplan", stylistTurn, String(Date.now() % 9973),
@@ -2199,10 +2224,12 @@ function composeWeekPlan(prompt, profile, lang = "en", recentHistory = []) {
 
   const scored = OUTFIT_RECIPES.map((recipe, i) => {
     let items = tuneItemsToProfile(recipeItems(recipe), profile, [], recipe.styleFamily, { occasionDriven: true });
+    const sil = recipeSilhouette(recipe);
     let recentPenalty = 0;
     for (const k of items) {
       if (recentItems.has(k)) recentPenalty += 12;
     }
+    if (recentSils.has(sil) || recentSils.has(silhouetteKey(items, recipe))) recentPenalty += 22;
     let score = (seed + i * 31) % 7;
     const recipeArch = (recipe.archetypes || []).map(normalizeArchetype);
     if (arch && recipeArch.includes(arch)) score += 28;
@@ -2227,7 +2254,7 @@ function composeWeekPlan(prompt, profile, lang = "en", recentHistory = []) {
     if (budget === "elevated" && items.some((k) => familyOfKey(k) === "blazer")) score += 8;
     if (budget === "considered" && !items.some((k) => familyOfKey(k) === "blazer")) score += 6;
     score -= recentPenalty;
-    return { recipe, score, items, silhouette: recipeSilhouette(recipe), styleFamily: recipe.styleFamily };
+    return { recipe, score, items, silhouette: sil, styleFamily: recipe.styleFamily };
   }).sort((a, b) => b.score - a.score);
 
   const picked = [];
@@ -3888,7 +3915,9 @@ export default function VestraPrototype() {
           }),
         };
       }).filter((o) => o.items.length >= 3);
-      if (outfits.length) {
+      const minCount = isWeek ? 5 : 3;
+      // Reject partial live payloads so local composer can fill a full set
+      if (outfits.length >= minCount) {
         const shoppingList = isWeek
           ? (Array.isArray(live.shoppingList) && live.shoppingList.length
             ? live.shoppingList.filter((row) => CATALOG[row.key || row])
@@ -3903,7 +3932,7 @@ export default function VestraPrototype() {
           text: live.source === "claude"
             ? (isWeek ? `${t("weekPlanIntro")} ${t("stylistLive")}` : (primaryMood ? `${t("stylistMoodIntro")} ${t("stylistLive")}` : t("stylistLive")))
             : (isWeek ? t("weekPlanIntro") : undefined),
-          outfits,
+          outfits: outfits.slice(0, minCount),
           shoppingList,
           weekPlan: isWeek,
           styleMood: primaryMood,
@@ -4042,6 +4071,7 @@ export default function VestraPrototype() {
     setPending(false);
     setSavedIds(new Set());
     setSavedOutfits([]);
+    setRecentLookHistory([]);
   }
 
   const tabs = [

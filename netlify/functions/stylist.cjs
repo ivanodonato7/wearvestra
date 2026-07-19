@@ -166,13 +166,15 @@ Reason like a stylist for someone who may not know how to dress. Return 3 varied
     const parsed = JSON.parse(text.slice(jsonStart, jsonEnd + 1));
     const allowed = new Set(catalogKeys);
     const want = week ? 5 : 3;
-    const usedSilhouettes = new Set();
     const avoidSil = new Set(avoidSilhouettes || []);
-    const outfits = (parsed.outfits || [])
-      .slice(0, want)
+    const avoidItems = new Set(avoidRecentItems || []);
+
+    // Validate the FULL model list first (don't slice before filter — that drops valid extras)
+    const mapped = (parsed.outfits || [])
       .map((o, i) => {
         const items = (o.items || []).filter((k) => allowed.has(k));
         const silhouette = o.silhouette || silhouetteOf(items);
+        const recentHits = items.reduce((n, k) => n + (avoidItems.has(k) ? 1 : 0), 0);
         return {
           id: `claude-${week ? "week-" : ""}${Date.now()}-${i}`,
           option: o.option || i + 1,
@@ -181,25 +183,65 @@ Reason like a stylist for someone who may not know how to dress. Return 3 varied
           rationale: o.rationale || "",
           silhouette,
           styleFamily: o.styleFamily,
+          recentHits,
+          avoidedSil: avoidSil.has(silhouette),
         };
       })
-      .filter((o) => {
-        if (o.items.length < 3) return false;
-        if (!week) {
-          if (avoidSil.has(o.silhouette) && usedSilhouettes.size === 0) {
-            /* allow if we have nothing else, but prefer fresh */
-          }
-          if (usedSilhouettes.has(o.silhouette)) return false;
-          usedSilhouettes.add(o.silhouette);
-          return true;
-        }
-        if (usedSilhouettes.has(o.silhouette)) return false;
-        usedSilhouettes.add(o.silhouette);
-        return true;
-      });
+      .filter((o) => o.items.length >= 3);
 
-    if (!outfits.length) {
-      return { statusCode: 502, headers, body: JSON.stringify({ error: "Empty outfits after filter" }) };
+    const pickUnique = (pool, limit) => {
+      const out = [];
+      const used = new Set();
+      for (const o of pool) {
+        if (out.length >= limit) break;
+        if (used.has(o.silhouette)) continue;
+        used.add(o.silhouette);
+        out.push(o);
+      }
+      return out;
+    };
+
+    // Prefer silhouettes / items not in the recent-avoid lists; fall back only if needed
+    const fresh = mapped
+      .filter((o) => !o.avoidedSil && o.recentHits === 0)
+      .sort((a, b) => a.recentHits - b.recentHits);
+    const soft = mapped
+      .filter((o) => !o.avoidedSil)
+      .sort((a, b) => a.recentHits - b.recentHits);
+    const any = mapped.sort((a, b) => (a.avoidedSil - b.avoidedSil) || (a.recentHits - b.recentHits));
+
+    let outfits = pickUnique(fresh, want);
+    if (outfits.length < want) {
+      const used = new Set(outfits.map((o) => o.silhouette));
+      for (const o of pickUnique(soft, want)) {
+        if (outfits.length >= want) break;
+        if (used.has(o.silhouette)) continue;
+        used.add(o.silhouette);
+        outfits.push(o);
+      }
+    }
+    if (outfits.length < want) {
+      const used = new Set(outfits.map((o) => o.silhouette));
+      for (const o of pickUnique(any, want)) {
+        if (outfits.length >= want) break;
+        if (used.has(o.silhouette)) continue;
+        used.add(o.silhouette);
+        outfits.push(o);
+      }
+    }
+
+    outfits = outfits.slice(0, want).map(({ recentHits, avoidedSil, ...o }, i) => ({
+      ...o,
+      option: o.option || i + 1,
+      day: week ? (o.day || WEEK_DAYS[i]) : undefined,
+    }));
+
+    if (outfits.length < want) {
+      return {
+        statusCode: 502,
+        headers,
+        body: JSON.stringify({ error: `Need ${want} outfits, got ${outfits.length}` }),
+      };
     }
 
     const shoppingList = week
