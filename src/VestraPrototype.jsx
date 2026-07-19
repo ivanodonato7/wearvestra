@@ -2590,6 +2590,33 @@ const DEFAULT_PROFILE = {
   favoriteStores: ["zara", "uniqlo", "nordstrom", "suitsupply"],
 };
 
+/** Empty shell for brand-new visitors — do NOT seed DEFAULT_PROFILE (named "Alex") into storage. */
+const EMPTY_PROFILE = {
+  name: "",
+  audience: null,
+  archetype: null,
+  fit: null,
+  lifestyle: null,
+  palette: [],
+  avoid: [],
+  budget: null,
+  occasions: [],
+  modelGender: "woman",
+  favoriteStores: [],
+};
+
+const APP_STAGES = new Set(["welcome", "signup", "onboarding", "reveal", "occasion", "app"]);
+
+function initialStageFromStorage(stored) {
+  const stage = stored?.stage;
+  if (!stage || !APP_STAGES.has(stage)) return "welcome";
+  // Only enter the main app when we have a real named profile
+  if (stage === "app") {
+    return stored?.profile?.name ? "app" : "welcome";
+  }
+  return stage;
+}
+
 // ==================== APP DOWNLOAD / INSTALL ====================
 /** Optional public store listings — set via Vite env when published. */
 const APP_STORE_URL =
@@ -2716,7 +2743,18 @@ function WelcomeScreen({ onStart, onSkip }) {
       <div className="onb-eyebrow">{t("welcomeEyebrow")}</div>
       <h1 className="onb-hero-title">{t("welcomeTitleLine1")}<br />{t("welcomeTitleLine2")}</h1>
       <p className="onb-hero-sub">{t("welcomeSub")}</p>
-      <button className="onb-primary-btn" onClick={onStart}>{t("getStarted")}</button>
+      <button
+        type="button"
+        className="onb-primary-btn"
+        data-testid="welcome-get-started"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onStart?.();
+        }}
+      >
+        {t("getStarted")}
+      </button>
 
       <div className="download-block">
         <div className="download-label">{t("downloadAppLabel")}</div>
@@ -2738,7 +2776,18 @@ function WelcomeScreen({ onStart, onSkip }) {
         </div>
       </div>
 
-      <button className="onb-skip-link" onClick={onSkip}>{t("skipTesting")}</button>
+      <button
+        type="button"
+        className="onb-skip-link"
+        data-testid="welcome-skip"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onSkip?.();
+        }}
+      >
+        {t("skipTesting")}
+      </button>
 
       {installPlatform && (
         <InstallSheet
@@ -3795,10 +3844,13 @@ function loadStoredState() {
 export default function VestraPrototype() {
   const stored = typeof window !== "undefined" ? loadStoredState() : null;
   const [lang, setLang] = useState(stored?.lang || "en");
-  const [stage, setStage] = useState(stored?.stage === "app" && stored?.profile?.name ? "app" : "welcome");
-  const [step, setStep] = useState(0);
-  const [answers, setAnswers] = useState({ name: "", audience: null, lifestyle: null, archetype: null, fit: null, palette: [], avoid: [], budget: null, occasions: [], sizes: {} });
-  const [profile, setProfile] = useState(stored?.profile || DEFAULT_PROFILE);
+  const [stage, setStage] = useState(() => initialStageFromStorage(stored));
+  const [step, setStep] = useState(() => (Number.isFinite(stored?.step) ? stored.step : 0));
+  const [answers, setAnswers] = useState(() => stored?.answers || {
+    name: "", audience: null, lifestyle: null, archetype: null, fit: null, palette: [], avoid: [], budget: null, occasions: [], sizes: {},
+  });
+  // Fresh visitors start empty — DEFAULT_PROFILE is only for "Skip for testing"
+  const [profile, setProfile] = useState(() => stored?.profile || EMPTY_PROFILE);
 
   const [tab, setTab] = useState(stored?.tab || "home");
   const [messages, setMessages] = useState(stored?.messages || []);
@@ -3819,8 +3871,10 @@ export default function VestraPrototype() {
         const payload = {
           lang,
           stage,
+          step,
           tab,
           profile,
+          answers,
           savedOutfits: savedOutfits.slice(-20),
           messages: messages.slice(-30),
         };
@@ -3830,7 +3884,7 @@ export default function VestraPrototype() {
       }
     }, 250);
     return () => clearTimeout(id);
-  }, [lang, stage, tab, profile, savedOutfits, messages]);
+  }, [lang, stage, step, tab, profile, answers, savedOutfits, messages]);
 
   async function sendMessage(text, profileOverride) {
     const finalText = text ?? input;
@@ -4031,10 +4085,16 @@ export default function VestraPrototype() {
     setStage("app");
   }
 
-  function skipToApp() {
-    setProfile(DEFAULT_PROFILE);
+  const goToSignup = useCallback(() => {
+    setStage("signup");
+  }, []);
+
+  const skipToApp = useCallback(() => {
+    setProfile({ ...DEFAULT_PROFILE });
+    setTab("home");
+    setMessages([]);
     setStage("app");
-  }
+  }, []);
 
   function deleteProfileAndRestart() {
     const keepLang = lang;
@@ -4098,7 +4158,7 @@ export default function VestraPrototype() {
           </aside>
         )}
         <div className="phone-body">
-          {stage === "welcome" && <WelcomeScreen onStart={() => setStage("signup")} onSkip={skipToApp} />}
+          {stage === "welcome" && <WelcomeScreen onStart={goToSignup} onSkip={skipToApp} />}
           {stage === "signup" && (
             <SignupScreen
               onContinue={({ name, email }) => {
