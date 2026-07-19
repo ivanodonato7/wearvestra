@@ -592,113 +592,224 @@ function tuneItemsToPalette(itemKeys, palette = [], avoid = []) {
 }
 
 /**
- * Per-style shopping targets — the catalog photos are shared stubs, but search + labels
- * must resolve to real streetwear / classy / sexy / modern products.
+ * Per-style + gender shopping/display targets.
+ * Catalog photos are shared stubs; labels & search must read as Her vs Him
+ * (blouse vs dress shirt, heels vs derby, etc.) when the toggle changes.
  */
 const STYLE_GENRE_ITEMS = {
   streetwear: {
-    blazer: { name: "Oversized Street Blazer", noun: "oversized streetwear blazer jacket" },
-    shirt: {
-      name: "Relaxed Hoodie / Crew",
-      noun: "oversized streetwear hoodie crewneck",
-      nameWoman: "Oversized Street Hoodie",
-      nounWoman: "oversized streetwear hoodie women",
-      nameMan: "Oversized Street Hoodie",
-      nounMan: "oversized streetwear hoodie men",
+    blazer: {
+      name: "Oversized Street Blazer", noun: "oversized streetwear blazer jacket",
+      nameWoman: "Oversized Street Blazer", nounWoman: "oversized streetwear blazer women",
+      nameMan: "Oversized Street Blazer", nounMan: "oversized streetwear blazer men",
     },
-    trouser: { name: "Baggy Cargo Pants", noun: "baggy cargo pants streetwear" },
-    shoe: { name: "Chunky Street Sneakers", noun: "chunky sneakers streetwear" },
+    shirt: {
+      name: "Relaxed Hoodie / Crew", noun: "oversized streetwear hoodie crewneck",
+      nameWoman: "Oversized Street Hoodie", nounWoman: "oversized streetwear hoodie women",
+      nameMan: "Oversized Street Hoodie", nounMan: "oversized streetwear hoodie men",
+    },
+    trouser: {
+      name: "Baggy Cargo Pants", noun: "baggy cargo pants streetwear",
+      nameWoman: "Baggy Cargo Pants", nounWoman: "baggy cargo pants streetwear women",
+      nameMan: "Baggy Cargo Pants", nounMan: "baggy cargo pants streetwear men",
+    },
+    shoe: {
+      name: "Chunky Street Sneakers", noun: "chunky sneakers streetwear",
+      nameWoman: "Chunky Platform Sneakers", nounWoman: "chunky platform sneakers women streetwear",
+      nameMan: "Chunky Street Sneakers", nounMan: "chunky sneakers men streetwear",
+    },
     belt: { name: "Utility Belt", noun: "utility belt streetwear" },
     scarf: { name: "Street Bandana", noun: "streetwear bandana" },
     sunglasses: { name: "Chunky Street Shades", noun: "chunky black sunglasses streetwear" },
   },
   classy: {
-    blazer: { name: "Tailored Wool Blazer", noun: "tailored wool blazer elegant" },
-    shirt: { name: "Crisp Dress Shirt", noun: "crisp cotton dress shirt elegant" },
-    trouser: { name: "Tailored Dress Trousers", noun: "tailored dress trousers elegant" },
-    shoe: { name: "Leather Oxford / Derby", noun: "leather oxford dress shoes" },
+    blazer: {
+      name: "Tailored Wool Blazer", noun: "tailored wool blazer elegant",
+      nameWoman: "Tailored Wool Blazer", nounWoman: "tailored wool blazer women elegant",
+      nameMan: "Tailored Wool Blazer", nounMan: "tailored wool blazer men elegant",
+    },
+    shirt: {
+      name: "Crisp Dress Shirt", noun: "crisp cotton dress shirt elegant",
+      nameWoman: "Silk Blouse / Fine Shirt", nounWoman: "silk blouse dress shirt women elegant",
+      nameMan: "Crisp Dress Shirt", nounMan: "crisp cotton dress shirt men elegant",
+    },
+    trouser: {
+      name: "Tailored Dress Trousers", noun: "tailored dress trousers elegant",
+      nameWoman: "Tailored Wide Trousers", nounWoman: "tailored wide leg trousers women elegant",
+      nameMan: "Tailored Dress Trousers", nounMan: "tailored dress trousers men elegant",
+    },
+    shoe: {
+      name: "Leather Oxford / Derby", noun: "leather oxford dress shoes",
+      nameWoman: "Leather Block Heel / Pump", nounWoman: "leather block heel pumps women",
+      nameMan: "Leather Oxford / Derby", nounMan: "leather oxford derby shoes men",
+    },
     belt: { name: "Leather Dress Belt", noun: "leather dress belt elegant" },
     scarf: { name: "Fine Wool Scarf", noun: "fine wool scarf elegant" },
     sunglasses: { name: "Classic Acetate Sunglasses", noun: "classic acetate sunglasses" },
   },
   sexy: {
-    blazer: { name: "Fitted Evening Blazer", noun: "fitted black evening blazer sexy" },
-    shirt: {
-      nameWoman: "Silk Camisole / Fitted Top",
-      nounWoman: "silk camisole fitted top sexy",
-      nameMan: "Slim Black Turtleneck",
-      nounMan: "slim fitted black turtleneck sexy",
-      name: "Fitted Evening Top",
-      noun: "fitted black evening top sexy",
+    blazer: {
+      name: "Fitted Evening Blazer", noun: "fitted black evening blazer sexy",
+      nameWoman: "Cropped Evening Blazer", nounWoman: "cropped fitted evening blazer women",
+      nameMan: "Fitted Evening Blazer", nounMan: "fitted black evening blazer men",
     },
-    trouser: { name: "Slim High-Waist Trousers", noun: "high waist slim black trousers sexy" },
+    shirt: {
+      nameWoman: "Silk Camisole / Fitted Top", nounWoman: "silk camisole fitted top sexy",
+      nameMan: "Slim Black Turtleneck", nounMan: "slim fitted black turtleneck sexy",
+      name: "Fitted Evening Top", noun: "fitted black evening top sexy",
+    },
+    trouser: {
+      name: "Slim High-Waist Trousers", noun: "high waist slim black trousers sexy",
+      nameWoman: "Slim High-Waist Trousers", nounWoman: "high waist slim trousers women sexy",
+      nameMan: "Slim Black Trousers", nounMan: "slim black dress trousers men",
+    },
     shoe: {
-      nameWoman: "Pointed Heel Boots",
-      nounWoman: "black pointed heel boots sexy",
-      nameMan: "Sleek Black Dress Shoes",
-      nounMan: "sleek black leather dress shoes",
-      name: "Sleek Evening Shoes",
-      noun: "sleek black evening shoes",
+      nameWoman: "Pointed Heel Boots", nounWoman: "black pointed heel boots sexy",
+      nameMan: "Sleek Black Dress Shoes", nounMan: "sleek black leather dress shoes",
+      name: "Sleek Evening Shoes", noun: "sleek black evening shoes",
     },
     belt: { name: "Slim Black Belt", noun: "slim black leather belt" },
     scarf: { name: "Silk Evening Scarf", noun: "silk scarf evening sexy" },
-    sunglasses: { name: "Cat-Eye / Slim Shades", noun: "slim black sunglasses evening" },
+    sunglasses: {
+      name: "Cat-Eye / Slim Shades", noun: "slim black sunglasses evening",
+      nameWoman: "Cat-Eye Sunglasses", nounWoman: "cat eye sunglasses women evening",
+      nameMan: "Slim Black Shades", nounMan: "slim black sunglasses men",
+    },
   },
   modern: {
-    blazer: { name: "Sharp Modern Blazer", noun: "modern structured blazer contemporary" },
-    shirt: { name: "Clean Modern Knit / Shirt", noun: "modern minimal shirt contemporary" },
-    trouser: { name: "Straight Modern Trousers", noun: "modern straight trousers contemporary" },
-    shoe: { name: "Minimal Leather Sneaker / Derby", noun: "minimal leather sneakers modern" },
+    blazer: {
+      name: "Sharp Modern Blazer", noun: "modern structured blazer contemporary",
+      nameWoman: "Sharp Modern Blazer", nounWoman: "modern structured blazer women",
+      nameMan: "Sharp Modern Blazer", nounMan: "modern structured blazer men",
+    },
+    shirt: {
+      name: "Clean Modern Knit / Shirt", noun: "modern minimal shirt contemporary",
+      nameWoman: "Clean Modern Knit Top", nounWoman: "modern minimal knit top women",
+      nameMan: "Clean Modern Shirt", nounMan: "modern minimal shirt men",
+    },
+    trouser: {
+      name: "Straight Modern Trousers", noun: "modern straight trousers contemporary",
+      nameWoman: "Straight Modern Trousers", nounWoman: "modern straight trousers women",
+      nameMan: "Straight Modern Trousers", nounMan: "modern straight trousers men",
+    },
+    shoe: {
+      name: "Minimal Leather Sneaker / Derby", noun: "minimal leather sneakers modern",
+      nameWoman: "Minimal Leather Sneaker", nounWoman: "minimal leather sneakers women",
+      nameMan: "Minimal Leather Derby", nounMan: "minimal leather derby men",
+    },
     belt: { name: "Minimal Leather Belt", noun: "minimal leather belt modern" },
     scarf: { name: "Architectural Scarf", noun: "modern wool scarf minimal" },
     sunglasses: { name: "Geometric Sunglasses", noun: "geometric modern sunglasses" },
   },
   edgy: {
     blazer: { name: "Hard-Edge Black Blazer", noun: "black edgy blazer leather trim" },
-    shirt: { name: "Dark Fitted Layer", noun: "black fitted shirt edgy" },
+    shirt: {
+      name: "Dark Fitted Layer", noun: "black fitted shirt edgy",
+      nameWoman: "Dark Fitted Top", nounWoman: "black fitted top women edgy",
+      nameMan: "Dark Fitted Shirt", nounMan: "black fitted shirt men edgy",
+    },
     trouser: { name: "Black Slim / Wide Contrast", noun: "black edgy trousers slim" },
-    shoe: { name: "Black Combat / Chelsea", noun: "black chelsea combat boots edgy" },
+    shoe: {
+      name: "Black Combat / Chelsea", noun: "black chelsea combat boots edgy",
+      nameWoman: "Black Combat Boots", nounWoman: "black combat boots women edgy",
+      nameMan: "Black Chelsea Boots", nounMan: "black chelsea boots men edgy",
+    },
     belt: { name: "Black Hardware Belt", noun: "black belt silver hardware edgy" },
     scarf: { name: "Dark Contrast Scarf", noun: "black scarf edgy" },
     sunglasses: { name: "Wrap / Narrow Black Shades", noun: "narrow black sunglasses edgy" },
   },
   romantic: {
-    blazer: { name: "Soft Unstructured Blazer", noun: "soft linen blazer romantic" },
-    shirt: { name: "Soft Knit / Blouse", noun: "soft romantic blouse knit" },
-    trouser: { name: "Fluid Wide Trousers", noun: "fluid wide leg trousers romantic" },
-    shoe: { name: "Soft Suede Boot / Flat", noun: "suede boots romantic" },
+    blazer: {
+      name: "Soft Unstructured Blazer", noun: "soft linen blazer romantic",
+      nameWoman: "Soft Unstructured Blazer", nounWoman: "soft linen blazer women romantic",
+      nameMan: "Soft Unstructured Blazer", nounMan: "soft linen blazer men",
+    },
+    shirt: {
+      name: "Soft Knit / Blouse", noun: "soft romantic blouse knit",
+      nameWoman: "Soft Blouse / Knit", nounWoman: "soft romantic blouse women",
+      nameMan: "Soft Knit Polo / Shirt", nounMan: "soft knit shirt men romantic",
+    },
+    trouser: {
+      name: "Fluid Wide Trousers", noun: "fluid wide leg trousers romantic",
+      nameWoman: "Fluid Wide Trousers", nounWoman: "fluid wide leg trousers women",
+      nameMan: "Fluid Wide Trousers", nounMan: "fluid wide leg trousers men",
+    },
+    shoe: {
+      name: "Soft Suede Boot / Flat", noun: "suede boots romantic",
+      nameWoman: "Soft Suede Flat / Heel", nounWoman: "suede flats heels women romantic",
+      nameMan: "Soft Suede Boot", nounMan: "suede boots men",
+    },
     belt: { name: "Soft Leather Belt", noun: "soft leather belt" },
     scarf: { name: "Soft Wool Scarf", noun: "soft wool scarf romantic" },
     sunglasses: { name: "Soft Round Sunglasses", noun: "round sunglasses soft" },
   },
   minimal: {
     blazer: { name: "Quiet Luxury Blazer", noun: "minimal tailored blazer quiet luxury" },
-    shirt: { name: "Clean Essential Tee / Shirt", noun: "minimal essential shirt" },
+    shirt: {
+      name: "Clean Essential Tee / Shirt", noun: "minimal essential shirt",
+      nameWoman: "Clean Essential Top", nounWoman: "minimal essential top women",
+      nameMan: "Clean Essential Shirt", nounMan: "minimal essential shirt men",
+    },
     trouser: { name: "Clean Straight Trousers", noun: "minimal straight trousers" },
-    shoe: { name: "Minimal Leather Shoe", noun: "minimal leather shoes" },
+    shoe: {
+      name: "Minimal Leather Shoe", noun: "minimal leather shoes",
+      nameWoman: "Minimal Leather Flat", nounWoman: "minimal leather flats women",
+      nameMan: "Minimal Leather Shoe", nounMan: "minimal leather shoes men",
+    },
     belt: { name: "Thin Minimal Belt", noun: "thin minimal leather belt" },
     scarf: { name: "Quiet Scarf", noun: "minimal wool scarf" },
     sunglasses: { name: "Minimal Black Sunglasses", noun: "minimal black sunglasses" },
   },
   bold: {
     blazer: { name: "Statement Blazer", noun: "statement color blazer bold" },
-    shirt: { name: "Bold Knit / Shirt", noun: "bold color sweater shirt" },
+    shirt: {
+      name: "Bold Knit / Shirt", noun: "bold color sweater shirt",
+      nameWoman: "Bold Knit Top", nounWoman: "bold color knit top women",
+      nameMan: "Bold Knit / Shirt", nounMan: "bold color sweater men",
+    },
     trouser: { name: "Statement Trousers", noun: "bold wide trousers" },
-    shoe: { name: "Statement Boots", noun: "bold boots statement" },
+    shoe: {
+      name: "Statement Boots", noun: "bold boots statement",
+      nameWoman: "Statement Heel Boots", nounWoman: "statement heel boots women",
+      nameMan: "Statement Boots", nounMan: "statement boots men",
+    },
     belt: { name: "Statement Belt", noun: "bold belt" },
     scarf: { name: "Statement Scarf", noun: "bold color scarf" },
     sunglasses: { name: "Statement Sunglasses", noun: "bold sunglasses" },
   },
   relaxed: {
     blazer: { name: "Easy Soft Blazer", noun: "unstructured soft blazer casual" },
-    shirt: { name: "Easy Knit / Tee", noun: "relaxed knit sweater casual" },
+    shirt: {
+      name: "Easy Knit / Tee", noun: "relaxed knit sweater casual",
+      nameWoman: "Easy Knit Top", nounWoman: "relaxed knit top women casual",
+      nameMan: "Easy Knit / Tee", nounMan: "relaxed knit sweater men casual",
+    },
     trouser: { name: "Easy Wide Trousers", noun: "relaxed wide trousers casual" },
-    shoe: { name: "Easy Suede Boot / Trainer", noun: "casual suede boots sneakers" },
+    shoe: {
+      name: "Easy Suede Boot / Trainer", noun: "casual suede boots sneakers",
+      nameWoman: "Easy Trainer / Flat", nounWoman: "casual trainers flats women",
+      nameMan: "Easy Suede Boot / Trainer", nounMan: "casual suede boots sneakers men",
+    },
     belt: { name: "Casual Leather Belt", noun: "casual leather belt" },
     scarf: { name: "Easy Scarf", noun: "casual wool scarf" },
     sunglasses: { name: "Everyday Sunglasses", noun: "casual sunglasses" },
   },
 };
+
+/** Fallback Her/Him labels when a look has no styleFamily (plain catalog stubs). */
+const CATALOG_GENDER_LABELS = {
+  blazer: { woman: "Tailored Blazer", man: "Tailored Blazer" },
+  shirt: { woman: "Crisp Blouse / Shirt", man: "Crisp Cotton Shirt" },
+  trouser: { woman: "Tailored Trousers", man: "Tailored Trousers" },
+  shoe: { woman: "Leather Heel / Flat", man: "Leather Derby Shoe" },
+  scarf: { woman: "Fine Wool Scarf", man: "Fine Wool Scarf" },
+  belt: { woman: "Leather Belt", man: "Leather Belt" },
+  sunglasses: { woman: "Acetate Sunglasses", man: "Acetate Sunglasses" },
+};
+
+function audienceFromModelGender(modelGender) {
+  return modelGender === "man" ? "Gentlemen" : "Ladies";
+}
 
 function styleGenreEntry(styleFamily, garmentFamily, audience) {
   const table = STYLE_GENRE_ITEMS[styleFamily];
@@ -713,9 +824,8 @@ function styleGenreEntry(styleFamily, garmentFamily, audience) {
 }
 
 /**
- * Overlay genre-specific shopping nouns onto a catalog stub.
- * Display name/image stay catalog-true (hoodie labels must not sit on shirt photos).
- * Genre nouns only drive store/Google search queries.
+ * Overlay genre + gender labels onto a catalog stub for display and shopping.
+ * Photos stay as shared stubs; names/search flip with Her/Him (and style family).
  */
 function styleAwareItem(item, styleFamily, audience) {
   if (!item) return item;
@@ -724,11 +834,28 @@ function styleAwareItem(item, styleFamily, audience) {
   if (!g) return { ...item, styleFamily };
   return {
     ...item,
+    name: g.name || item.name,
     searchNoun: g.noun || item.searchNoun,
     searchQuery: g.noun || item.searchQuery,
     shopAsName: g.name || null,
     styleFamily,
   };
+}
+
+/** Resolve the item row the user sees for the current Her/Him + style. */
+function displayItemForGender(item, modelGender, styleFamily = null) {
+  if (!item) return item;
+  const audience = audienceFromModelGender(modelGender);
+  const men = audience === "Gentlemen";
+  if (styleFamily) {
+    return styleAwareItem(item, styleFamily, audience);
+  }
+  const fam = familyOfKey(item.key) || (item.type !== "accessory" ? item.type : null);
+  const labels = fam && CATALOG_GENDER_LABELS[fam];
+  if (!labels) return item;
+  const gendered = men ? labels.man : labels.woman;
+  if (!gendered || gendered === item.name) return item;
+  return { ...item, name: gendered };
 }
 
 /** Replace catalog keys (shirtAlt, trouserAlt…) with human product names in stylist copy. */
@@ -3194,7 +3321,8 @@ const OutfitCard = memo(function OutfitCard({
   const [shopItem, setShopItem] = useState(null);
   const styleFamily = outfit.styleFamily || null;
   const genreLabel = styleFamilyLabel(styleFamily, t);
-  const audienceForShop = audience || (modelGender === "man" ? "Gentlemen" : "Ladies");
+  // Toggle is source of truth — do NOT lock to onboarding audience
+  const audienceForShop = audienceFromModelGender(modelGender);
   const header = [optionLabel, genreLabel].filter(Boolean).join(" · ") || t("stylistSuggests");
   const rationale = humanizeRationale(outfit.rationale, lang);
   const heroOccasion = resolveHeroOccasionSlug({
@@ -3213,6 +3341,7 @@ const OutfitCard = memo(function OutfitCard({
             type="button"
             className={`model-gender-pill ${modelGender === "woman" ? "active" : ""}`}
             onClick={() => onModelGenderChange?.("woman")}
+            data-testid="gender-her"
           >
             {t("modelOnHer")}
           </button>
@@ -3220,6 +3349,7 @@ const OutfitCard = memo(function OutfitCard({
             type="button"
             className={`model-gender-pill ${modelGender === "man" ? "active" : ""}`}
             onClick={() => onModelGenderChange?.("man")}
+            data-testid="gender-him"
           >
             {t("modelOnHim")}
           </button>
@@ -3231,22 +3361,23 @@ const OutfitCard = memo(function OutfitCard({
           occasion={heroOccasion}
           palette={palette}
         />
-        <div className="item-list">
+        <div className="item-list" data-testid="item-list" data-gender={modelGender}>
           {outfit.items.map((key) => {
-            const item = CATALOG[key];
-            if (!item) return null;
+            const base = CATALOG[key];
+            if (!base) return null;
+            const item = displayItemForGender(base, modelGender, styleFamily);
             return (
-              <div key={item.id} className="item-row">
+              <div key={`${item.id}-${modelGender}`} className="item-row" data-item-name={item.name}>
                 <button
                   type="button"
                   className="item-row-shop"
                   onClick={() => setShopItem(item)}
                   title={t("viewProduct")}
                 >
-                  <img className="item-row-image" src={item.image} alt={tName(item)} loading="lazy" decoding="async" />
+                  <img className="item-row-image" src={item.image} alt={item.name || tName(base)} loading="lazy" decoding="async" />
                   <div className="item-row-info">
                     <div className="item-row-brand">{genreLabel || item.retailer}</div>
-                    <div className="item-row-name">{tName(item)}</div>
+                    <div className="item-row-name">{item.name || tName(base)}</div>
                     <div className="item-row-meta">${item.price} · {t("shopInStock")}</div>
                   </div>
                   <span className="link-btn-sm" aria-hidden="true">
@@ -3859,7 +3990,14 @@ export default function VestraPrototype() {
   }, []);
 
   const handleModelGenderChange = useCallback((g) => {
-    setProfile((p) => (p.modelGender === g ? p : { ...p, modelGender: g }));
+    setProfile((p) => {
+      if (p.modelGender === g && p.audience === audienceFromModelGender(g)) return p;
+      return {
+        ...p,
+        modelGender: g,
+        audience: audienceFromModelGender(g),
+      };
+    });
   }, []);
 
   function finishOnboarding(occasionText) {
