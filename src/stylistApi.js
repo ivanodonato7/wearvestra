@@ -8,7 +8,7 @@
  *
  * Modes:
  *   - "looks" (default): 3 outfit options
- *   - "week": Mon–Fri weekwardrobe plan (5 looks, no repeat silhouettes, shopping list)
+ *   - "week": Mon–Fri week wardrobe plan (5 looks, no repeat silhouettes, shopping list)
  */
 
 export function isWeekPlanPrompt(prompt) {
@@ -53,12 +53,22 @@ export async function fetchStylistLooks({
   lang = "en",
   catalogKeys = [],
   mode,
+  avoidRecentItems = [],
+  avoidSilhouettes = [],
 }) {
   const resolvedMode = mode || (isWeekPlanPrompt(prompt) ? "week" : "looks");
   const controller = new AbortController();
   const timeoutMs = resolvedMode === "week" ? 22000 : 14000;
   const timer = setTimeout(() => controller.abort(), timeoutMs);
-  const payload = { prompt, profile, lang, catalogKeys, mode: resolvedMode };
+  const payload = {
+    prompt,
+    profile,
+    lang,
+    catalogKeys,
+    mode: resolvedMode,
+    avoidRecentItems: [...new Set(avoidRecentItems || [])].slice(0, 40),
+    avoidSilhouettes: [...new Set(avoidSilhouettes || [])].slice(0, 20),
+  };
   try {
     for (const endpoint of candidateEndpoints()) {
       try {

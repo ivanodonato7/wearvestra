@@ -5,45 +5,42 @@
  *   looks (default): { outfits: [3], source: "claude" }
  *   week: { outfits: [5 Mon–Fri], shoppingList: [...], mode: "week", source: "claude" }
  */
-const SYSTEM_LOOKS = `You are Vestra, a precise fashion stylist for EVERY style — streetwear, classy/elegant, sexy/evening, modern/sharp, edgy, romantic, minimal, bold, and relaxed.
-You ONLY dress people using the provided catalog keys.
-Return STRICT JSON with this shape:
-{"outfits":[{"option":1,"styleFamily":"streetwear","items":["shirtAlt","trouserAlt","shoeAlt","sunglassesAlt"],"rationale":"..."},{"option":2,"styleFamily":"classy","items":[...],"rationale":"..."},{"option":3,"styleFamily":"sexy","items":[...],"rationale":"..."}]}
-Rules:
-- Exactly 3 outfits.
-- The 3 outfits MUST use THREE DIFFERENT styleFamily values from: streetwear, classy, sexy, modern, edgy, romantic, minimal, bold, relaxed.
-- If the user asks for a specific mood (streetwear, classy, sexy, modern, edgy…), make option 1 match that mood strongly; still vary options 2–3 into adjacent but distinct families.
-- Streetwear: no stiff boardroom vibe — prefer Alt/easy pieces, sunglasses, often no blazer or a soft blazerAlt. Tag styleFamily "streetwear".
-- Classy/elegant: tailored blazer + clean shirt + straight trousers + refined shoe/belt or scarf. Tag styleFamily "classy".
-- Sexy/evening: darker keys (blazerBlack, trouserBlack, shoeBlack, scarfBurgundy), sharper lines, date/night energy. Tag styleFamily "sexy".
-- Modern: crisp structured shapes, navy/black accents, intentional and contemporary. Tag styleFamily "modern".
-- Edgy: high contrast, black-forward, attitude without costume. Tag styleFamily "edgy".
-- When the user names a mood, ALL 3 outfits should use that styleFamily (vary silhouettes within the genre).
-- Each items array uses ONLY keys from the catalog list.
-- Include at most one key per garment family (blazer*, shirt*, trouser*, shoe*, and one accessory family).
-- Honor the user's palette colors — never choose olive/green pieces unless Olive or Forest Green is in their palette. Sexy/edgy may lean black/navy when those fit the palette or prompt.
-- Honor archetype, fit, lifestyle, budget, and occasions — but NEVER collapse every look into the same quiet-tailored uniform.
-- Rationale: 1–2 sentences, name the style family and their colors.
-- Rationale MUST use plain garment words (blazer, shirt, trousers, boots, sunglasses). NEVER write catalog keys like shirtAlt, trouserAlt, shoeAlt, blazerNavy, sunglassesAlt.
-- No markdown, no prose outside JSON.`;
+const SYSTEM_LOOKS = `You are Vestra, a real-world fashion stylist for people who may have NO style vocabulary.
+You dress anyone for any occasion — wedding, gym-adjacent casual, first date, job interview, work dinner, weekend, travel, night out — using ONLY the provided catalog keys.
 
-const SYSTEM_WEEK = `You are Vestra, a precise fashion stylist building a weekday wardrobe plan that still spans real style range (classy, modern, relaxed, sexy Friday, etc.).
-You ONLY dress people using the provided catalog keys.
-Return STRICT JSON with this shape:
+Return STRICT JSON:
+{"outfits":[{"option":1,"styleFamily":"classy","items":["blazerNavy","shirt","trouserNavy","shoeBlack","beltAlt"],"rationale":"...","silhouette":"layered-tailored-belt"},{"option":2,"styleFamily":"modern","items":[...],"rationale":"...","silhouette":"..."},{"option":3,"styleFamily":"relaxed","items":[...],"rationale":"...","silhouette":"..."}]}
+
+How to think (in order):
+1. OCCASION / REQUEST FIRST — read the user's prompt. Infer formality (black-tie → gym-casual), silhouette (structured vs easy), and color mood (dark evening vs light daytime) from the REQUEST before using their Style DNA.
+2. If the prompt is vague ("help me look good tonight", "dress me"), assume a versatile evening-smart look and offer THREE DIFFERENT formality levels (e.g. polished / modern / relaxed), not three clones.
+3. Style DNA (archetype, fit, lifestyle, palette) is a LIGHT adjustment on top — nudge fabric ease, outerwear preference, and color bias. NEVER let DNA override a clear occasion (e.g. do not return quiet office looks for "wedding" or stiff tailoring for "gym" / "weekend nothing fussy").
+4. Color theory: prefer harmony with their palette when it fits the occasion; still vary lightness/contrast across the 3 options. Never use olive/green unless those colors are in their palette.
+5. Body/fit basics: honor fitted vs relaxed vs oversized as a soft preference, not a uniform.
+
+Variety rules:
+- Exactly 3 outfits with THREE DIFFERENT styleFamily values when the user did NOT name one mood.
+- If they named a mood (streetwear, classy, sexy, modern, edgy…), keep ALL 3 in that mood but vary silhouette strings (outer on/off, trouser ease, accessory family).
+- Never repeat the same item combination or silhouette across the 3 options.
+- If avoidRecentItems / avoidSilhouettes are provided, do NOT reuse those catalog keys or silhouette strings unless the user is refining the same look.
+- Each items array: ONLY catalog keys; at most one key per garment family (blazer*, shirt*, trouser*, shoe*, one accessory).
+- Rationale: 1–2 plain sentences naming occasion + formality. NEVER write catalog keys like shirtAlt.
+- No markdown outside JSON.`;
+
+const SYSTEM_WEEK = `You are Vestra, building a Mon–Fri wardrobe plan with real range (classy, modern, relaxed, sexy Friday, etc.).
+You ONLY use the provided catalog keys.
+Return STRICT JSON:
 {"outfits":[{"day":"Monday","option":1,"styleFamily":"classy","items":["blazerNavy","shirt","trouserNavy","shoeBlack","beltAlt"],"rationale":"...","silhouette":"layered-tailored-belt"},{"day":"Tuesday","option":2,"items":[...],"rationale":"...","silhouette":"..."},{"day":"Wednesday","option":3,"items":[...],"rationale":"...","silhouette":"..."},{"day":"Thursday","option":4,"items":[...],"rationale":"...","silhouette":"..."},{"day":"Friday","option":5,"items":[...],"rationale":"...","silhouette":"..."}],"shoppingList":[{"key":"blazerNavy","reason":"Anchors Mon/Thu tailored days"}]}
 Rules:
-- Exactly 5 outfits — Monday through Friday in order.
-- Each day needs a DISTINCT silhouette. Silhouette = outer vs open + structure (tailored/structured/relaxed) + accessory family (belt/scarf/sunglasses/none). No two days may share the same silhouette string.
-- Rotate styleFamily across the week (e.g. classy, modern, minimal, relaxed, sexy) so it does not feel like five clones.
-- Vary presence of blazer, trouser ease, and accessory so the week does not feel repetitive.
-- Each items array uses ONLY keys from the catalog list.
-- Include at most one key per garment family (blazer*, shirt*, trouser*, shoe*, and one accessory family).
-- Honor the user's palette colors — never choose olive/green pieces unless Olive or Forest Green is in their palette.
-- Bias toward workweek polish unless the prompt asks for streetwear/sexy/etc.
-- shoppingList: one consolidated list of UNIQUE catalog keys needed across the week (every key used in any outfit, each once), with a short reason.
-- Rationale: 1 sentence tying the day + style family to their profile.
-- Rationale MUST use plain garment words. NEVER write catalog keys like shirtAlt, trouserAlt, shoeAlt, blazerNavy.
-- No markdown, no prose outside JSON.`;
+- Exactly 5 outfits — Monday through Friday.
+- Each day needs a DISTINCT silhouette string (outer vs open + tailored/structured/relaxed + accessory family).
+- Rotate styleFamily across the week.
+- Request text and workweek formality drive the plan; Style DNA is a light nudge only.
+- If avoidRecentItems are provided, minimize reusing those keys.
+- Catalog keys only; one key per garment family per look.
+- shoppingList: unique keys used across the week with short reasons.
+- Rationale: plain garment words, never catalog keys.
+- No markdown outside JSON.`;
 
 function isWeekMode(body) {
   if (body?.mode === "week") return true;
@@ -107,24 +104,38 @@ exports.handler = async (event) => {
     return { statusCode: 400, headers, body: JSON.stringify({ error: "Invalid JSON" }) };
   }
 
-  const { prompt, profile = {}, lang = "en", catalogKeys = [] } = body;
+  const {
+    prompt,
+    profile = {},
+    lang = "en",
+    catalogKeys = [],
+    avoidRecentItems = [],
+    avoidSilhouettes = [],
+  } = body;
   if (!prompt || !catalogKeys.length) {
     return { statusCode: 400, headers, body: JSON.stringify({ error: "prompt and catalogKeys required" }) };
   }
 
   const week = isWeekMode(body);
   const system = week ? SYSTEM_WEEK : SYSTEM_LOOKS;
+  const avoidBlock = [
+    avoidRecentItems?.length ? `Avoid reusing these catalog keys from recent looks: ${avoidRecentItems.join(", ")}` : "",
+    avoidSilhouettes?.length ? `Avoid these silhouette strings: ${avoidSilhouettes.join(", ")}` : "",
+  ].filter(Boolean).join("\n");
+
   const userMsg = week
     ? `Language: ${lang}
-User prompt: ${prompt}
-Profile JSON: ${JSON.stringify(profile)}
+User prompt (OCCASION FIRST): ${prompt}
+Style DNA profile (light adjustment only): ${JSON.stringify(profile)}
 Catalog keys (use only these): ${catalogKeys.join(", ")}
-Return a Mon–Fri weekwardrobe plan: exactly 5 outfits with distinct silhouettes, plus one shoppingList, as JSON.`
+${avoidBlock}
+Return a Mon–Fri week wardrobe plan: exactly 5 outfits with distinct silhouettes, plus one shoppingList, as JSON.`
     : `Language: ${lang}
-User prompt: ${prompt}
-Profile JSON: ${JSON.stringify(profile)}
+User prompt (OCCASION / REQUEST FIRST — this drives formality & silhouette): ${prompt}
+Style DNA profile (light adjustment only — do not let it override the request): ${JSON.stringify(profile)}
 Catalog keys (use only these): ${catalogKeys.join(", ")}
-Return 3 outfits as JSON.`;
+${avoidBlock}
+Reason like a stylist for someone who may not know how to dress. Return 3 varied outfits as JSON.`;
 
   try {
     const res = await fetch("https://api.anthropic.com/v1/messages", {
@@ -136,7 +147,7 @@ Return 3 outfits as JSON.`;
       },
       body: JSON.stringify({
         model: "claude-sonnet-5",
-        max_tokens: week ? 2200 : 1200,
+        max_tokens: week ? 2200 : 1400,
         system,
         messages: [{ role: "user", content: userMsg }],
       }),
@@ -156,6 +167,7 @@ Return 3 outfits as JSON.`;
     const allowed = new Set(catalogKeys);
     const want = week ? 5 : 3;
     const usedSilhouettes = new Set();
+    const avoidSil = new Set(avoidSilhouettes || []);
     const outfits = (parsed.outfits || [])
       .slice(0, want)
       .map((o, i) => {
@@ -168,11 +180,19 @@ Return 3 outfits as JSON.`;
           items,
           rationale: o.rationale || "",
           silhouette,
+          styleFamily: o.styleFamily,
         };
       })
       .filter((o) => {
         if (o.items.length < 3) return false;
-        if (!week) return true;
+        if (!week) {
+          if (avoidSil.has(o.silhouette) && usedSilhouettes.size === 0) {
+            /* allow if we have nothing else, but prefer fresh */
+          }
+          if (usedSilhouettes.has(o.silhouette)) return false;
+          usedSilhouettes.add(o.silhouette);
+          return true;
+        }
         if (usedSilhouettes.has(o.silhouette)) return false;
         usedSilhouettes.add(o.silhouette);
         return true;
@@ -182,41 +202,27 @@ Return 3 outfits as JSON.`;
       return { statusCode: 502, headers, body: JSON.stringify({ error: "Empty outfits after filter" }) };
     }
 
-    if (week) {
-      // Ensure day labels even if model omitted some
-      outfits.forEach((o, i) => {
-        o.day = o.day || WEEK_DAYS[i];
-        o.option = i + 1;
-      });
-      const keySet = new Set();
-      const shoppingList = [];
-      const fromModel = Array.isArray(parsed.shoppingList) ? parsed.shoppingList : [];
-      for (const row of fromModel) {
-        const key = typeof row === "string" ? row : row?.key;
-        if (!key || !allowed.has(key) || keySet.has(key)) continue;
-        keySet.add(key);
-        shoppingList.push({
-          key,
-          reason: (typeof row === "object" && row?.reason) || "",
-        });
-      }
-      // Fill any missing keys used in outfits
-      for (const o of outfits) {
-        for (const key of o.items) {
-          if (keySet.has(key)) continue;
-          keySet.add(key);
-          shoppingList.push({ key, reason: "" });
-        }
-      }
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify({ outfits, shoppingList, mode: "week", source: "claude" }),
-      };
-    }
+    const shoppingList = week
+      ? (Array.isArray(parsed.shoppingList) ? parsed.shoppingList : [])
+        .map((row) => (typeof row === "string" ? { key: row, reason: "" } : { key: row.key, reason: row.reason || "" }))
+        .filter((row) => allowed.has(row.key))
+      : undefined;
 
-    return { statusCode: 200, headers, body: JSON.stringify({ outfits, source: "claude" }) };
+    return {
+      statusCode: 200,
+      headers,
+      body: JSON.stringify({
+        outfits,
+        shoppingList,
+        mode: week ? "week" : "looks",
+        source: "claude",
+      }),
+    };
   } catch (err) {
-    return { statusCode: 500, headers, body: JSON.stringify({ error: String(err.message || err) }) };
+    return {
+      statusCode: 502,
+      headers,
+      body: JSON.stringify({ error: String(err.message || err) }),
+    };
   }
 };
