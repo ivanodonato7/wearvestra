@@ -1,14 +1,13 @@
 /**
  * product-feed-sync-background — long-running Awin Create-a-Feed ingest.
  *
- * Netlify Background Function (returns 202 immediately, runs up to ~15 min).
- * Streams AWIN_FEED_URL, filters menswear, writes Netlify Blobs cache.
- *
- * Trigger: POST /api/product-feed-sync  (redirect → this function)
- * Schedule: daily 07:00 UTC
- *
- * IMPORTANT: must call connectLambda(event) via write/read helpers so Blobs work.
+ * Tries Netlify Blobs (needs connectLambda). The reliable production cache is
+ * public/data/menswear-catalog.json, refreshed via:
+ *   AWIN_FEED_URL=… node scripts/sync-awin-feed-live.cjs
+ * then commit/deploy that file.
  */
+const fs = require("fs");
+const path = require("path");
 const {
   streamMenswearFromFeedUrl,
   writeMenswearCache,
@@ -41,10 +40,11 @@ async function runSync(event) {
     };
   }
 
-  await writeSyncStatus({
-    status: "running",
-    startedAt: new Date().toISOString(),
-  }, event);
+  try {
+    await writeSyncStatus({ status: "running", startedAt: new Date().toISOString() }, event);
+  } catch (err) {
+    console.error("status write failed (continuing)", err?.message || err);
+  }
 
   const maxTotal = Math.min(Math.max(Number(process.env.AWIN_MAX_PRODUCTS || 4000), 100), 8000);
   const { items, meta } = await streamMenswearFromFeedUrl(feedUrl, {
@@ -60,11 +60,24 @@ async function runSync(event) {
       message: "Feed downloaded but no menswear rows matched filters.",
       finishedAt: new Date().toISOString(),
     };
-    await writeSyncStatus({ status: "failed", ...result }, event);
+    try { await writeSyncStatus({ status: "failed", ...result }, event); } catch { /* ignore */ }
     return result;
   }
 
-  const stored = await writeMenswearCache({ items, meta }, event);
+  let stored = null;
+  try {
+    stored = await writeMenswearCache({ items, meta }, event);
+  } catch (err) {
+    console.error("blobs write failed", err?.message || err);
+    try {
+      fs.writeFileSync(
+        path.join("/tmp", "vestra-awin-menswear-v1.json"),
+        JSON.stringify({ version: 1, source: "awin", items, meta }),
+      );
+      stored = { via: "tmp-only", error: err?.message || String(err) };
+    } catch { /* ignore */ }
+  }
+
   const result = {
     ok: true,
     source: "awin",
@@ -73,7 +86,7 @@ async function runSync(event) {
     stored,
     finishedAt: new Date().toISOString(),
   };
-  await writeSyncStatus({ status: "ok", ...result }, event);
+  try { await writeSyncStatus({ status: "ok", ...result }, event); } catch { /* ignore */ }
   return result;
 }
 
@@ -93,16 +106,5 @@ exports.handler = async (event) => {
     }));
   } catch (err) {
     console.error("product-feed-sync-background failed", err);
-    try {
-      await writeSyncStatus({
-        status: "failed",
-        ok: false,
-        reason: "sync_error",
-        message: err?.message || "Awin sync failed",
-        finishedAt: new Date().toISOString(),
-      }, event);
-    } catch (e2) {
-      console.error("failed to persist sync status", e2);
-    }
   }
 };

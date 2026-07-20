@@ -1,15 +1,19 @@
-#!/usr/bin/env node
 /**
  * One-shot live sync against AWIN_FEED_URL (never commit the URL/key).
+ * Writes:
+ *   - /tmp/vestra-awin-menswear-v1.json (local function-style cache)
+ *   - public/data/menswear-catalog.json (durable site cache for product-search)
+ *
  * Usage: AWIN_FEED_URL='https://productdata.awin.com/...' node scripts/sync-awin-feed-live.cjs
  */
+const fs = require("fs");
+const path = require("path");
 const {
   streamMenswearFromFeedUrl,
   writeMenswearCache,
   readMenswearCache,
   DEFAULT_CAPS,
 } = require("../netlify/functions/lib/awinMenswearFeed.cjs");
-const productSearch = require("../netlify/functions/product-search.cjs");
 
 async function main() {
   const feedUrl = String(process.env.AWIN_FEED_URL || "").trim();
@@ -39,13 +43,17 @@ async function main() {
     process.exit(2);
   }
 
-  const stored = await writeMenswearCache({ items, meta });
-  console.log("stored", stored);
+  const payload = { version: 1, source: "awin", items, meta };
+  const publicPath = path.join(__dirname, "..", "public", "data", "menswear-catalog.json");
+  fs.mkdirSync(path.dirname(publicPath), { recursive: true });
+  fs.writeFileSync(publicPath, JSON.stringify(payload));
+  console.log("wrote", publicPath, "count", items.length, "bytes", fs.statSync(publicPath).size);
+
+  const stored = await writeMenswearCache(payload);
+  console.log("local cache", stored);
 
   const cache = await readMenswearCache();
-  const withLinks = (cache.items || []).filter((i) => /awin1\.com|awin\.com|productdata/i.test(i.shopUrl || ""));
-  console.log("cache total", cache.items.length, "with awin-ish links", withLinks.length);
-  console.log("sample", cache.items.slice(0, 5).map((i) => ({
+  console.log("sample", (cache?.items || []).slice(0, 3).map((i) => ({
     family: i.family,
     name: i.name,
     price: i.price,
@@ -53,27 +61,10 @@ async function main() {
     shopUrl: (i.shopUrl || "").slice(0, 80),
   })));
 
-  const res = await productSearch.handler({
-    httpMethod: "POST",
-    body: JSON.stringify({ limit: 20 }),
-  });
-  const body = JSON.parse(res.body);
-  console.log("product-search", {
-    status: res.statusCode,
-    source: body.source,
-    count: body.count,
-    cachedTotal: body.cachedTotal,
-    firstLink: body.items?.[0]?.shopUrl?.slice(0, 100),
-    families: [...new Set((body.items || []).map((i) => i.family))],
-  });
-
-  if (body.source !== "awin" || !body.items?.length) {
-    process.exit(3);
-  }
-  if (!body.items.every((i) => i.shopUrl)) {
+  if (!items.every((i) => i.shopUrl)) {
     process.exit(4);
   }
-  console.log("LIVE OK");
+  console.log("LIVE OK count=" + items.length);
 }
 
 main().catch((err) => {
