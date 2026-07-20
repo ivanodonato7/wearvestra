@@ -64,7 +64,9 @@ Rules:
   casual = tees, hoodies, joggers, sneakers, cargo; smart-casual = chinos, polos, loafers; formal = blazers, dress shirts, dress trousers, dress shoes; black-tie = tuxedo / dinner jacket only.
 - colors: 1–2 PRIMARY colors only (simple words: black, navy, grey, white, brown, tan, olive…). Ignore marketing color lists that name every option.
 - fit: silhouette of the garment (fitted/slim/tailored → fitted; regular/straight → regular; relaxed/loose/oversized/wide → relaxed).
-- category: corrected garment family. If Awin says "General Clothing", infer from the name. Use "other" if not menswear clothing.
+- category: MUST be one of: blazer, shirt, trouser, shoe, belt, scarf, sunglasses, other.
+  Map hoodies/sweatshirts/tees/polos → shirt; shorts/joggers/chinos/cargos → trouser; sneakers/trainers → shoe; coats/overcoats/sport coats → blazer. Use other only if not clothing.
+- Workwear (holster trousers, hi-vis, safety shoes) is casual, never formal.
 - confidence: high when name is clear; medium when reasonable inference; low when name is vague/generic/ambiguous (e.g. "Mens Pant", "Jacket", nonsense SEO dump). NEVER invent attributes when unsure — set confidence=low instead.
 - One result object per input key. No markdown.`;
 

@@ -1,94 +1,24 @@
 /**
- * One-shot: enrich 10 sample items from the static catalog with Claude.
- * Used to sanity-check tag quality before enabling CATALOG_ENRICH=1 on full sync.
+ * Enrich 10 fixed sample items with Claude for quality review.
+ * Does NOT touch the full catalog. Full sync enrichment stays gated by CATALOG_ENRICH=1.
  *
  * GET/POST /api/catalog-enrich-sample
  */
-const fs = require("fs");
-const path = require("path");
 const { enrichCatalogItems, estimateFullCatalogCost } = require("./lib/catalogEnrich.cjs");
 
-function pickSample(items, n = 10) {
-  const want = [
-    { re: /\b(blazer|sport\s*coat)\b/i, fam: "blazer" },
-    { re: /\bdress\s*shirt\b/i, fam: "shirt" },
-    { re: /\b(chino|trousers?)\b/i, fam: "trouser" },
-    { re: /\b(dress\s*shoe|loafer|wingtip|derby)\b/i, fam: "shoe" },
-    { re: /\b(hoodie|sweatshirt)\b/i, fam: "shirt" },
-    { re: /\b(jogger|athletic\s*shorts?|gym\s*shorts?)\b/i, fam: "trouser" },
-    { re: /\b(sneaker|trainer)\b/i, fam: "shoe" },
-    { re: /\b(polo|t-?shirt)\b/i, fam: "shirt" },
-    { re: /\bbelts?\b/i, fam: "belt" },
-    { re: /\bcargo\b/i, fam: "trouser" },
-  ];
-  const picked = [];
-  const used = new Set();
-  for (const row of want) {
-    const hit = items.find((i) => {
-      if (used.has(i.key)) return false;
-      if (!row.re.test(i.name || "")) return false;
-      if (row.fam && i.family && i.family !== row.fam && row.fam !== "belt") return false;
-      return true;
-    }) || items.find((i) => row.re.test(i.name || "") && !used.has(i.key));
-    if (hit) {
-      used.add(hit.key);
-      picked.push(hit);
-    }
-  }
-  for (const i of items) {
-    if (picked.length >= n) break;
-    if (!used.has(i.key)) {
-      used.add(i.key);
-      picked.push(i);
-    }
-  }
-  return picked.slice(0, n);
-}
-
-function loadStaticCatalogFromDisk() {
-  const candidates = [
-    path.join(__dirname, "..", "..", "public", "data", "menswear-catalog.json"),
-    path.join(__dirname, "..", "..", "dist", "data", "menswear-catalog.json"),
-    path.join(process.cwd(), "public", "data", "menswear-catalog.json"),
-    path.join(process.cwd(), "dist", "data", "menswear-catalog.json"),
-  ];
-  for (const p of candidates) {
-    try {
-      if (fs.existsSync(p)) {
-        const raw = JSON.parse(fs.readFileSync(p, "utf8"));
-        return Array.isArray(raw) ? raw : (raw.items || []);
-      }
-    } catch { /* try next */ }
-  }
-  return [];
-}
-
-async function loadStaticCatalog(event) {
-  const fromDisk = loadStaticCatalogFromDisk();
-  if (fromDisk.length) return fromDisk;
-
-  // On Netlify, functions don't ship the publish dir — fetch the static asset.
-  const host = event.headers?.["x-forwarded-host"]
-    || event.headers?.host
-    || event.headers?.Host
-    || "";
-  const proto = event.headers?.["x-forwarded-proto"] || "https";
-  const urls = [];
-  if (host) urls.push(`${proto}://${host}/data/menswear-catalog.json`);
-  urls.push("https://wearvestra.com/data/menswear-catalog.json");
-  urls.push("https://www.wearvestra.com/data/menswear-catalog.json");
-
-  for (const url of urls) {
-    try {
-      const res = await fetch(url, { headers: { accept: "application/json" } });
-      if (!res.ok) continue;
-      const raw = await res.json();
-      const items = Array.isArray(raw) ? raw : (raw.items || []);
-      if (items.length) return items;
-    } catch { /* try next */ }
-  }
-  return [];
-}
+/** Diverse slice of the live catalog — embedded so the function never loads the 2.3MB JSON. */
+const SAMPLE_ITEMS = [
+  { key: "aw-38887429825", name: "LINEN BLAZER", brand: "AlbertoNardoniStore", category: "General Clothing", family: "blazer" },
+  { key: "aw-38887585815", name: "Men's French Cuff Mini Plus Patter Spread Collar Regular Fit Dress Shirt & Tie Set In White & Red", brand: "AlbertoNardoniStore", category: "General Clothing", family: "shirt" },
+  { key: "aw-41666310336", name: "WEST BAY Pleated Chino Mens Corduroy Trousers Blue Straight 90s W35 L30", brand: "Loopi", category: "General Clothing", family: "trouser" },
+  { key: "aw-38868251931", name: "1920's Gangster Wingtip Men's Dress Shoe - Black and White", brand: "Bravo", category: "General Clothing", family: "shoe" },
+  { key: "aw-43302305331", name: "CHAMPION Mens Blue Pullover Hoodie S Cotton Blend Casual Sportswear", brand: "Loopi", category: "General Clothing", family: "shirt" },
+  { key: "aw-42563203683", name: "NIKE Mens Red & Black Sports Casual Athletic Shorts S W23 Elite", brand: "Loopi", category: "General Clothing", family: "trouser" },
+  { key: "aw-40757611789", name: "Båld Sneaker | shoe size: 40", brand: "Dauntless", category: "General Clothing", family: "shoe" },
+  { key: "aw-45016456809", name: "Fynch Hatton Polo 2-Tone Piquee Polo Shirt - Beige - XL", brand: "Fynch Hatton", category: "Men's Tops", family: "shirt" },
+  { key: "aw-40783542022", name: "Torino Black Belt", brand: "Santoro Milan", category: "Men's Suits", family: "belt" },
+  { key: "aw-40959253744", name: "DICKIES Cargo Mens Trousers Beige Regular Straight W30 L32", brand: "Loopi", category: "General Clothing", family: "trouser" },
+];
 
 exports.handler = async (event) => {
   const headers = {
@@ -96,35 +26,37 @@ exports.handler = async (event) => {
     "Access-Control-Allow-Headers": "Content-Type",
     "Content-Type": "application/json",
   };
-  if (event.httpMethod === "OPTIONS") {
-    return { statusCode: 204, headers, body: "" };
-  }
-
-  if (!process.env.ANTHROPIC_API_KEY) {
-    return {
-      statusCode: 503,
-      headers,
-      body: JSON.stringify({ error: "ANTHROPIC_API_KEY not configured" }),
-    };
-  }
-
-  const items = await loadStaticCatalog(event);
-  if (!items.length) {
-    return {
-      statusCode: 500,
-      headers,
-      body: JSON.stringify({ error: "static catalog missing" }),
-    };
-  }
-
-  const cost = {
-    haiku: estimateFullCatalogCost({ itemCount: items.length, model: "claude-haiku-4-5" }),
-    sonnet: estimateFullCatalogCost({ itemCount: items.length, model: "claude-sonnet-4-6" }),
-  };
-
-  const sample = pickSample(items, 10);
   try {
-    const { items: enriched, stats } = await enrichCatalogItems(sample, { limit: 10 });
+    if (event.httpMethod === "OPTIONS") {
+      return { statusCode: 204, headers, body: "" };
+    }
+
+    const cost = {
+      haiku: estimateFullCatalogCost({ itemCount: 2503, model: "claude-haiku-4-5" }),
+      sonnet: estimateFullCatalogCost({ itemCount: 2503, model: "claude-sonnet-4-6" }),
+    };
+
+    if (!process.env.ANTHROPIC_API_KEY) {
+      return {
+        statusCode: 503,
+        headers,
+        body: JSON.stringify({
+          error: "ANTHROPIC_API_KEY not configured",
+          costEstimateFullCatalog: cost,
+          sampleWouldBe: SAMPLE_ITEMS,
+        }),
+      };
+    }
+
+    const model = process.env.CATALOG_ENRICH_SAMPLE_MODEL
+      || process.env.CATALOG_ENRICH_MODEL
+      || "claude-haiku-4-5";
+    const { items: enriched, stats } = await enrichCatalogItems(SAMPLE_ITEMS, {
+      limit: 10,
+      model,
+      batchSize: 10,
+    });
+
     const report = enriched.map((i) => ({
       key: i.key,
       name: i.name,
@@ -135,11 +67,12 @@ exports.handler = async (event) => {
         formalityScore: i.formality,
         colors: i.colors || i.paletteTags || [],
         fit: i.fit || i.cut,
-        category: i.category,
+        category: i.family || i.category,
         confidence: i.enrichmentConfidence,
         note: i.enrichment?.enrichmentNote || null,
       },
     }));
+
     return {
       statusCode: 200,
       headers,
@@ -155,7 +88,7 @@ exports.handler = async (event) => {
     return {
       statusCode: 502,
       headers,
-      body: JSON.stringify({ error: String(err.message || err), costEstimateFullCatalog: cost }),
+      body: JSON.stringify({ error: String(err && err.message ? err.message : err) }),
     };
   }
 };
