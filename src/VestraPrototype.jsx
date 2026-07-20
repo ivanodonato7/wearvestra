@@ -33,7 +33,6 @@ const UI = {
     namePlaceholder: "Your first name", emailPlaceholder: "your@email.com", continueBtn: "Continue",
     signupEmailLabel: "Email (optional)", signupNote: "This is a prototype — no account is actually created.",
     nameRequired: "Please enter your name to continue.",
-    stepAudienceTitle: "Who are we dressing?", stepAudiencePrompt: "This helps us show the right fits and inspiration.",
     step0Title: "How would you describe your day-to-day?", step0Prompt: "Pick the photo that feels closest to your days.",
     lifeOfficeDesc: "Meetings, clients, and polished days that need to look intentional.",
     lifeCreativeDesc: "Flexible workplaces where you can dress with a little more ease.",
@@ -47,10 +46,10 @@ const UI = {
     archWarmDesc: "Textures, layers, and earthy tones that feel inviting and lived-in.",
     archClassicDesc: "Classy, timeless pieces you’d wear for years — neat, reliable, elegant.",
     archMinimalDesc: "Fewer pieces, quieter colors, strong proportions that do the talking.",
-    archRomanticDesc: "Soft fabrics, gentle movement, and a lighter, more delicate mood.",
+    archRomanticDesc: "Soft fabrics, easy drape, and a warmer, more relaxed mood.",
     archBoldDesc: "Statement color, presence, and outfits people remember.",
     archStreetDesc: "Urban ease — sunglasses, looser cuts, cool without trying for the boardroom.",
-    archSexyDesc: "Body-aware, evening-ready energy — darker tones, sharper lines, intentional allure.",
+    archSexyDesc: "Evening-ready energy — darker tones, sharper lines, intentional presence.",
     archEdgyDesc: "Contrast and attitude — modern with a harder edge, never too polite.",
     step2Title: "How do you like things to fit?", step2Prompt: "When you get dressed, you lean toward—",
     step3Title: "Let's talk color.", step3Prompt: "Which of these do you find yourself reaching for? Pick a few.",
@@ -98,7 +97,6 @@ const UI = {
     bagTitle: "Bag", bagEmpty: "Save an outfit to see its items here, grouped by retailer.", checkoutWith: "Checkout with",
     profileTitle: "Profile", nameLabel: "Name", styleArchetypeLabel: "Style Archetype", fitPreferenceLabel: "Fit Preference",
     lifestyleLabel: "Day-to-day",
-    dressingForLabel: "Dressing for",
     paletteLabel: "Palette", budgetLabel: "Budget", dressesForLabel: "Dresses For",
     prototypeNote: "Your Style DNA is saved on this device. Delete it anytime to start over.", languageLabel: "Language",
     deleteProfileLabel: "Start over",
@@ -108,7 +106,6 @@ const UI = {
     deleteProfileCancel: "Keep my profile",
     navHome: "Home", navStylist: "Stylist", navWardrobe: "Wardrobe", navBag: "Bag", navProfile: "Profile",
     viewProduct: "Shop this item", swapItem: "Swap this item",
-    modelOnHer: "Her", modelOnHim: "Him", modelLabel: "Shown on",
     heroGenerating: "Dressing the model…",
     heroInspiration: "Style inspiration",
     shopAcross: "Shop across stores", shopAcrossSub: "Search this piece from budget to luxury",
@@ -147,7 +144,6 @@ const UI = {
     namePlaceholder: "Tu nombre", emailPlaceholder: "tu@email.com", continueBtn: "Continuar",
     signupEmailLabel: "Email (opcional)", signupNote: "Esto es un prototipo — no se crea ninguna cuenta real.",
     nameRequired: "Escribe tu nombre para continuar.",
-    stepAudienceTitle: "¿Para quién es el estilo?", stepAudiencePrompt: "Así te mostramos los cortes e inspiración adecuados.",
     step0Title: "¿Cómo describirías tu día a día?", step0Prompt: "Elige la foto que más se parezca a tus días.",
     lifeOfficeDesc: "Reuniones, clientes y días que piden un look intencional.",
     lifeCreativeDesc: "Espacios flexibles donde puedes vestirte con más soltura.",
@@ -161,10 +157,10 @@ const UI = {
     archWarmDesc: "Texturas, capas y tonos tierra acogedores y naturales.",
     archClassicDesc: "Clásico y elegante — piezas atemporales, limpias y fiables.",
     archMinimalDesc: "Menos piezas, colores discretos, proporciones que hablan solas.",
-    archRomanticDesc: "Telas suaves, movimiento ligero y un aire más delicado.",
+    archRomanticDesc: "Telas suaves, caída fácil y un aire más cálido y relajado.",
     archBoldDesc: "Color con presencia y looks que se recuerdan.",
     archStreetDesc: "Energía urbana — gafas, cortes más holgados, cool sin look de oficina.",
-    archSexyDesc: "Energía de noche — tonos oscuros, líneas marcadas, atractivo intencional.",
+    archSexyDesc: "Energía de noche — tonos oscuros, líneas marcadas, presencia intencional.",
     archEdgyDesc: "Contraste y actitud — moderno con un filo más duro.",
     step2Title: "¿Cómo te gusta que te quede la ropa?", step2Prompt: "Cuando te vistes, prefieres—",
     step3Title: "Hablemos de color.", step3Prompt: "¿Cuáles sueles elegir? Marca varios.",
@@ -212,7 +208,6 @@ const UI = {
     bagTitle: "Bolsa", bagEmpty: "Guarda un look para ver sus prendas aquí, agrupadas por tienda.", checkoutWith: "Comprar en",
     profileTitle: "Perfil", nameLabel: "Nombre", styleArchetypeLabel: "Arquetipo de Estilo", fitPreferenceLabel: "Preferencia de Ajuste",
     lifestyleLabel: "Día a día",
-    dressingForLabel: "Vestuario para",
     paletteLabel: "Paleta", budgetLabel: "Presupuesto", dressesForLabel: "Se Viste Para",
     prototypeNote: "Tu ADN de estilo se guarda en este dispositivo. Puedes borrarlo cuando quieras para empezar de nuevo.", languageLabel: "Idioma",
     deleteProfileLabel: "Empezar de nuevo",
@@ -222,7 +217,6 @@ const UI = {
     deleteProfileCancel: "Conservar mi perfil",
     navHome: "Inicio", navStylist: "Estilista", navWardrobe: "Armario", navBag: "Bolsa", navProfile: "Perfil",
     viewProduct: "Comprar esta prenda", swapItem: "Cambiar esta prenda",
-    modelOnHer: "Ella", modelOnHim: "Él", modelLabel: "Mostrado en",
     heroGenerating: "Vistiendo al modelo…",
     heroInspiration: "Inspiración de estilo",
     shopAcross: "Buscar en tiendas", shopAcrossSub: "Desde low-cost hasta lujo",
@@ -261,7 +255,6 @@ const UI = {
     namePlaceholder: "Votre prénom", emailPlaceholder: "votre@email.com", continueBtn: "Continuer",
     signupEmailLabel: "Email (optionnel)", signupNote: "Ceci est un prototype — aucun compte n'est réellement créé.",
     nameRequired: "Indiquez votre prénom pour continuer.",
-    stepAudienceTitle: "Pour qui s'habille-t-on ?", stepAudiencePrompt: "Cela nous aide à montrer les coupes et inspirations adaptées.",
     step0Title: "Comment décririez-vous votre quotidien ?", step0Prompt: "Choisissez la photo qui ressemble le plus à vos journées.",
     lifeOfficeDesc: "Réunions, clients, et des journées qui demandent une allure intentionnelle.",
     lifeCreativeDesc: "Espaces flexibles où l'on peut s'habiller avec plus de souplesse.",
@@ -275,10 +268,10 @@ const UI = {
     archWarmDesc: "Textures, superpositions et tons terreux accueillants.",
     archClassicDesc: "Classique et élégant — des pièces intemporelles, nettes et fiables.",
     archMinimalDesc: "Moins de pièces, couleurs discrètes, proportions qui parlent.",
-    archRomanticDesc: "Tissus fluides, mouvement doux, une humeur plus délicate.",
+    archRomanticDesc: "Tissus souples, tombé facile, une humeur plus chaleureuse et détendue.",
     archBoldDesc: "Couleur affirmée et tenues dont on se souvient.",
     archStreetDesc: "Énergie urbaine — lunettes, coupes plus amples, cool sans look de bureau.",
-    archSexyDesc: "Énergie du soir — tons sombres, lignes marquées, allure intentionnelle.",
+    archSexyDesc: "Énergie du soir — tons sombres, lignes marquées, présence intentionnelle.",
     archEdgyDesc: "Contraste et attitude — moderne avec un bord plus tranché.",
     step2Title: "Comment aimez-vous que ça tombe ?", step2Prompt: "Quand vous vous habillez, vous préférez—",
     step3Title: "Parlons couleur.", step3Prompt: "Lesquelles portez-vous le plus souvent ? Choisissez-en plusieurs.",
@@ -326,7 +319,6 @@ const UI = {
     bagTitle: "Panier", bagEmpty: "Enregistrez une tenue pour voir ses articles ici, regroupés par enseigne.", checkoutWith: "Payer chez",
     profileTitle: "Profil", nameLabel: "Prénom", styleArchetypeLabel: "Archétype de Style", fitPreferenceLabel: "Préférence de Coupe",
     lifestyleLabel: "Quotidien",
-    dressingForLabel: "S'habille pour",
     paletteLabel: "Palette", budgetLabel: "Budget", dressesForLabel: "S'habille Pour",
     prototypeNote: "Votre ADN Style est enregistré sur cet appareil. Supprimez-le quand vous voulez pour recommencer.", languageLabel: "Langue",
     deleteProfileLabel: "Recommencer",
@@ -336,7 +328,6 @@ const UI = {
     deleteProfileCancel: "Garder mon profil",
     navHome: "Accueil", navStylist: "Styliste", navWardrobe: "Garde-robe", navBag: "Panier", navProfile: "Profil",
     viewProduct: "Acheter cet article", swapItem: "Changer cet article",
-    modelOnHer: "Elle", modelOnHim: "Lui", modelLabel: "Porté par",
     heroGenerating: "Habillage du mannequin…",
     heroInspiration: "Inspiration style",
     shopAcross: "Chercher en boutiques", shopAcrossSub: "Du abordable au luxe",
@@ -364,7 +355,6 @@ const OPTIONS_I18N = {
     "Office / client-facing": "Oficina / cara al cliente", "Creative or flexible workplace": "Trabajo creativo o flexible",
     "Remote, mostly at home": "Remoto, mayormente en casa", "On the move — travel, events, varied": "En movimiento — viajes, eventos, variado",
     "Student life": "Vida de estudiante",
-    "Ladies": "Mujer", "Gentlemen": "Hombre", "Gender neutral": "Género neutro",
     "Quiet & Tailored": "Discreto y Sastre", "Relaxed & Considered": "Relajado y Cuidado", "Modern & Sharp": "Moderno y Definido",
     "Warm & Layered": "Cálido y en Capas", "Classic & Polished": "Clásico y Pulido", "Minimal & Directional": "Minimalista y Vanguardista",
     "Romantic & Soft": "Romántico y Suave", "Bold & Expressive": "Audaz y Expresivo",
@@ -388,7 +378,6 @@ const OPTIONS_I18N = {
     "Office / client-facing": "Bureau / relation client", "Creative or flexible workplace": "Travail créatif ou flexible",
     "Remote, mostly at home": "Télétravail, surtout à la maison", "On the move — travel, events, varied": "En mouvement — voyages, événements, varié",
     "Student life": "Vie étudiante",
-    "Ladies": "Femme", "Gentlemen": "Homme", "Gender neutral": "Non genré",
     "Quiet & Tailored": "Discret et Tailleur", "Relaxed & Considered": "Détendu et Réfléchi", "Modern & Sharp": "Moderne et Affûté",
     "Warm & Layered": "Chaleureux et Superposé", "Classic & Polished": "Classique et Soigné", "Minimal & Directional": "Minimaliste et Avant-gardiste",
     "Romantic & Soft": "Romantique et Doux", "Bold & Expressive": "Audacieux et Expressif",
@@ -592,245 +581,117 @@ function tuneItemsToPalette(itemKeys, palette = [], avoid = []) {
 }
 
 /**
- * Per-style + gender shopping/display targets.
- * Catalog photos are shared stubs; labels & search must read as Her vs Him
- * (blouse vs dress shirt, heels vs derby, etc.) when the toggle changes.
+ * Per-style shopping/display targets for the men's catalog.
+ * Photos stay as shared stubs; names & search nouns are men-only.
  */
 const STYLE_GENRE_ITEMS = {
   streetwear: {
-    blazer: {
-      name: "Oversized Street Blazer", noun: "oversized streetwear blazer jacket",
-      nameWoman: "Oversized Street Blazer", nounWoman: "oversized streetwear blazer women",
-      nameMan: "Oversized Street Blazer", nounMan: "oversized streetwear blazer men",
-    },
-    shirt: {
-      name: "Relaxed Hoodie / Crew", noun: "oversized streetwear hoodie crewneck",
-      nameWoman: "Oversized Street Hoodie", nounWoman: "oversized streetwear hoodie women",
-      nameMan: "Oversized Street Hoodie", nounMan: "oversized streetwear hoodie men",
-    },
-    trouser: {
-      name: "Baggy Cargo Pants", noun: "baggy cargo pants streetwear",
-      nameWoman: "Baggy Cargo Pants", nounWoman: "baggy cargo pants streetwear women",
-      nameMan: "Baggy Cargo Pants", nounMan: "baggy cargo pants streetwear men",
-    },
-    shoe: {
-      name: "Chunky Street Sneakers", noun: "chunky sneakers streetwear",
-      nameWoman: "Chunky Platform Sneakers", nounWoman: "chunky platform sneakers women streetwear",
-      nameMan: "Chunky Street Sneakers", nounMan: "chunky sneakers men streetwear",
-    },
+    blazer: { name: "Oversized Street Blazer", noun: "oversized streetwear blazer men" },
+    shirt: { name: "Oversized Street Hoodie", noun: "oversized streetwear hoodie men" },
+    trouser: { name: "Baggy Cargo Pants", noun: "baggy cargo pants streetwear men" },
+    shoe: { name: "Chunky Street Sneakers", noun: "chunky sneakers men streetwear" },
     belt: { name: "Utility Belt", noun: "utility belt streetwear" },
     scarf: { name: "Street Bandana", noun: "streetwear bandana" },
     sunglasses: { name: "Chunky Street Shades", noun: "chunky black sunglasses streetwear" },
   },
   classy: {
-    blazer: {
-      name: "Tailored Wool Blazer", noun: "tailored wool blazer elegant",
-      nameWoman: "Tailored Wool Blazer", nounWoman: "tailored wool blazer women elegant",
-      nameMan: "Tailored Wool Blazer", nounMan: "tailored wool blazer men elegant",
-    },
-    shirt: {
-      name: "Crisp Dress Shirt", noun: "crisp cotton dress shirt elegant",
-      nameWoman: "Silk Blouse / Fine Shirt", nounWoman: "silk blouse dress shirt women elegant",
-      nameMan: "Crisp Dress Shirt", nounMan: "crisp cotton dress shirt men elegant",
-    },
-    trouser: {
-      name: "Tailored Dress Trousers", noun: "tailored dress trousers elegant",
-      nameWoman: "Tailored Wide Trousers", nounWoman: "tailored wide leg trousers women elegant",
-      nameMan: "Tailored Dress Trousers", nounMan: "tailored dress trousers men elegant",
-    },
-    shoe: {
-      name: "Leather Oxford / Derby", noun: "leather oxford dress shoes",
-      nameWoman: "Leather Block Heel / Pump", nounWoman: "leather block heel pumps women",
-      nameMan: "Leather Oxford / Derby", nounMan: "leather oxford derby shoes men",
-    },
+    blazer: { name: "Tailored Wool Blazer", noun: "tailored wool blazer men elegant" },
+    shirt: { name: "Crisp Dress Shirt", noun: "crisp cotton dress shirt men elegant" },
+    trouser: { name: "Tailored Dress Trousers", noun: "tailored dress trousers men elegant" },
+    shoe: { name: "Leather Oxford / Derby", noun: "leather oxford derby shoes men" },
     belt: { name: "Leather Dress Belt", noun: "leather dress belt elegant" },
     scarf: { name: "Fine Wool Scarf", noun: "fine wool scarf elegant" },
     sunglasses: { name: "Classic Acetate Sunglasses", noun: "classic acetate sunglasses" },
   },
   sexy: {
-    blazer: {
-      name: "Fitted Evening Blazer", noun: "fitted black evening blazer sexy",
-      nameWoman: "Cropped Evening Blazer", nounWoman: "cropped fitted evening blazer women",
-      nameMan: "Fitted Evening Blazer", nounMan: "fitted black evening blazer men",
-    },
-    shirt: {
-      nameWoman: "Silk Camisole / Fitted Top", nounWoman: "silk camisole fitted top sexy",
-      nameMan: "Slim Black Turtleneck", nounMan: "slim fitted black turtleneck sexy",
-      name: "Fitted Evening Top", noun: "fitted black evening top sexy",
-    },
-    trouser: {
-      name: "Slim High-Waist Trousers", noun: "high waist slim black trousers sexy",
-      nameWoman: "Slim High-Waist Trousers", nounWoman: "high waist slim trousers women sexy",
-      nameMan: "Slim Black Trousers", nounMan: "slim black dress trousers men",
-    },
-    shoe: {
-      nameWoman: "Pointed Heel Boots", nounWoman: "black pointed heel boots sexy",
-      nameMan: "Sleek Black Dress Shoes", nounMan: "sleek black leather dress shoes",
-      name: "Sleek Evening Shoes", noun: "sleek black evening shoes",
-    },
+    blazer: { name: "Fitted Evening Blazer", noun: "fitted black evening blazer men" },
+    shirt: { name: "Slim Black Turtleneck", noun: "slim fitted black turtleneck sexy" },
+    trouser: { name: "Slim Black Trousers", noun: "slim black dress trousers men" },
+    shoe: { name: "Sleek Black Dress Shoes", noun: "sleek black leather dress shoes" },
     belt: { name: "Slim Black Belt", noun: "slim black leather belt" },
     scarf: { name: "Silk Evening Scarf", noun: "silk scarf evening sexy" },
-    sunglasses: {
-      name: "Cat-Eye / Slim Shades", noun: "slim black sunglasses evening",
-      nameWoman: "Cat-Eye Sunglasses", nounWoman: "cat eye sunglasses women evening",
-      nameMan: "Slim Black Shades", nounMan: "slim black sunglasses men",
-    },
+    sunglasses: { name: "Slim Black Shades", noun: "slim black sunglasses men" },
   },
   modern: {
-    blazer: {
-      name: "Sharp Modern Blazer", noun: "modern structured blazer contemporary",
-      nameWoman: "Sharp Modern Blazer", nounWoman: "modern structured blazer women",
-      nameMan: "Sharp Modern Blazer", nounMan: "modern structured blazer men",
-    },
-    shirt: {
-      name: "Clean Modern Knit / Shirt", noun: "modern minimal shirt contemporary",
-      nameWoman: "Clean Modern Knit Top", nounWoman: "modern minimal knit top women",
-      nameMan: "Clean Modern Shirt", nounMan: "modern minimal shirt men",
-    },
-    trouser: {
-      name: "Straight Modern Trousers", noun: "modern straight trousers contemporary",
-      nameWoman: "Straight Modern Trousers", nounWoman: "modern straight trousers women",
-      nameMan: "Straight Modern Trousers", nounMan: "modern straight trousers men",
-    },
-    shoe: {
-      name: "Minimal Leather Sneaker / Derby", noun: "minimal leather sneakers modern",
-      nameWoman: "Minimal Leather Sneaker", nounWoman: "minimal leather sneakers women",
-      nameMan: "Minimal Leather Derby", nounMan: "minimal leather derby men",
-    },
+    blazer: { name: "Sharp Modern Blazer", noun: "modern structured blazer men" },
+    shirt: { name: "Clean Modern Shirt", noun: "modern minimal shirt men" },
+    trouser: { name: "Straight Modern Trousers", noun: "modern straight trousers men" },
+    shoe: { name: "Minimal Leather Derby", noun: "minimal leather derby men" },
     belt: { name: "Minimal Leather Belt", noun: "minimal leather belt modern" },
     scarf: { name: "Architectural Scarf", noun: "modern wool scarf minimal" },
     sunglasses: { name: "Geometric Sunglasses", noun: "geometric modern sunglasses" },
   },
   edgy: {
     blazer: { name: "Hard-Edge Black Blazer", noun: "black edgy blazer leather trim" },
-    shirt: {
-      name: "Dark Fitted Layer", noun: "black fitted shirt edgy",
-      nameWoman: "Dark Fitted Top", nounWoman: "black fitted top women edgy",
-      nameMan: "Dark Fitted Shirt", nounMan: "black fitted shirt men edgy",
-    },
+    shirt: { name: "Dark Fitted Shirt", noun: "black fitted shirt men edgy" },
     trouser: { name: "Black Slim / Wide Contrast", noun: "black edgy trousers slim" },
-    shoe: {
-      name: "Black Combat / Chelsea", noun: "black chelsea combat boots edgy",
-      nameWoman: "Black Combat Boots", nounWoman: "black combat boots women edgy",
-      nameMan: "Black Chelsea Boots", nounMan: "black chelsea boots men edgy",
-    },
+    shoe: { name: "Black Chelsea Boots", noun: "black chelsea boots men edgy" },
     belt: { name: "Black Hardware Belt", noun: "black belt silver hardware edgy" },
     scarf: { name: "Dark Contrast Scarf", noun: "black scarf edgy" },
     sunglasses: { name: "Wrap / Narrow Black Shades", noun: "narrow black sunglasses edgy" },
   },
   romantic: {
-    blazer: {
-      name: "Soft Unstructured Blazer", noun: "soft linen blazer romantic",
-      nameWoman: "Soft Unstructured Blazer", nounWoman: "soft linen blazer women romantic",
-      nameMan: "Soft Unstructured Blazer", nounMan: "soft linen blazer men",
-    },
-    shirt: {
-      name: "Soft Knit / Blouse", noun: "soft romantic blouse knit",
-      nameWoman: "Soft Blouse / Knit", nounWoman: "soft romantic blouse women",
-      nameMan: "Soft Knit Polo / Shirt", nounMan: "soft knit shirt men romantic",
-    },
-    trouser: {
-      name: "Fluid Wide Trousers", noun: "fluid wide leg trousers romantic",
-      nameWoman: "Fluid Wide Trousers", nounWoman: "fluid wide leg trousers women",
-      nameMan: "Fluid Wide Trousers", nounMan: "fluid wide leg trousers men",
-    },
-    shoe: {
-      name: "Soft Suede Boot / Flat", noun: "suede boots romantic",
-      nameWoman: "Soft Suede Flat / Heel", nounWoman: "suede flats heels women romantic",
-      nameMan: "Soft Suede Boot", nounMan: "suede boots men",
-    },
+    blazer: { name: "Soft Unstructured Blazer", noun: "soft linen blazer men" },
+    shirt: { name: "Soft Knit Polo / Shirt", noun: "soft knit shirt men romantic" },
+    trouser: { name: "Fluid Wide Trousers", noun: "fluid wide leg trousers men" },
+    shoe: { name: "Soft Suede Boot", noun: "suede boots men" },
     belt: { name: "Soft Leather Belt", noun: "soft leather belt" },
     scarf: { name: "Soft Wool Scarf", noun: "soft wool scarf romantic" },
     sunglasses: { name: "Soft Round Sunglasses", noun: "round sunglasses soft" },
   },
   minimal: {
     blazer: { name: "Quiet Luxury Blazer", noun: "minimal tailored blazer quiet luxury" },
-    shirt: {
-      name: "Clean Essential Tee / Shirt", noun: "minimal essential shirt",
-      nameWoman: "Clean Essential Top", nounWoman: "minimal essential top women",
-      nameMan: "Clean Essential Shirt", nounMan: "minimal essential shirt men",
-    },
+    shirt: { name: "Clean Essential Shirt", noun: "minimal essential shirt men" },
     trouser: { name: "Clean Straight Trousers", noun: "minimal straight trousers" },
-    shoe: {
-      name: "Minimal Leather Shoe", noun: "minimal leather shoes",
-      nameWoman: "Minimal Leather Flat", nounWoman: "minimal leather flats women",
-      nameMan: "Minimal Leather Shoe", nounMan: "minimal leather shoes men",
-    },
+    shoe: { name: "Minimal Leather Shoe", noun: "minimal leather shoes men" },
     belt: { name: "Thin Minimal Belt", noun: "thin minimal leather belt" },
     scarf: { name: "Quiet Scarf", noun: "minimal wool scarf" },
     sunglasses: { name: "Minimal Black Sunglasses", noun: "minimal black sunglasses" },
   },
   bold: {
     blazer: { name: "Statement Blazer", noun: "statement color blazer bold" },
-    shirt: {
-      name: "Bold Knit / Shirt", noun: "bold color sweater shirt",
-      nameWoman: "Bold Knit Top", nounWoman: "bold color knit top women",
-      nameMan: "Bold Knit / Shirt", nounMan: "bold color sweater men",
-    },
+    shirt: { name: "Bold Knit / Shirt", noun: "bold color sweater men" },
     trouser: { name: "Statement Trousers", noun: "bold wide trousers" },
-    shoe: {
-      name: "Statement Boots", noun: "bold boots statement",
-      nameWoman: "Statement Heel Boots", nounWoman: "statement heel boots women",
-      nameMan: "Statement Boots", nounMan: "statement boots men",
-    },
+    shoe: { name: "Statement Boots", noun: "statement boots men" },
     belt: { name: "Statement Belt", noun: "bold belt" },
     scarf: { name: "Statement Scarf", noun: "bold color scarf" },
     sunglasses: { name: "Statement Sunglasses", noun: "bold sunglasses" },
   },
   relaxed: {
     blazer: { name: "Easy Soft Blazer", noun: "unstructured soft blazer casual" },
-    shirt: {
-      name: "Easy Knit / Tee", noun: "relaxed knit sweater casual",
-      nameWoman: "Easy Knit Top", nounWoman: "relaxed knit top women casual",
-      nameMan: "Easy Knit / Tee", nounMan: "relaxed knit sweater men casual",
-    },
+    shirt: { name: "Easy Knit / Tee", noun: "relaxed knit sweater men casual" },
     trouser: { name: "Easy Wide Trousers", noun: "relaxed wide trousers casual" },
-    shoe: {
-      name: "Easy Suede Boot / Trainer", noun: "casual suede boots sneakers",
-      nameWoman: "Easy Trainer / Flat", nounWoman: "casual trainers flats women",
-      nameMan: "Easy Suede Boot / Trainer", nounMan: "casual suede boots sneakers men",
-    },
+    shoe: { name: "Easy Suede Boot / Trainer", noun: "casual suede boots sneakers men" },
     belt: { name: "Casual Leather Belt", noun: "casual leather belt" },
     scarf: { name: "Easy Scarf", noun: "casual wool scarf" },
     sunglasses: { name: "Everyday Sunglasses", noun: "casual sunglasses" },
   },
 };
 
-/** Fallback Her/Him labels when a look has no styleFamily (plain catalog stubs). */
-const CATALOG_GENDER_LABELS = {
-  blazer: { woman: "Tailored Blazer", man: "Tailored Blazer" },
-  shirt: { woman: "Crisp Blouse / Shirt", man: "Crisp Cotton Shirt" },
-  trouser: { woman: "Tailored Trousers", man: "Tailored Trousers" },
-  shoe: { woman: "Leather Heel / Flat", man: "Leather Derby Shoe" },
-  scarf: { woman: "Fine Wool Scarf", man: "Fine Wool Scarf" },
-  belt: { woman: "Leather Belt", man: "Leather Belt" },
-  sunglasses: { woman: "Acetate Sunglasses", man: "Acetate Sunglasses" },
+/** Display names for plain catalog stubs (no styleFamily). */
+const CATALOG_DISPLAY_LABELS = {
+  blazer: "Tailored Blazer",
+  shirt: "Crisp Cotton Shirt",
+  trouser: "Tailored Trousers",
+  shoe: "Leather Derby Shoe",
+  scarf: "Fine Wool Scarf",
+  belt: "Leather Belt",
+  sunglasses: "Acetate Sunglasses",
 };
 
-function audienceFromModelGender(modelGender) {
-  return modelGender === "man" ? "Gentlemen" : "Ladies";
-}
-
-function styleGenreEntry(styleFamily, garmentFamily, audience) {
+function styleGenreEntry(styleFamily, garmentFamily) {
   const table = STYLE_GENRE_ITEMS[styleFamily];
   if (!table || !garmentFamily) return null;
   const entry = table[garmentFamily];
   if (!entry) return null;
-  const men = audience === "Gentlemen";
-  return {
-    name: (men ? entry.nameMan : entry.nameWoman) || entry.name,
-    noun: (men ? entry.nounMan : entry.nounWoman) || entry.noun,
-  };
+  return { name: entry.name, noun: entry.noun };
 }
 
-/**
- * Overlay genre + gender labels onto a catalog stub for display and shopping.
- * Photos stay as shared stubs; names/search flip with Her/Him (and style family).
- */
-function styleAwareItem(item, styleFamily, audience) {
+/** Overlay genre labels onto a catalog stub for display and shopping. */
+function styleAwareItem(item, styleFamily) {
   if (!item) return item;
   const garmentFam = familyOfKey(item.key) || (item.type !== "accessory" ? item.type : null);
-  const g = styleGenreEntry(styleFamily, garmentFam, audience);
+  const g = styleGenreEntry(styleFamily, garmentFam);
   if (!g) return { ...item, styleFamily };
   return {
     ...item,
@@ -842,20 +703,14 @@ function styleAwareItem(item, styleFamily, audience) {
   };
 }
 
-/** Resolve the item row the user sees for the current Her/Him + style. */
-function displayItemForGender(item, modelGender, styleFamily = null) {
+/** Resolve the item row the user sees for the current style (men's catalog). */
+function displayCatalogItem(item, styleFamily = null) {
   if (!item) return item;
-  const audience = audienceFromModelGender(modelGender);
-  const men = audience === "Gentlemen";
-  if (styleFamily) {
-    return styleAwareItem(item, styleFamily, audience);
-  }
+  if (styleFamily) return styleAwareItem(item, styleFamily);
   const fam = familyOfKey(item.key) || (item.type !== "accessory" ? item.type : null);
-  const labels = fam && CATALOG_GENDER_LABELS[fam];
-  if (!labels) return item;
-  const gendered = men ? labels.man : labels.woman;
-  if (!gendered || gendered === item.name) return item;
-  return { ...item, name: gendered };
+  const label = fam && CATALOG_DISPLAY_LABELS[fam];
+  if (!label || label === item.name) return item;
+  return { ...item, name: label };
 }
 
 /** Replace catalog keys (shirtAlt, trouserAlt…) with human product names in stylist copy. */
@@ -871,16 +726,16 @@ function humanizeRationale(text, lang = "en") {
   return out;
 }
 
-/** Build a shopping query: palette color + style-genre garment (not always "dress blazer"). */
-function buildItemSearchQuery(item, palette = [], avoid = [], styleFamily = null, audience = null) {
+/** Build a shopping query: palette color + style-genre garment (men's catalog). */
+function buildItemSearchQuery(item, palette = [], avoid = [], styleFamily = null) {
   if (!item) return "";
-  const styled = styleFamily ? styleAwareItem(item, styleFamily, audience) : item;
+  const styled = styleFamily ? styleAwareItem(item, styleFamily) : displayCatalogItem(item);
   const preferred = (palette || []).filter((p) => !(avoid || []).includes(p));
   const tags = item.paletteTags || [];
   let colorLabel = preferred.find((p) => tags.includes(p));
   if (!colorLabel && preferred.length) {
     if (item.type === "shirt") {
-      colorLabel = preferred.find((p) => ["Ivory / Cream", "White", "Black", "Grey / Charcoal", "Navy", "Blush / Dusty Pink"].includes(p)) || preferred[0];
+      colorLabel = preferred.find((p) => ["Ivory / Cream", "White", "Black", "Grey / Charcoal", "Navy"].includes(p)) || preferred[0];
     } else if (item.type === "shoe" || item.key?.includes("belt") || item.key?.includes("Belt")) {
       colorLabel = preferred.find((p) => ["Black", "Camel / Tan", "Rust / Terracotta", "Burgundy", "Navy"].includes(p)) || preferred[0];
     } else if (item.key?.includes("sunglasses")) {
@@ -1179,8 +1034,8 @@ function googleShoppingUrl(query) {
   return `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(query)}`;
 }
 
-function storeLinksForItem(item, palette = [], avoid = [], styleFamily = null, audience = null) {
-  const q = buildItemSearchQuery(item, palette, avoid, styleFamily, audience);
+function storeLinksForItem(item, palette = [], avoid = [], styleFamily = null) {
+  const q = buildItemSearchQuery(item, palette, avoid, styleFamily);
   return STORE_DIRECTORY.map((store) => ({
     ...store,
     href: store.url(q),
@@ -1736,10 +1591,9 @@ function resolveHeroOccasionSlug({ occasion, styleFamily, occasions = [], prompt
   return "default";
 }
 
-function heroStockUrl(gender, occasionSlug) {
-  const who = gender === "man" ? "him" : "her";
+function heroStockUrl(occasionSlug) {
   const slug = HERO_OCCASION_SLUGS.has(occasionSlug) ? occasionSlug : "default";
-  return assetUrl(`/heroes/${who}-${slug}.jpg`);
+  return assetUrl(`/heroes/him-${slug}.jpg`);
 }
 
 function normalizeArchetype(archetype) {
@@ -2319,7 +2173,7 @@ function composeWeekPlan(prompt, profile, lang = "en") {
   return { outfits: picked, shoppingList: buildShoppingList(picked) };
 }
 
-// AI-generated model photos keyed by gender + outfit signature (catalog keys, stable order)
+// Model photos for men's looks (legacy try-on / fuzzy match helpers)
 const MODEL_KEY_ORDER = [
   "blazer", "blazerAlt", "blazerNavy", "blazerBlack",
   "shirt", "shirtAlt",
@@ -2335,24 +2189,16 @@ function outfitSignature(itemKeys) {
 }
 
 const MODEL_IMAGES = {
-  woman: {
-    "blazer+shirt+trouser+shoe": assetUrl("/models/model-woman-wedding.jpg"),
-    "blazerAlt+shirt+trouser+shoe": assetUrl("/models/model-woman-wedding-linen.jpg"),
-    "shirt+trouser+shoe+scarf": assetUrl("/models/model-woman-dinner.jpg"),
-    "shirt+trouser+shoe": assetUrl("/models/model-woman-everyday.jpg"),
-  },
-  man: {
-    "blazer+shirt+trouser+shoe": assetUrl("/models/model-man-wedding.jpg"),
-    "blazerAlt+shirt+trouser+shoe": assetUrl("/models/model-man-wedding-alt.jpg"),
-    "blazer+shirtAlt+trouser+shoe": assetUrl("/models/model-man-wedding-alt.jpg"),
-    "blazerAlt+shirtAlt+trouser+shoe": assetUrl("/models/model-man-wedding-alt.jpg"),
-    "shirt+trouser+shoe+scarf": assetUrl("/models/model-man-dinner.jpg"),
-    "shirt+trouser+shoe": assetUrl("/models/model-man-everyday.jpg"),
-  },
+  "blazer+shirt+trouser+shoe": assetUrl("/models/model-man-wedding.jpg"),
+  "blazerAlt+shirt+trouser+shoe": assetUrl("/models/model-man-wedding-alt.jpg"),
+  "blazer+shirtAlt+trouser+shoe": assetUrl("/models/model-man-wedding-alt.jpg"),
+  "blazerAlt+shirtAlt+trouser+shoe": assetUrl("/models/model-man-wedding-alt.jpg"),
+  "shirt+trouser+shoe+scarf": assetUrl("/models/model-man-dinner.jpg"),
+  "shirt+trouser+shoe": assetUrl("/models/model-man-everyday.jpg"),
 };
 
-function resolveModelImage(itemKeys, gender) {
-  const map = MODEL_IMAGES[gender] || MODEL_IMAGES.woman;
+function resolveModelImage(itemKeys) {
+  const map = MODEL_IMAGES;
   const sig = outfitSignature(itemKeys);
   if (map[sig]) return map[sig];
 
@@ -2379,49 +2225,32 @@ function resolveModelImage(itemKeys, gender) {
 }
 
 // ==================== ONBOARDING DATA ====================
-const AUDIENCE_OPTIONS = ["Ladies", "Gentlemen", "Gender neutral"];
-const AUDIENCE_META = {
-  Ladies: { image: assetUrl("/onboarding/audience-ladies.jpg"), modelGender: "woman" },
-  Gentlemen: { image: assetUrl("/onboarding/audience-gentlemen.jpg"), modelGender: "man" },
-  "Gender neutral": { image: assetUrl("/onboarding/audience-neutral.jpg"), modelGender: "woman" },
-};
-
-/** Pick woman/man photo from option meta based on audience choice. */
-function resolveAudienceImage(meta, audience, optionIndex = 0) {
+/** Prefer men's photography for quiz cards; fall back to any available image. */
+function resolveStepImage(meta) {
   if (!meta) return "";
-  if (meta.image) return meta.image; // audience step itself
-  if (audience === "Gentlemen") return meta.man || meta.woman || "";
-  if (audience === "Ladies") return meta.woman || meta.man || "";
-  // Gender neutral: alternate so both presentations appear
-  const pair = optionIndex % 2 === 0 ? meta.woman : meta.man;
-  return pair || meta.woman || meta.man || "";
+  return meta.image || meta.man || meta.woman || "";
 }
 
 const LIFESTYLE_OPTIONS = ["Office / client-facing", "Creative or flexible workplace", "Remote, mostly at home", "On the move — travel, events, varied", "Student life"];
 const LIFESTYLE_META = {
   "Office / client-facing": {
-    woman: assetUrl("/onboarding/life-office.jpg"),
-    man: assetUrl("/onboarding/life-office-man.jpg"),
+    image: assetUrl("/onboarding/life-office-man.jpg"),
     descKey: "lifeOfficeDesc",
   },
   "Creative or flexible workplace": {
-    woman: assetUrl("/onboarding/life-creative.jpg"),
-    man: assetUrl("/onboarding/life-creative-man.jpg"),
+    image: assetUrl("/onboarding/life-creative-man.jpg"),
     descKey: "lifeCreativeDesc",
   },
   "Remote, mostly at home": {
-    woman: assetUrl("/onboarding/life-remote.jpg"),
-    man: assetUrl("/onboarding/life-remote-man.jpg"),
+    image: assetUrl("/onboarding/life-remote-man.jpg"),
     descKey: "lifeRemoteDesc",
   },
   "On the move — travel, events, varied": {
-    woman: assetUrl("/onboarding/life-travel.jpg"),
-    man: assetUrl("/onboarding/life-travel-man.jpg"),
+    image: assetUrl("/onboarding/life-travel-man.jpg"),
     descKey: "lifeTravelDesc",
   },
   "Student life": {
-    woman: assetUrl("/onboarding/life-student.jpg"),
-    man: assetUrl("/onboarding/life-student-man.jpg"),
+    image: assetUrl("/onboarding/life-student-man.jpg"),
     descKey: "lifeStudentDesc",
   },
 };
@@ -2441,79 +2270,64 @@ const ARCHETYPE_OPTIONS = [
 
 const ARCHETYPE_META = {
   "Quiet & Tailored": {
-    woman: assetUrl("/styles/style-quiet-tailored.jpg"),
-    man: assetUrl("/styles/style-quiet-tailored-man.jpg"),
+    image: assetUrl("/styles/style-quiet-tailored-man.jpg"),
     descKey: "archQuietDesc",
   },
   "Relaxed & Considered": {
-    woman: assetUrl("/styles/style-relaxed-considered.jpg"),
-    man: assetUrl("/styles/style-relaxed-considered-man.jpg"),
+    image: assetUrl("/styles/style-relaxed-considered-man.jpg"),
     descKey: "archRelaxedDesc",
   },
   "Modern & Sharp": {
-    woman: assetUrl("/styles/style-modern-sharp.jpg"),
-    man: assetUrl("/styles/style-modern-sharp-man.jpg"),
+    image: assetUrl("/styles/style-modern-sharp-man.jpg"),
     descKey: "archModernDesc",
   },
   "Warm & Layered": {
-    woman: assetUrl("/styles/style-warm-layered.jpg"),
-    man: assetUrl("/styles/style-warm-layered-man.jpg"),
+    image: assetUrl("/styles/style-warm-layered-man.jpg"),
     descKey: "archWarmDesc",
   },
   "Classic & Polished": {
-    woman: assetUrl("/styles/style-classic-polished.jpg"),
-    man: assetUrl("/styles/style-classic-polished-man.jpg"),
+    image: assetUrl("/styles/style-classic-polished-man.jpg"),
     descKey: "archClassicDesc",
   },
   "Minimal & Directional": {
-    woman: assetUrl("/styles/style-minimal-directional.jpg"),
-    man: assetUrl("/styles/style-minimal-directional-man.jpg"),
+    image: assetUrl("/styles/style-minimal-directional-man.jpg"),
     descKey: "archMinimalDesc",
   },
   "Romantic & Soft": {
-    woman: assetUrl("/styles/style-romantic-soft.jpg"),
-    man: assetUrl("/styles/style-romantic-soft-man.jpg"),
+    image: assetUrl("/styles/style-romantic-soft-man.jpg"),
     descKey: "archRomanticDesc",
   },
   "Bold & Expressive": {
-    woman: assetUrl("/styles/style-bold-expressive.jpg"),
-    man: assetUrl("/styles/style-bold-expressive-man.jpg"),
+    image: assetUrl("/styles/style-bold-expressive-man.jpg"),
     descKey: "archBoldDesc",
   },
   // Reuse closest existing photography until dedicated street/sexy/edgy shoots ship
   "Streetwear & Cool": {
-    woman: assetUrl("/styles/style-bold-expressive.jpg"),
-    man: assetUrl("/styles/style-bold-expressive-man.jpg"),
+    image: assetUrl("/styles/style-bold-expressive-man.jpg"),
     descKey: "archStreetDesc",
   },
   "Sexy & Evening": {
-    woman: assetUrl("/styles/style-romantic-soft.jpg"),
-    man: assetUrl("/styles/style-romantic-soft-man.jpg"),
+    image: assetUrl("/styles/style-romantic-soft-man.jpg"),
     descKey: "archSexyDesc",
   },
   "Edgy & Contemporary": {
-    woman: assetUrl("/styles/style-modern-sharp.jpg"),
-    man: assetUrl("/styles/style-modern-sharp-man.jpg"),
+    image: assetUrl("/styles/style-modern-sharp-man.jpg"),
     descKey: "archEdgyDesc",
   },
 };
 const FIT_OPTIONS = ["Fitted & tailored", "True to size, structured", "Relaxed, room to move", "Oversized, intentionally loose"];
 const FIT_META = {
   "Fitted & tailored": {
-    woman: assetUrl("/onboarding/fit-fitted.jpg"),
-    man: assetUrl("/onboarding/fit-fitted-man.jpg"),
+    image: assetUrl("/onboarding/fit-fitted-man.jpg"),
   },
   "True to size, structured": {
-    woman: assetUrl("/onboarding/fit-structured.jpg"),
-    man: assetUrl("/onboarding/fit-structured-man.jpg"),
+    image: assetUrl("/onboarding/fit-structured-man.jpg"),
   },
   "Relaxed, room to move": {
-    woman: assetUrl("/onboarding/fit-relaxed.jpg"),
-    man: assetUrl("/onboarding/fit-relaxed-man.jpg"),
+    image: assetUrl("/onboarding/fit-relaxed-man.jpg"),
   },
   "Oversized, intentionally loose": {
-    woman: assetUrl("/onboarding/fit-oversized.jpg"),
-    man: assetUrl("/onboarding/fit-oversized-man.jpg"),
+    image: assetUrl("/onboarding/fit-oversized-man.jpg"),
   },
 };
 const COLOR_OPTIONS = [
@@ -2539,34 +2353,28 @@ const BUDGET_OPTIONS = [
 const OCCASION_OPTIONS = ["Work", "Date nights", "Travel", "Events & celebrations", "Everyday, just want to feel put together"];
 const OCCASION_META = {
   Work: {
-    woman: assetUrl("/onboarding/occ-work-woman.jpg"),
-    man: assetUrl("/onboarding/occ-work-man.jpg"),
+    image: assetUrl("/onboarding/occ-work-man.jpg"),
     descKey: "occWorkDesc",
   },
   "Date nights": {
-    woman: assetUrl("/onboarding/occ-date-woman.jpg"),
-    man: assetUrl("/onboarding/occ-date-man.jpg"),
+    image: assetUrl("/onboarding/occ-date-man.jpg"),
     descKey: "occDateDesc",
   },
   Travel: {
-    woman: assetUrl("/onboarding/occ-travel-woman.jpg"),
-    man: assetUrl("/onboarding/occ-travel-man.jpg"),
+    image: assetUrl("/onboarding/occ-travel-man.jpg"),
     descKey: "occTravelDesc",
   },
   "Events & celebrations": {
-    woman: assetUrl("/onboarding/occ-events-woman.jpg"),
-    man: assetUrl("/onboarding/occ-events-man.jpg"),
+    image: assetUrl("/onboarding/occ-events-man.jpg"),
     descKey: "occEventsDesc",
   },
   "Everyday, just want to feel put together": {
-    woman: assetUrl("/onboarding/occ-everyday-woman.jpg"),
-    man: assetUrl("/onboarding/occ-everyday-man.jpg"),
+    image: assetUrl("/onboarding/occ-everyday-man.jpg"),
     descKey: "occEverydayDesc",
   },
 };
 
 const STEPS = [
-  { id: "audience", titleKey: "stepAudienceTitle", promptKey: "stepAudiencePrompt", type: "visual", options: AUDIENCE_OPTIONS, meta: AUDIENCE_META },
   { id: "lifestyle", titleKey: "step0Title", promptKey: "step0Prompt", type: "photoList", options: LIFESTYLE_OPTIONS, meta: LIFESTYLE_META },
   { id: "archetype", titleKey: "step1Title", promptKey: "step1Prompt", type: "archetype", options: ARCHETYPE_OPTIONS },
   { id: "fit", titleKey: "step2Title", promptKey: "step2Prompt", type: "visual", options: FIT_OPTIONS, meta: FIT_META },
@@ -2578,7 +2386,6 @@ const STEPS = [
 
 const DEFAULT_PROFILE = {
   name: "Alex",
-  audience: "Ladies",
   archetype: "Quiet Tailored",
   fit: "Fitted & tailored",
   lifestyle: "Office / client-facing",
@@ -2586,14 +2393,12 @@ const DEFAULT_PROFILE = {
   avoid: [],
   budget: "balanced",
   occasions: ["Work", "Events & celebrations"],
-  modelGender: "woman",
   favoriteStores: ["zara", "uniqlo", "nordstrom", "suitsupply"],
 };
 
 /** Empty shell for brand-new visitors — do NOT seed DEFAULT_PROFILE (named "Alex") into storage. */
 const EMPTY_PROFILE = {
   name: "",
-  audience: null,
   archetype: null,
   fit: null,
   lifestyle: null,
@@ -2601,7 +2406,6 @@ const EMPTY_PROFILE = {
   avoid: [],
   budget: null,
   occasions: [],
-  modelGender: "woman",
   favoriteStores: [],
 };
 
@@ -2612,7 +2416,25 @@ function loadStoredState() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
-    return JSON.parse(raw);
+    const parsed = JSON.parse(raw);
+    const hadAudienceStep = !!(parsed?.answers && "audience" in parsed.answers)
+      || !!(parsed?.profile && ("audience" in parsed.profile || "modelGender" in parsed.profile));
+    if (hadAudienceStep && Number.isFinite(parsed?.step) && parsed.step > 0) {
+      // Old quizzes started with audience at index 0 — shift down one step
+      parsed.step = Math.max(0, parsed.step - 1);
+    }
+    if (parsed?.profile) {
+      const { audience, modelGender, ...rest } = parsed.profile;
+      parsed.profile = rest;
+    }
+    if (parsed?.answers && "audience" in parsed.answers) {
+      const { audience, ...rest } = parsed.answers;
+      parsed.answers = rest;
+    }
+    if (Number.isFinite(parsed?.step) && parsed.step >= STEPS.length) {
+      parsed.step = Math.max(0, STEPS.length - 1);
+    }
+    return parsed;
   } catch {
     return null;
   }
@@ -2665,7 +2487,7 @@ function persistBootstrap({ stage, profile, lang = "en", tab = "home", step = 0,
       tab,
       profile: profile || prev.profile || EMPTY_PROFILE,
       answers: answers || prev.answers || {
-        name: "", audience: null, lifestyle: null, archetype: null, fit: null, palette: [], avoid: [], budget: null, occasions: [], sizes: {},
+        name: "", lifestyle: null, archetype: null, fit: null, palette: [], avoid: [], budget: null, occasions: [], sizes: {},
       },
       savedOutfits: prev.savedOutfits || [],
       messages,
@@ -2911,7 +2733,6 @@ function SignupScreen({ onContinue, onBack }) {
 function OnboardingScreen({ step, totalSteps, question, answers, setAnswers, onNext, onBack }) {
   const { t, tOpt } = useLang();
   const [showAvoid, setShowAvoid] = useState(false);
-  const audience = answers.audience || "Ladies";
 
   function selectSingle(value) {
     setAnswers((a) => ({ ...a, [question.id]: value }));
@@ -2954,9 +2775,9 @@ function OnboardingScreen({ step, totalSteps, question, answers, setAnswers, onN
 
         {question.type === "archetype" && (
           <div className="onb-style-grid">
-            {question.options.map((opt, idx) => {
+            {question.options.map((opt) => {
               const meta = ARCHETYPE_META[opt] || {};
-              const image = resolveAudienceImage(meta, audience, idx);
+              const image = resolveStepImage(meta);
               return (
                 <button
                   key={opt}
@@ -2977,9 +2798,9 @@ function OnboardingScreen({ step, totalSteps, question, answers, setAnswers, onN
 
         {question.type === "photoList" && (
           <div className="onb-style-grid">
-            {question.options.map((opt, idx) => {
+            {question.options.map((opt) => {
               const meta = (question.meta && question.meta[opt]) || {};
-              const image = resolveAudienceImage(meta, audience, idx);
+              const image = resolveStepImage(meta);
               return (
                 <button
                   key={opt}
@@ -3000,9 +2821,9 @@ function OnboardingScreen({ step, totalSteps, question, answers, setAnswers, onN
 
         {question.type === "photoMulti" && (
           <div className="onb-style-grid">
-            {question.options.map((opt, idx) => {
+            {question.options.map((opt) => {
               const meta = (question.meta && question.meta[opt]) || {};
-              const image = resolveAudienceImage(meta, audience, idx);
+              const image = resolveStepImage(meta);
               const selected = (answers[question.id] || []).includes(opt);
               return (
                 <button
@@ -3024,9 +2845,9 @@ function OnboardingScreen({ step, totalSteps, question, answers, setAnswers, onN
 
         {question.type === "visual" && (
           <div className={`onb-visual-grid ${question.options.length === 3 ? "onb-visual-grid-3" : ""}`}>
-            {question.options.map((opt, idx) => {
+            {question.options.map((opt) => {
               const meta = (question.meta && question.meta[opt]) || {};
-              const image = resolveAudienceImage(meta, audience, idx);
+              const image = resolveStepImage(meta);
               return (
                 <button
                   key={opt}
@@ -3180,26 +3001,18 @@ function OccasionScreen({ onSubmit, onSkip }) {
 }
 
 // ==================== OUTFIT HERO ====================
-// Static stock mood photo by occasion + Her/Him (not a literal product shot).
-const OutfitHero = memo(function OutfitHero({ gender = "woman", occasion = "default", palette = [] }) {
+// Static stock mood photo by occasion (men's inspiration — not a literal product shot).
+const OutfitHero = memo(function OutfitHero({ occasion = "default", palette = [] }) {
   const { t } = useLang();
   const slug = HERO_OCCASION_SLUGS.has(occasion)
     ? occasion
     : resolveHeroOccasionSlug({ occasion });
-  const src = heroStockUrl(gender, slug);
-  const fallback = heroStockUrl(gender, "default");
+  const src = heroStockUrl(slug);
+  const fallback = heroStockUrl("default");
   const swatches = (palette || [])
     .map((label) => (COLOR_OPTIONS.find((c) => c.label === label) || {}).hex)
     .filter(Boolean)
     .slice(0, 4);
-
-  // Prefetch the other gender so Her/Him toggles feel instant
-  useEffect(() => {
-    const other = gender === "man" ? "woman" : "man";
-    const img = new Image();
-    img.decoding = "async";
-    img.src = heroStockUrl(other, slug);
-  }, [gender, slug]);
 
   return (
     <div className="model-wrap outfit-hero-wrap outfit-hero-stock">
@@ -3233,14 +3046,14 @@ function styleFamilyLabel(styleFamily, t) {
 }
 
 // ==================== SHOP ACROSS STORES ====================
-function ShopSheet({ item, onClose, favoriteStores = [], palette = [], avoid = [], styleFamily = null, audience = null }) {
+function ShopSheet({ item, onClose, favoriteStores = [], palette = [], avoid = [], styleFamily = null }) {
   const { t, tOpt, tName } = useLang();
   const [stock, setStock] = useState({ status: "loading", products: [], scannedAt: null });
   // Genre shops skip catalog stock stubs — open the full store directory immediately
   const genreShop = styleFamily && ["streetwear", "sexy", "edgy", "modern", "classy"].includes(styleFamily);
   const [showStores, setShowStores] = useState(true);
 
-  const searchQuery = buildItemSearchQuery(item, palette, avoid, styleFamily, audience);
+  const searchQuery = buildItemSearchQuery(item, palette, avoid, styleFamily);
   const paletteLabels = (palette || []).filter((p) => !(avoid || []).includes(p));
 
   useEffect(() => {
@@ -3284,7 +3097,7 @@ function ShopSheet({ item, onClose, favoriteStores = [], palette = [], avoid = [
   }, [item, palette, avoid, genreShop]);
 
   if (!item) return null;
-  const links = storeLinksForItem(item, palette, avoid, styleFamily, audience);
+  const links = storeLinksForItem(item, palette, avoid, styleFamily);
   const shoppingUrl = googleShoppingUrl(searchQuery);
   const favSet = new Set(favoriteStores);
   const favoriteLinks = links.filter((s) => favSet.has(s.id));
@@ -3417,21 +3230,16 @@ const OutfitCard = memo(function OutfitCard({
   onSwap,
   onSave,
   saved,
-  modelGender,
-  onModelGenderChange,
   favoriteStores,
   optionLabel,
   palette = [],
   avoid = [],
-  audience = null,
   promptHint = "",
 }) {
   const { lang, t, tName } = useLang();
   const [shopItem, setShopItem] = useState(null);
   const styleFamily = outfit.styleFamily || null;
   const genreLabel = styleFamilyLabel(styleFamily, t);
-  // Toggle is source of truth — do NOT lock to onboarding audience
-  const audienceForShop = audienceFromModelGender(modelGender);
   const header = [optionLabel, genreLabel].filter(Boolean).join(" · ") || t("stylistSuggests");
   const rationale = humanizeRationale(outfit.rationale, lang);
   const heroOccasion = resolveHeroOccasionSlug({
@@ -3443,40 +3251,18 @@ const OutfitCard = memo(function OutfitCard({
   return (
     <div className="card">
       <div className="eyebrow gold">{header}</div>
-      <div className="model-gender-row">
-        <span className="model-gender-label">{t("modelLabel")}</span>
-        <div className="model-gender-switch">
-          <button
-            type="button"
-            className={`model-gender-pill ${modelGender === "woman" ? "active" : ""}`}
-            onClick={() => onModelGenderChange?.("woman")}
-            data-testid="gender-her"
-          >
-            {t("modelOnHer")}
-          </button>
-          <button
-            type="button"
-            className={`model-gender-pill ${modelGender === "man" ? "active" : ""}`}
-            onClick={() => onModelGenderChange?.("man")}
-            data-testid="gender-him"
-          >
-            {t("modelOnHim")}
-          </button>
-        </div>
-      </div>
       <div className="outfit-visual">
         <OutfitHero
-          gender={modelGender}
           occasion={heroOccasion}
           palette={palette}
         />
-        <div className="item-list" data-testid="item-list" data-gender={modelGender}>
+        <div className="item-list" data-testid="item-list">
           {outfit.items.map((key) => {
             const base = CATALOG[key];
             if (!base) return null;
-            const item = displayItemForGender(base, modelGender, styleFamily);
+            const item = displayCatalogItem(base, styleFamily);
             return (
-              <div key={`${item.id}-${modelGender}`} className="item-row" data-item-name={item.name}>
+              <div key={item.id} className="item-row" data-item-name={item.name}>
                 <button
                   type="button"
                   className="item-row-shop"
@@ -3518,7 +3304,6 @@ const OutfitCard = memo(function OutfitCard({
           palette={palette}
           avoid={avoid}
           styleFamily={styleFamily}
-          audience={audienceForShop}
         />
       )}
     </div>
@@ -3603,7 +3388,7 @@ function WeekShoppingList({ shoppingList, favoriteStores, palette = [], avoid = 
   );
 }
 
-function ChatScreen({ messages, onSend, input, setInput, onSwap, onSave, savedIds, pending, modelGender, onModelGenderChange, favoriteStores, palette = [], avoid = [], audience = null }) {
+function ChatScreen({ messages, onSend, input, setInput, onSwap, onSave, savedIds, pending, favoriteStores, palette = [], avoid = [] }) {
   const { t } = useLang();
   const endRef = useRef(null);
   useEffect(() => {
@@ -3641,12 +3426,9 @@ function ChatScreen({ messages, onSend, input, setInput, onSwap, onSave, savedId
                     onSwap={onSwap}
                     onSave={onSave}
                     saved={savedIds.has(`${i}:${oi}`)}
-                    modelGender={modelGender}
-                    onModelGenderChange={onModelGenderChange}
                     favoriteStores={favoriteStores}
                     palette={palette}
                     avoid={avoid}
-                    audience={audience}
                     promptHint={promptHint}
                   />
                 ))}
@@ -3671,8 +3453,6 @@ function ChatScreen({ messages, onSend, input, setInput, onSwap, onSave, savedId
                   onSwap={onSwap}
                   onSave={onSave}
                   saved={savedIds.has(`${i}:0`) || savedIds.has(i)}
-                  modelGender={modelGender}
-                  onModelGenderChange={onModelGenderChange}
                   favoriteStores={favoriteStores}
                   palette={palette}
                   avoid={avoid}
@@ -3706,7 +3486,7 @@ function ChatScreen({ messages, onSend, input, setInput, onSwap, onSave, savedId
 const noopSwap = () => {};
 const noopSave = () => {};
 
-function WardrobeScreen({ savedOutfits, modelGender, onModelGenderChange, favoriteStores, palette = [], avoid = [] }) {
+function WardrobeScreen({ savedOutfits, favoriteStores, palette = [], avoid = [] }) {
   const { t } = useLang();
   return (
     <div className="screen">
@@ -3724,8 +3504,6 @@ function WardrobeScreen({ savedOutfits, modelGender, onModelGenderChange, favori
               onSwap={noopSwap}
               onSave={noopSave}
               saved
-              modelGender={modelGender}
-              onModelGenderChange={onModelGenderChange}
               favoriteStores={favoriteStores}
               palette={palette}
               avoid={avoid}
@@ -3796,7 +3574,6 @@ function ProfileScreen({ profile, onToggleFavoriteStore, onDeleteProfile }) {
   const budgetLabel = tOpt((BUDGET_OPTIONS.find((b) => b.key === profile.budget) || {}).label || "Balanced");
   const rows = [
     [t("nameLabel"), profile.name || DEFAULT_PROFILE.name],
-    [t("dressingForLabel"), tOpt(profile.audience || DEFAULT_PROFILE.audience)],
     [t("styleArchetypeLabel"), tOpt(profile.archetype)],
     [t("fitPreferenceLabel"), tOpt(profile.fit)],
     [t("lifestyleLabel"), tOpt(profile.lifestyle || DEFAULT_PROFILE.lifestyle)],
@@ -3895,7 +3672,7 @@ export default function VestraPrototype() {
   const [stage, setStage] = useState(() => initialStageFromStorage(stored));
   const [step, setStep] = useState(() => (Number.isFinite(stored?.step) ? stored.step : 0));
   const [answers, setAnswers] = useState(() => stored?.answers || {
-    name: "", audience: null, lifestyle: null, archetype: null, fit: null, palette: [], avoid: [], budget: null, occasions: [], sizes: {},
+    name: "", lifestyle: null, archetype: null, fit: null, palette: [], avoid: [], budget: null, occasions: [], sizes: {},
   });
   // Fresh visitors start empty — DEFAULT_PROFILE is only for "Skip for testing"
   const [profile, setProfile] = useState(() => stored?.profile || EMPTY_PROFILE);
@@ -4108,24 +3885,10 @@ export default function VestraPrototype() {
     });
   }, []);
 
-  const handleModelGenderChange = useCallback((g) => {
-    setProfile((p) => {
-      if (p.modelGender === g && p.audience === audienceFromModelGender(g)) return p;
-      return {
-        ...p,
-        modelGender: g,
-        audience: audienceFromModelGender(g),
-      };
-    });
-  }, []);
-
   function finishOnboarding(occasionText) {
     const archetypeShortEn = answers.archetype.replace(" & ", " ");
-    const audience = answers.audience || DEFAULT_PROFILE.audience;
-    const audienceMeta = AUDIENCE_META[audience] || AUDIENCE_META.Ladies;
     const built = {
       name: answers.name || profile.name || DEFAULT_PROFILE.name,
-      audience,
       archetype: archetypeShortEn,
       fit: answers.fit,
       lifestyle: answers.lifestyle || DEFAULT_PROFILE.lifestyle,
@@ -4133,7 +3896,6 @@ export default function VestraPrototype() {
       avoid: answers.avoid || [],
       budget: answers.budget,
       occasions: answers.occasions,
-      modelGender: audienceMeta.modelGender || DEFAULT_PROFILE.modelGender,
       favoriteStores: profile.favoriteStores || DEFAULT_PROFILE.favoriteStores,
     };
     setProfile(built);
@@ -4154,7 +3916,7 @@ export default function VestraPrototype() {
     // Sync persist + hash BEFORE setState. A SW controllerchange reload used to
     // land before the 250ms debounce wrote "signup", snapping first-time visitors
     // back to welcome — buttons looked dead.
-    const safeProfile = profile?.modelGender ? profile : { ...EMPTY_PROFILE };
+    const safeProfile = profile || { ...EMPTY_PROFILE };
     persistBootstrap({
       stage: "signup",
       profile: safeProfile,
@@ -4162,7 +3924,7 @@ export default function VestraPrototype() {
       tab: tab || "home",
       step: Number.isFinite(step) ? step : 0,
       answers: answers || {
-        name: "", audience: null, lifestyle: null, archetype: null, fit: null, palette: [], avoid: [], budget: null, occasions: [], sizes: {},
+        name: "", lifestyle: null, archetype: null, fit: null, palette: [], avoid: [], budget: null, occasions: [], sizes: {},
       },
       messages: messages || [],
     });
@@ -4178,7 +3940,7 @@ export default function VestraPrototype() {
       tab: "home",
       step: 0,
       answers: answers || {
-        name: "", audience: null, lifestyle: null, archetype: null, fit: null, palette: [], avoid: [], budget: null, occasions: [], sizes: {},
+        name: "", lifestyle: null, archetype: null, fit: null, palette: [], avoid: [], budget: null, occasions: [], sizes: {},
       },
       messages: [],
     });
@@ -4200,7 +3962,7 @@ export default function VestraPrototype() {
     setStage("welcome");
     setStageHash("welcome");
     setStep(0);
-    setAnswers({ name: "", audience: null, lifestyle: null, archetype: null, fit: null, palette: [], avoid: [], budget: null, occasions: [], sizes: {} });
+    setAnswers({ name: "", lifestyle: null, archetype: null, fit: null, palette: [], avoid: [], budget: null, occasions: [], sizes: {} });
     setProfile({ ...EMPTY_PROFILE });
     setTab("home");
     setMessages([]);
@@ -4288,19 +4050,14 @@ export default function VestraPrototype() {
                   onSave={handleSave}
                   savedIds={savedIds}
                   pending={pending}
-                  modelGender={profile.modelGender || "woman"}
-                  onModelGenderChange={handleModelGenderChange}
                   favoriteStores={profile.favoriteStores || []}
                   palette={profile.palette || []}
                   avoid={profile.avoid || []}
-                  audience={profile.audience || null}
                 />
               )}
               {tab === "wardrobe" && (
                 <WardrobeScreen
                   savedOutfits={savedOutfits}
-                  modelGender={profile.modelGender || "woman"}
-                  onModelGenderChange={handleModelGenderChange}
                   favoriteStores={profile.favoriteStores || []}
                   palette={profile.palette || []}
                   avoid={profile.avoid || []}

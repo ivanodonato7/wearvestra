@@ -197,11 +197,6 @@
 .outfit-hero-figure.no-outer .hero-top{ grid-column:1; grid-row:1 / span 2; }
 .outfit-hero-figure.no-outer .hero-bottom{ grid-column:2; grid-row:1 / span 2; }
 .outfit-hero-figure.no-shoe .hero-acc{ grid-column:1 / -1; }
-.model-gender-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px; }
-.model-gender-label{ font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#8b877a; }
-.model-gender-switch{ display:flex; gap:4px; }
-.model-gender-pill{ font-size:10px; letter-spacing:0.04em; padding:5px 10px; border-radius:999px; border:1px solid #2a2a26; background:#151513; color:#8b877a; cursor:pointer; font-family:'Inter',sans-serif; }
-.model-gender-pill.active{ background:#C6A567; color:#0B0B0C; border-color:#C6A567; }
 .item-list{ flex:1; display:flex; flex-direction:column; gap:8px; min-width:0; }
 .item-row{ display:flex; align-items:center; gap:8px; background:#151513; border:1px solid #2a2a26; border-radius:4px; padding:6px; color:inherit; }
 .item-row:hover{ border-color:#C6A567; }

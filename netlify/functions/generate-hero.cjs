@@ -8,19 +8,17 @@
  *   { modelImage, garmentImage, category?, gender? }
  *
  * Batch mode (chains all garments server-side; may hit Netlify timeout):
- *   { garmentImages: string[], gender, baseUrl?, categories?: string[] }
+ *   { garmentImages: string[], gender?, baseUrl?, categories?: string[] }
  *
  * Returns: { image, source: "fashn", steps? }
+ * Men's-only: always uses the man base model.
  */
 const FASHN_BASE = "https://api.fashn.ai/v1";
 const POLL_MS = 2000;
 const MAX_POLLS = 20;
 const MAX_GARMENTS = 5;
 
-const BASE_MODELS = {
-  woman: "/models/model-woman-everyday.jpg",
-  man: "/models/model-man-everyday.jpg",
-};
+const BASE_MODEL = "/models/model-man-everyday.jpg";
 
 function corsHeaders() {
   return {
@@ -137,7 +135,7 @@ exports.handler = async (event) => {
     return { statusCode: 400, headers, body: JSON.stringify({ error: "Invalid JSON" }) };
   }
 
-  const gender = body.gender === "man" ? "man" : "woman";
+  const gender = "man";
   const baseUrl =
     body.baseUrl
     || process.env.URL
@@ -149,7 +147,7 @@ exports.handler = async (event) => {
     if (body.garmentImage) {
       const garmentImage = absoluteUrl(body.garmentImage, baseUrl);
       const modelImage = absoluteUrl(
-        body.modelImage || BASE_MODELS[gender],
+        body.modelImage || BASE_MODEL,
         baseUrl,
       );
       if (!garmentImage || !modelImage) {
@@ -187,7 +185,7 @@ exports.handler = async (event) => {
     }
 
     const categories = Array.isArray(body.categories) ? body.categories : [];
-    let modelImage = absoluteUrl(BASE_MODELS[gender], baseUrl);
+    let modelImage = absoluteUrl(BASE_MODEL, baseUrl);
     let steps = 0;
     const errors = [];
 

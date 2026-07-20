@@ -4,14 +4,6 @@
   "source": "bing_shopping",
   "products": [
     {
-      "title": "Thursday Boot Company Women's Duchess Chelsea Boot In Dark Brown Suede - Thursday Boots",
-      "price": "$160.00",
-      "merchant": "Thursdayboots",
-      "url": "https://thursdayboots.com/products/womens-duchess-chelsea-boot-dark-brown-suede?utm_source=bing&utm_medium=cse&utm_term=40099405365338",
-      "image": "https://th.bing.com/th?id=OPHS.m691%2bEro0sjTiw474C474&w=220&h=220&c=17&o=5&pid=21.1",
-      "availability": "In stock"
-    },
-    {
       "title": "Men's Cavalier Chelsea Boot In Dark Brown Suede - Thursday Boots By Thursday Boot Company",
       "price": "$199.00",
       "merchant": "Thursdayboots",
@@ -33,14 +25,6 @@
       "merchant": "Us",
       "url": "https://us.canali.com/dark-brown-suede-chelsea-boots-651236rb01348510/p?idsku=25774",
       "image": "https://th.bing.com/th?id=OPHS.xDWNTkeRcy6c%2bw474C474&w=220&h=220&c=17&o=5&pid=21.1",
-      "availability": "In stock"
-    },
-    {
-      "title": "Gianvito Rossi 70 Suede Chelsea Boots - Women - Dark Brown Boots - IT39",
-      "price": "$1,395.00",
-      "merchant": "Net-a-Porter",
-      "url": "https://www.net-a-porter.com/en-us/shop/product/gianvito-rossi/shoes/ankle/70-suede-chelsea-boots/46376663162900246",
-      "image": "https://th.bing.com/th/id/OPHS.CE8SfdaAFPzHDw474C474?w=220&h=220&c=17&o=5&pid=21.1",
       "availability": "In stock"
     },
     {

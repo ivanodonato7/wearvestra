@@ -4,14 +4,6 @@
   "source": "bing_shopping",
   "products": [
     {
-      "title": "Loewe Anagram Round-Frame Acetate Sunglasses - Women - White Sunglasses",
-      "price": "$440.00",
-      "merchant": "Net-a-Porter",
-      "url": "https://www.net-a-porter.com/en-us/shop/product/loewe-eyewear/accessories/round-frame/anagram-round-frame-acetate-sunglasses/46376663163051479",
-      "image": "https://th.bing.com/th?id=OPHS.Lzm%2bNyydioDGrA474C474&w=220&h=220&c=17&o=5&pid=21.1",
-      "availability": "In stock"
-    },
-    {
       "title": "Acetate Tortoiseshell Square Sunglasses In Brown",
       "price": "$435.00",
       "merchant": "Modesens",
@@ -25,14 +17,6 @@
       "merchant": "Stylight",
       "url": "https://www.stylight.com/redirect.action?productUuid=c377c3ac-46c4-518d-a7dc-2f2161823e10",
       "image": "https://th.bing.com/th?id=OPHS.q5XxR1exVs7%2fAA474C474&w=220&h=220&c=17&o=5&pid=21.1",
-      "availability": "In stock"
-    },
-    {
-      "title": "Tortoiseshell Sunglasses - Women - Acetate - 45 - Brown",
-      "price": "$349.00",
-      "merchant": "Stylight",
-      "url": "https://www.stylight.com/redirect.action?productUuid=c6c00174-1ddc-5734-a8e5-b8e1d1c5284b",
-      "image": "https://th.bing.com/th/id/OPHS.45Nl6Dj2tj1qAg474C474?w=220&h=220&c=17&o=5&pid=21.1",
       "availability": "In stock"
     },
     {
@@ -73,22 +57,6 @@
       "merchant": "Stylight",
       "url": "https://www.stylight.com/redirect.action?productUuid=ca2b207e-cf92-5030-a49b-8941323a7109",
       "image": "https://th.bing.com/th?id=OPHS.25GU3hgUQTEC%2fA474C474&w=220&h=220&c=17&o=5&pid=21.1",
-      "availability": "In stock"
-    },
-    {
-      "title": "Sa106 Womens Classic Mod Soft Cat Eye Plastic Sunglasses / Tortoise Frame - Brown Lens",
-      "price": "$13.95",
-      "merchant": "Walmart",
-      "url": "https://www.walmart.com/ip/Womens-Classic-Mod-Soft-Cat-Eye-Plastic-Sunglasses-Tortoise-Brown/1731271684?wmlspartner=wlpa&selectedSellerId=3505",
-      "image": "https://th.bing.com/th?id=OPHS.YXQ%2bzdSyVFcGqA474C474&w=220&h=220&c=17&o=5&pid=21.1",
-      "availability": "In stock"
-    },
-    {
-      "title": "Ray-Ban Womens Brown Rb4398 Erik Tortoiseshell Acetate Sunglasses",
-      "price": "$179.00",
-      "merchant": "Selfridges",
-      "url": "https://www.selfridges.com/US/en/product/rayban-rb4398-erik-tortoiseshell-acetate-sunglasses_R04150922/#colour=BROWN",
-      "image": "https://th.bing.com/th/id/OPHS.GQxx1uucOUSwwg474C474?w=220&h=220&c=17&o=5&pid=21.1",
       "availability": "In stock"
     },
     {

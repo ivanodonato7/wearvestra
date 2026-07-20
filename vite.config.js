@@ -14,7 +14,7 @@ export default defineConfig({
       manifest: {
         name: 'Vestra',
         short_name: 'Vestra',
-        description: 'Your AI stylist — streetwear to classy to sexy — outfits, wardrobe, and shopping.',
+        description: "Men's AI stylist — streetwear to classy to sexy — outfits, wardrobe, and shopping.",
         theme_color: '#F6F1E7',
         background_color: '#F6F1E7',
         display: 'standalone',

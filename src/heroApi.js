@@ -34,9 +34,8 @@ export function wearOrderKeys(itemKeys = []) {
   return ordered;
 }
 
-export function heroCacheKey(itemKeys, gender) {
-  const g = gender === "man" ? "man" : "woman";
-  return `${g}:${wearOrderKeys(itemKeys).join("|")}`;
+export function heroCacheKey(itemKeys, gender = "man") {
+  return `man:${wearOrderKeys(itemKeys).join("|")}`;
 }
 
 function loadHeroCache() {
@@ -127,16 +126,12 @@ async function postHeroStep(payload, signal) {
  * Chain FASHN try-on steps: each garment layers onto the previous model image.
  * @returns {Promise<string|null>} final image URL or data URL
  */
-export async function fetchHeroTryOn({ itemKeys, gender, catalog, signal }) {
+export async function fetchHeroTryOn({ itemKeys, catalog, signal }) {
   const ordered = wearOrderKeys(itemKeys);
   if (!ordered.length) return null;
 
   const origin = typeof window !== "undefined" ? window.location.origin : "https://wearvestra.com";
-  const g = gender === "man" ? "man" : "woman";
-  let modelImage = absoluteAssetUrl(
-    g === "man" ? "/models/model-man-everyday.jpg" : "/models/model-woman-everyday.jpg",
-    origin,
-  );
+  let modelImage = absoluteAssetUrl("/models/model-man-everyday.jpg", origin);
 
   let stepsOk = 0;
 
@@ -156,7 +151,7 @@ export async function fetchHeroTryOn({ itemKeys, gender, catalog, signal }) {
           modelImage,
           garmentImage,
           category: categoryForKey(key),
-          gender: g,
+          gender: "man",
           baseUrl: origin,
         },
         controller.signal,
