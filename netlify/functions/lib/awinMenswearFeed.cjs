@@ -35,16 +35,19 @@ const EXCLUDE_RE = /\b(baby|babies|infant|toddler|newborn|maternity|nursing|wome
 /** Positive menswear garment signal */
 const GARMENT_RE = /\b(suit|suits|blazer|sport\s*coat|jacket|shirts?|dress\s*shirt|oxford|polo|hoodie|sweater|knit|turtleneck|trouser|trousers|pants?|chino|jeans?|shoe|shoes|boot|boots|sneaker|sneakers|loafer|derby|outerwear|coat|overcoat|parka|athletic|activewear|gym|trainer|trainers|shorts?|gilet|waistcoat|vest)\b/i;
 
+/** Name-first family rules — most specific first. Avoid category-path poisoning. */
 const FAMILY_RULES = [
-  { family: "sunglasses", type: "accessory", re: /\b(sunglass|eyewear)\b/i },
+  { family: "sunglasses", type: "accessory", re: /\b(sunglass|eyeglasses?|eyewear)\b/i },
   { family: "scarf", type: "accessory", re: /\b(scarf|pocket\s*square)\b/i },
   { family: "belt", type: "accessory", re: /\b(belt)\b/i },
-  // Shirts before shoes — "oxford shirt" must not become footwear
-  { family: "shirt", type: "shirt", re: /\b(shirt|tee|t-shirt|polo|hoodie|sweater|knit|turtleneck|jumper|activewear|gym|athletic)\b/i },
-  { family: "trouser", type: "trouser", re: /\b(trouser|pant|chino|jean|short|cargo)\b/i },
-  { family: "blazer", type: "blazer", re: /\b(suit|blazer|sport\s*coat|suit\s*jacket)\b/i },
-  { family: "blazer", type: "blazer", re: /\b(coat|jacket|outerwear|parka|overcoat|gilet)\b/i },
-  { family: "shoe", type: "shoe", re: /\b(shoes?|boots?|sneakers?|loafer|derby|trainers?|footwear|oxford\s+shoes?)\b/i },
+  // Footwear BEFORE trousers — "dress shoe" / "short boots" must not become pants
+  { family: "shoe", type: "shoe", re: /\b(dress\s*shoes?|shoes?|boots?|sneakers?|loafer|derby|trainers?|footwear|oxfords?|wingtip|brogue|monk)\b/i },
+  { family: "trouser", type: "trouser", re: /\b(joggers?|sweatpants?|track\s*pants?|gym\s*shorts?|athletic\s*shorts?)\b/i },
+  { family: "trouser", type: "trouser", re: /\b(trousers?|chinos?|jeans?|pants?|cargos?)\b/i },
+  { family: "shirt", type: "shirt", re: /\b(hoodie|sweatshirt|t-?shirts?|tees?\b|polo|turtleneck|jumper|sweater|knit|henley|dress\s*shirts?|shirts?)\b/i },
+  { family: "blazer", type: "blazer", re: /\b(tuxedo|tux|suit|blazer|sport\s*coat|suit\s*jacket|dinner\s*jacket)\b/i },
+  { family: "blazer", type: "blazer", re: /\b(overcoat|peacoat|topcoat|parka|gilet|waistcoat|outerwear|jacket|coat)\b/i },
+  { family: "trouser", type: "trouser", re: /\bshorts\b/i },
 ];
 
 const DEFAULT_CAPS = {
@@ -86,7 +89,17 @@ function mapColors(text) {
   return { paletteTags: [...new Set(tags)].slice(0, 3), color: hex };
 }
 
-function inferFamily(blob) {
+function inferFamily(blob, nameFirst = "") {
+  // Prefer product name so merchant category paths cannot force jeans → shoe
+  const name = String(nameFirst || "");
+  if (name) {
+    for (const rule of FAMILY_RULES) {
+      if (!rule.re.test(name)) continue;
+      if (rule.family === "trouser" && /\bshort\s*sleeve\b/i.test(name) && !/\bshorts\b/i.test(name)) continue;
+      if (rule.family === "trouser" && /\bshort\b/i.test(name) && /\b(suit|blazer|coat)\b/i.test(name) && !/\bshorts\b/i.test(name)) continue;
+      return { family: rule.family, type: rule.type };
+    }
+  }
   for (const rule of FAMILY_RULES) {
     if (rule.re.test(blob)) return { family: rule.family, type: rule.type };
   }
@@ -157,15 +170,16 @@ function normalizeRow(row) {
   if (!isMenswearRow(row)) return null;
 
   const blob = [
+    name,
     fashionCell(row, "category"),
     cell(row, "category_name", "category", "merchant_category", "merchant_product_category_path"),
-    name,
     cell(row, "product_type", "fashion_product_type"),
     cell(row, "description", "product_short_description"),
     fashionCell(row, "suitable_for"),
     cell(row, "gender"),
   ].join(" ");
-  const meta = inferFamily(blob);
+  if (/\b(sock|socks|glove|gloves)\b/i.test(name)) return null;
+  const meta = inferFamily(blob, name);
   if (!meta) return null;
 
   const price = parsePrice(cell(row, "search_price", "store_price", "price", "display_price", "rrp_price", "base_price"));

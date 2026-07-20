@@ -4,39 +4,46 @@
  * Modes:
  *   looks (default): { outfits: [3], source: "claude" }
  *   week: { outfits: [5 Mon–Fri], shoppingList: [...], mode: "week", source: "claude" }
+ *
+ * Catalog may arrive as bare keys (legacy) or rich product cards with name /
+ * category / formality so the model can reason about occasion appropriateness
+ * against the real Awin feed (not fictional stub buckets).
  */
 const SYSTEM_LOOKS = `You are Vestra, a real-world men's fashion stylist for guys who may have NO style vocabulary.
-You dress men for any occasion — wedding, gym-adjacent casual, first date, job interview, work dinner, weekend, travel, night out — using ONLY the provided catalog keys.
+You dress men for any occasion — wedding, gym, first date, job interview, funeral, work dinner, weekend casual — using ONLY the provided catalog product keys.
 
 Return STRICT JSON:
-{"outfits":[{"option":1,"styleFamily":"classy","items":["blazerNavy","shirt","trouserNavy","shoeBlack","beltAlt"],"rationale":"...","silhouette":"layered-tailored-belt"},{"option":2,"styleFamily":"modern","items":[...],"rationale":"...","silhouette":"..."},{"option":3,"styleFamily":"relaxed","items":[...],"rationale":"...","silhouette":"..."}]}
+{"outfits":[{"option":1,"styleFamily":"classy","items":["aw-123","aw-456","aw-789","aw-012"],"rationale":"...","silhouette":"layered-tailored-belt"},{"option":2,"styleFamily":"modern","items":[...],"rationale":"...","silhouette":"..."},{"option":3,"styleFamily":"relaxed","items":[...],"rationale":"...","silhouette":"..."}]}
 
 How to think (in order):
-1. OCCASION / REQUEST FIRST — read the user's prompt. Infer formality (black-tie → gym-casual), silhouette (structured vs easy), and color mood (dark evening vs light daytime) from the REQUEST before using their Style DNA.
-2. If the prompt is vague ("help me look good tonight", "dress me"), assume a versatile evening-smart look and offer THREE DIFFERENT formality levels (e.g. polished / modern / relaxed), not three clones.
-3. Style DNA (archetype, fit, lifestyle, palette) is a LIGHT adjustment on top — nudge fabric ease, outerwear preference, and color bias. NEVER let DNA override a clear occasion (e.g. do not return quiet office looks for "wedding" or stiff tailoring for "gym" / "weekend nothing fussy").
-4. Color theory: prefer harmony with their palette when it fits the occasion; still vary lightness/contrast across the 3 options. Never use olive/green unless those colors are in their palette.
-5. Body/fit basics: honor fitted vs relaxed vs oversized as a soft preference, not a uniform.
+1. OCCASION / FORMALITY FIRST — read the user's prompt AND each product's name, category, and formality score (0=active → 100=black-tie). Infer what is appropriate BEFORE Style DNA.
+2. HARD RULES (never break these):
+   - Wedding / funeral / black-tie: ONLY tailored / dress pieces (suits, blazers, dress shirts, dress trousers, dress shoes). NEVER cargo pants, joggers, gym shorts, hoodies, sneakers, ripped denim.
+   - Gym / workout / athletic: ONLY active or athleisure (hoodies, joggers, tees, shorts, trainers). NEVER blazers, suits, dress shoes, loafers.
+   - Job interview / office: smart / business (blazer or sharp shirt + chinos/trousers + dress shoes). No cargo, gym, or street-hype pieces.
+   - First date / dinner: smart-evening (polished but not black-tie). No gym gear or cargo.
+   - Weekend casual: easy everyday. No tuxedo / black-tie.
+3. Prefer products whose formalityBand / formality number sits in the formalityTarget window when provided.
+4. Style DNA is a LIGHT nudge only — never override a clear occasion.
+5. Color theory: prefer harmony with their palette; never force olive/green unless in palette.
 
 Variety rules:
 - Exactly 3 outfits with THREE DIFFERENT styleFamily values when the user did NOT name one mood.
-- If they named a mood (streetwear, classy, sexy, modern, edgy…), keep ALL 3 in that mood but vary silhouette strings (outer on/off, trouser ease, accessory family).
+- If they named a mood, keep ALL 3 in that mood but vary silhouette.
 - Never repeat the same item combination or silhouette across the 3 options.
-- If avoidRecentItems / avoidSilhouettes are provided, do NOT reuse those catalog keys or silhouette strings unless the user is refining the same look.
-- Each items array: ONLY catalog keys; at most one key per garment family (blazer*, shirt*, trouser*, shoe*, one accessory).
-- Rationale: 1–2 plain sentences naming occasion + formality. NEVER write catalog keys like shirtAlt.
+- Each items array: ONLY catalog keys from the provided list; at most one key per garment family (blazer, shirt, trouser, shoe, one accessory).
+- Rationale: 1–2 plain sentences naming occasion + formality. NEVER write raw catalog keys.
 - No markdown outside JSON.`;
 
 const SYSTEM_WEEK = `You are Vestra, building a men's Mon–Fri wardrobe plan with real range (classy, modern, relaxed, sexy Friday, etc.).
-You ONLY use the provided catalog keys.
+You ONLY use the provided catalog product keys. Respect each product's name/category/formality — never put cargo pants on a formal day or blazers on an active day.
 Return STRICT JSON:
-{"outfits":[{"day":"Monday","option":1,"styleFamily":"classy","items":["blazerNavy","shirt","trouserNavy","shoeBlack","beltAlt"],"rationale":"...","silhouette":"layered-tailored-belt"},{"day":"Tuesday","option":2,"items":[...],"rationale":"...","silhouette":"..."},{"day":"Wednesday","option":3,"items":[...],"rationale":"...","silhouette":"..."},{"day":"Thursday","option":4,"items":[...],"rationale":"...","silhouette":"..."},{"day":"Friday","option":5,"items":[...],"rationale":"...","silhouette":"..."}],"shoppingList":[{"key":"blazerNavy","reason":"Anchors Mon/Thu tailored days"}]}
+{"outfits":[{"day":"Monday","option":1,"styleFamily":"classy","items":["aw-1","aw-2","aw-3","aw-4"],"rationale":"...","silhouette":"layered-tailored-belt"},{"day":"Tuesday","option":2,"items":[...],"rationale":"...","silhouette":"..."},{"day":"Wednesday","option":3,"items":[...],"rationale":"...","silhouette":"..."},{"day":"Thursday","option":4,"items":[...],"rationale":"...","silhouette":"..."},{"day":"Friday","option":5,"items":[...],"rationale":"...","silhouette":"..."}],"shoppingList":[{"key":"aw-1","reason":"Anchors Mon/Thu tailored days"}]}
 Rules:
 - Exactly 5 outfits — Monday through Friday.
-- Each day needs a DISTINCT silhouette string (outer vs open + tailored/structured/relaxed + accessory family).
+- Each day needs a DISTINCT silhouette string.
 - Rotate styleFamily across the week.
 - Request text and workweek formality drive the plan; Style DNA is a light nudge only.
-- If avoidRecentItems are provided, minimize reusing those keys.
 - Catalog keys only; one key per garment family per look.
 - shoppingList: unique keys used across the week with short reasons.
 - Rationale: plain garment words, never catalog keys.
@@ -60,23 +67,68 @@ const WEEK_DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 function silhouetteOf(items) {
   const fam = (k) => {
     const s = String(k || "");
-    if (s.startsWith("blazer")) return "blazer";
-    if (s.startsWith("shirt")) return "shirt";
-    if (s.startsWith("trouser")) return "trouser";
-    if (s.startsWith("shoe")) return "shoe";
+    if (s.startsWith("blazer") || s.includes("blazer")) return "blazer";
+    if (s.startsWith("shirt") || s.includes("shirt")) return "shirt";
+    if (s.startsWith("trouser") || s.includes("trouser")) return "trouser";
+    if (s.startsWith("shoe") || s.includes("shoe")) return "shoe";
     if (s.startsWith("belt")) return "belt";
     if (s.startsWith("scarf")) return "scarf";
     if (s.startsWith("sunglasses")) return "sunglasses";
+    if (/^aw-/i.test(s) || /^ss-/i.test(s)) return "live";
     return null;
   };
   const families = items.map(fam).filter(Boolean);
   const hasOuter = families.includes("blazer");
   const acc = families.find((f) => ["belt", "scarf", "sunglasses"].includes(f)) || "none";
-  const trouser = items.find((k) => fam(k) === "trouser") || "";
-  const shirt = items.find((k) => fam(k) === "shirt") || "";
-  const bottom = String(trouser).includes("Alt") ? "ease" : "straight";
-  const top = String(shirt).includes("Alt") ? "soft" : "crisp";
-  return `${hasOuter ? "layered" : "open"}-${top}-${bottom}-${acc}`;
+  return `${hasOuter ? "layered" : "open"}-${families.join("-") || "mix"}-${acc}`;
+}
+
+function formatCatalogForPrompt(catalogKeys, catalogItems) {
+  if (Array.isArray(catalogItems) && catalogItems.length) {
+    return catalogItems.map((i) => {
+      const parts = [
+        i.key,
+        i.name ? `"${String(i.name).slice(0, 80)}"` : null,
+        i.family ? `family=${i.family}` : null,
+        i.category ? `cat=${String(i.category).slice(0, 40)}` : null,
+        i.brand ? `brand=${i.brand}` : null,
+        Number.isFinite(i.formality) ? `formality=${i.formality}` : null,
+        i.formalityBand ? `band=${i.formalityBand}` : null,
+      ].filter(Boolean);
+      return `- ${parts.join(" | ")}`;
+    }).join("\n");
+  }
+  return (catalogKeys || []).join(", ");
+}
+
+/** Server-side hard filter when formalityTarget + catalogItems are available. */
+function itemBlockedByTarget(item, target) {
+  if (!item || !target) return false;
+  const blob = [item.name, item.category, item.family, item.brand].filter(Boolean).join(" ");
+  if (target.hardBan && new RegExp(target.hardBan.source || target.hardBan, target.hardBan.flags || "i").test(blob)) {
+    return true;
+  }
+  // Serialized regex from JSON arrives as {source, flags} or plain string
+  if (typeof target.hardBan === "string" && target.hardBan) {
+    try {
+      if (new RegExp(target.hardBan, "i").test(blob)) return true;
+    } catch { /* ignore */ }
+  }
+  if (target.forbidOuter && item.family === "blazer") return true;
+  if (Number.isFinite(item.formality) && Number.isFinite(target.min) && Number.isFinite(target.max)) {
+    if (item.formality < target.min - 10 || item.formality > target.max + 10) return true;
+  }
+  return false;
+}
+
+function serializeTarget(target) {
+  if (!target) return null;
+  return {
+    ...target,
+    hardBan: target.hardBan instanceof RegExp
+      ? target.hardBan.source
+      : (typeof target.hardBan === "string" ? target.hardBan : null),
+  };
 }
 
 exports.handler = async (event) => {
@@ -109,13 +161,21 @@ exports.handler = async (event) => {
     profile = {},
     lang = "en",
     catalogKeys = [],
+    catalogItems = [],
+    formalityTarget = null,
     avoidRecentItems = [],
     avoidSilhouettes = [],
   } = body;
-  if (!prompt || !catalogKeys.length) {
-    return { statusCode: 400, headers, body: JSON.stringify({ error: "prompt and catalogKeys required" }) };
+
+  const keys = catalogKeys.length
+    ? catalogKeys
+    : (catalogItems || []).map((i) => i.key).filter(Boolean);
+  if (!prompt || !keys.length) {
+    return { statusCode: 400, headers, body: JSON.stringify({ error: "prompt and catalogKeys/catalogItems required" }) };
   }
 
+  const byKey = new Map((catalogItems || []).map((i) => [i.key, i]));
+  const target = serializeTarget(formalityTarget);
   const week = isWeekMode(body);
   const system = week ? SYSTEM_WEEK : SYSTEM_LOOKS;
   const avoidBlock = [
@@ -123,19 +183,28 @@ exports.handler = async (event) => {
     avoidSilhouettes?.length ? `Avoid these silhouette strings: ${avoidSilhouettes.join(", ")}` : "",
   ].filter(Boolean).join("\n");
 
+  const catalogBlock = formatCatalogForPrompt(keys, catalogItems);
+  const targetBlock = target
+    ? `Formality target for this request: label=${target.label}, prefer≈${target.prefer}, window ${target.min}-${target.max}. hardBan pattern: ${target.hardBan || "none"}. requireOuter=${!!target.requireOuter}, forbidOuter=${!!target.forbidOuter}. REJECT any product that matches hardBan or sits far outside the window.`
+    : "";
+
   const userMsg = week
     ? `Language: ${lang}
 User prompt (OCCASION FIRST): ${prompt}
 Style DNA profile (light adjustment only): ${JSON.stringify(profile)}
-Catalog keys (use only these): ${catalogKeys.join(", ")}
+${targetBlock}
+Catalog products (use ONLY these keys — reason from name/category/formality):
+${catalogBlock}
 ${avoidBlock}
 Return a Mon–Fri week wardrobe plan: exactly 5 outfits with distinct silhouettes, plus one shoppingList, as JSON.`
     : `Language: ${lang}
 User prompt (OCCASION / REQUEST FIRST — this drives formality & silhouette): ${prompt}
 Style DNA profile (light adjustment only — do not let it override the request): ${JSON.stringify(profile)}
-Catalog keys (use only these): ${catalogKeys.join(", ")}
+${targetBlock}
+Catalog products (use ONLY these keys — reason from name/category/formality):
+${catalogBlock}
 ${avoidBlock}
-Reason like a stylist for someone who may not know how to dress. Return 3 varied outfits as JSON.`;
+Reason like a stylist. Wedding ≠ cargo. Gym ≠ blazer. Return 3 varied outfits as JSON.`;
 
   try {
     const res = await fetch("https://api.anthropic.com/v1/messages", {
@@ -164,15 +233,19 @@ Reason like a stylist for someone who may not know how to dress. Return 3 varied
       return { statusCode: 502, headers, body: JSON.stringify({ error: "No JSON in model response" }) };
     }
     const parsed = JSON.parse(text.slice(jsonStart, jsonEnd + 1));
-    const allowed = new Set(catalogKeys);
+    const allowed = new Set(keys);
     const want = week ? 5 : 3;
     const avoidSil = new Set(avoidSilhouettes || []);
     const avoidItems = new Set(avoidRecentItems || []);
 
-    // Validate the FULL model list first (don't slice before filter — that drops valid extras)
     const mapped = (parsed.outfits || [])
       .map((o, i) => {
-        const items = (o.items || []).filter((k) => allowed.has(k));
+        const items = (o.items || []).filter((k) => {
+          if (!allowed.has(k)) return false;
+          const meta = byKey.get(k);
+          if (meta && target && itemBlockedByTarget(meta, formalityTarget || target)) return false;
+          return true;
+        });
         const silhouette = o.silhouette || silhouetteOf(items);
         const recentHits = items.reduce((n, k) => n + (avoidItems.has(k) ? 1 : 0), 0);
         return {
@@ -201,7 +274,6 @@ Reason like a stylist for someone who may not know how to dress. Return 3 varied
       return out;
     };
 
-    // Prefer silhouettes / items not in the recent-avoid lists; fall back only if needed
     const fresh = mapped
       .filter((o) => !o.avoidedSil && o.recentHits === 0)
       .sort((a, b) => a.recentHits - b.recentHits);

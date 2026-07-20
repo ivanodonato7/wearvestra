@@ -50,6 +50,8 @@ export async function fetchStylistLooks({
   profile,
   lang = "en",
   catalogKeys = [],
+  catalogItems = [],
+  formalityTarget = null,
   mode,
   avoidRecentItems = [],
   avoidSilhouettes = [],
@@ -58,11 +60,16 @@ export async function fetchStylistLooks({
   const timeoutMs = resolvedMode === "week" ? 22000 : 14000;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
+  const keys = catalogKeys.length
+    ? catalogKeys
+    : (catalogItems || []).map((i) => i.key).filter(Boolean);
   const payload = {
     prompt,
     profile,
     lang,
-    catalogKeys,
+    catalogKeys: keys,
+    catalogItems: Array.isArray(catalogItems) ? catalogItems.slice(0, 200) : [],
+    formalityTarget,
     mode: resolvedMode,
     avoidRecentItems: [...new Set(avoidRecentItems || [])].slice(0, 40),
     avoidSilhouettes: [...new Set(avoidSilhouettes || [])].slice(0, 20),

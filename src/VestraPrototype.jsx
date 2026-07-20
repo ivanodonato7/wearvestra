@@ -2,8 +2,23 @@ import React, { useState, useRef, useEffect, useCallback, useMemo, memo, createC
 import { Home, MessageCircle, Bookmark, ShoppingBag, User, Send, RefreshCw, Check, Sparkles, ArrowLeft, ExternalLink, X } from "lucide-react";
 import { fetchStylistLooks, isWeekPlanPrompt } from "./stylistApi";
 import { clearHeroCache } from "./heroApi";
-import { CATALOG, ITEM_FAMILY_VARIANTS } from "./catalogStore";
+import {
+  CATALOG,
+  ITEM_FAMILY_VARIANTS,
+  catalogSource,
+  pickLiveForFamily,
+  occasionFormalityTarget,
+  liveCatalogItems,
+  itemFitsOccasion,
+} from "./catalogStore";
 import { ensureProductCatalog } from "./productCatalogApi";
+import { formalityScore } from "./formality";
+import {
+  detectOccasions as detectOccasionsShared,
+  remapOutfitItemsToLive as remapOutfitItemsToLiveShared,
+  sanitizeOutfitForOccasion as sanitizeOutfitForOccasionShared,
+  catalogPayloadForStylist as catalogPayloadForStylistShared,
+} from "./occasionPipeline";
 
 // ==================== LANGUAGE / i18n ====================
 // A real backend barely needs any of this — Claude already answers fluently
@@ -669,6 +684,10 @@ function styleGenreEntry(styleFamily, garmentFamily) {
 /** Overlay genre labels onto a catalog stub for display and shopping. */
 function styleAwareItem(item, styleFamily) {
   if (!item) return item;
+  // Real Awin products keep their real names — never rewrite to "Baggy Cargo Pants"
+  if (item.source === "awin" || item.shopUrl || /^(aw|ss)-/i.test(item.key)) {
+    return { ...item, styleFamily };
+  }
   const garmentFam = familyOfKey(item.key) || (item.type !== "accessory" ? item.type : null);
   const g = styleGenreEntry(styleFamily, garmentFam);
   if (!g) return { ...item, styleFamily };
@@ -685,6 +704,7 @@ function styleAwareItem(item, styleFamily) {
 /** Resolve the item row the user sees for the current style (men's catalog). */
 function displayCatalogItem(item, styleFamily = null) {
   if (!item) return item;
+  if (item.source === "awin" || item.shopUrl) return { ...item, styleFamily: styleFamily || item.styleFamily };
   if (styleFamily) return styleAwareItem(item, styleFamily);
   const fam = familyOfKey(item.key) || (item.type !== "accessory" ? item.type : null);
   const label = fam && CATALOG_DISPLAY_LABELS[fam];
@@ -1050,28 +1070,9 @@ function variantsForKey(key) {
   return fam ? (ITEM_FAMILY_VARIANTS[fam] || [key]) : [key];
 }
 
-/** Cap keys sent to Claude — stubs first, then a sample of live aw-/ss-* products. */
-function catalogKeysForStylist(maxLive = 180) {
-  const all = Object.keys(CATALOG);
-  const stubs = all.filter((k) => !/^(aw|ss)-/i.test(String(k)));
-  const live = all.filter((k) => /^(aw|ss)-/i.test(String(k)));
-  if (live.length <= maxLive) return all;
-  // Round-robin by family so Claude sees blazers, shirts, trousers, etc.
-  const byFam = {};
-  for (const k of live) {
-    const fam = familyOfKey(k) || "other";
-    if (!byFam[fam]) byFam[fam] = [];
-    byFam[fam].push(k);
-  }
-  const picked = [];
-  const fams = Object.keys(byFam);
-  let i = 0;
-  while (picked.length < maxLive && fams.some((f) => byFam[f].length)) {
-    const fam = fams[i % fams.length];
-    if (byFam[fam].length) picked.push(byFam[fam].shift());
-    i += 1;
-  }
-  return [...stubs, ...picked];
+/** Build Claude catalog payload — real product cards biased to occasion formality. */
+function catalogPayloadForStylist(prompt = "", maxLive = 160) {
+  return catalogPayloadForStylistShared(prompt, maxLive);
 }
 
 /** Best catalog variant for a family given the user's palette. */
@@ -1526,10 +1527,11 @@ const OUTFIT_RECIPES = [
 
 const OCCASION_KEYWORDS = [
   { id: "wedding", keys: ["wedding", "formal", "gala", "black tie", "ceremony", "boda", "mariage", "formel"] },
-  { id: "dinner", keys: ["dinner", "date night", "evening", "restaurant", "cena", "dîner", "soirée", "rendez-vous"] },
-  { id: "work", keys: ["work", "office", "meeting", "client", "interview", "trabajo", "bureau", "réunion"] },
+  { id: "funeral", keys: ["funeral", "memorial", "wake", "mourning", "bereavement", "entierro", "funérailles"] },
+  { id: "dinner", keys: ["dinner", "date night", "first date", "evening", "restaurant", "cena", "dîner", "soirée", "rendez-vous"] },
+  { id: "work", keys: ["work", "office", "meeting", "client", "interview", "job interview", "trabajo", "bureau", "réunion"] },
   { id: "travel", keys: ["travel", "airport", "trip", "flight", "viaje", "voyage", "avion"] },
-  { id: "weekend", keys: ["weekend", "casual", "brunch", "fin de semana", "week-end"] },
+  { id: "weekend", keys: ["weekend", "casual", "brunch", "weekend casual", "fin de semana", "week-end"] },
   { id: "event", keys: ["event", "party", "celebration", "cocktail", "evento", "fête"] },
   { id: "everyday", keys: ["everyday", "daily", "nothing fussy", "diario", "quotidien"] },
   { id: "street", keys: ["streetwear", "street", "urban", "hype", "sneaker", "urbano"] },
@@ -1553,18 +1555,7 @@ const STYLE_MOOD_KEYWORDS = [
 ];
 
 function detectOccasions(text) {
-  const lower = (text || "").toLowerCase();
-  const hits = [];
-  for (const row of OCCASION_KEYWORDS) {
-    if (row.keys.some((k) => {
-      // Prefer word-boundary-ish match for short keys that substrings poison
-      if (k.length <= 4) {
-        return new RegExp(`(?:^|[^a-z])${k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?:[^a-z]|$)`).test(lower);
-      }
-      return lower.includes(k);
-    })) hits.push(row.id);
-  }
-  return hits;
+  return detectOccasionsShared(text);
 }
 
 function detectStyleMoods(text) {
@@ -1696,6 +1687,14 @@ function fitSignals(fit) {
 
 function recipeItems(recipe) {
   return [recipe.outer, recipe.top, recipe.bottom, recipe.shoe, recipe.acc].filter(Boolean);
+}
+
+function remapOutfitItemsToLive(itemKeys, prompt, occasions, profile = {}) {
+  return remapOutfitItemsToLiveShared(itemKeys, prompt, occasions, profile);
+}
+
+function sanitizeOutfitForOccasion(outfit, prompt, occasions, profile = {}) {
+  return sanitizeOutfitForOccasionShared(outfit, prompt, occasions, profile);
 }
 
 /** Pick the best color variant per family using palette first, then fit + style mood.
@@ -1938,20 +1937,24 @@ function composeOutfits(prompt, profile, lang = "en", count = 3) {
     if (promptOccasions.includes("weekend") || promptOccasions.includes("everyday") || promptOccasions.includes("street") || promptOccasions.includes("active") || styleMoods.includes("streetwear")) {
       if ((recipe.occasions || []).includes("wedding") || (recipe.occasions || []).includes("formal")) score -= 28;
     }
-    if (promptOccasions.includes("wedding") || promptOccasions.includes("event")) {
-      if ((recipe.occasions || []).some((o) => ["wedding", "event", "formal", "celebration"].includes(o))) score += 18;
-      if (!hasOuter && recipe.styleFamily !== "sexy" && recipe.styleFamily !== "romantic") score -= 10;
+    if (promptOccasions.includes("wedding") || promptOccasions.includes("event") || promptOccasions.includes("funeral")) {
+      if ((recipe.occasions || []).some((o) => ["wedding", "event", "formal", "celebration", "dinner"].includes(o))) score += 22;
+      if (recipe.styleFamily === "classy" || recipe.styleFamily === "romantic") score += 12;
+      if (!hasOuter && recipe.styleFamily !== "sexy") score -= 14;
+      if (recipe.styleFamily === "streetwear" || recipe.structure === "relaxed" && promptOccasions.includes("funeral")) score -= 20;
     }
     if (promptOccasions.includes("active")) {
-      if (recipe.styleFamily === "streetwear" || recipe.structure === "relaxed") score += 30;
-      if (hasOuter && recipe.styleFamily === "classy") score -= 22;
+      if (recipe.styleFamily === "streetwear" || recipe.structure === "relaxed") score += 36;
+      if (hasOuter || recipe.styleFamily === "classy") score -= 30;
+      if ((recipe.occasions || []).includes("wedding") || (recipe.occasions || []).includes("formal")) score -= 40;
     }
     if (promptOccasions.includes("sexy") || styleMoods.includes("sexy")) {
       if ((recipe.vibe || []).includes("sexy") || recipe.styleFamily === "sexy") score += 24;
     }
     if (promptOccasions.includes("work") && !promptOccasions.includes("dinner")) {
-      if ((recipe.occasions || []).includes("work") || recipe.styleFamily === "classy" || recipe.styleFamily === "modern") score += 16;
-      if (recipe.styleFamily === "sexy" || recipe.styleFamily === "streetwear") score -= 12;
+      if ((recipe.occasions || []).includes("work") || recipe.styleFamily === "classy" || recipe.styleFamily === "modern") score += 20;
+      if (recipe.styleFamily === "sexy" || recipe.styleFamily === "streetwear") score -= 16;
+      if ((recipe.occasions || []).includes("active") || (recipe.occasions || []).includes("casual")) score -= 12;
     }
     if (promptOccasions.includes("dinner") || promptOccasions.includes("work")) {
       if ((recipe.occasions || []).includes("dinner") || (recipe.occasions || []).includes("work") || (recipe.occasions || []).includes("evening")) score += 14;
@@ -1999,27 +2002,35 @@ function composeOutfits(prompt, profile, lang = "en", count = 3) {
     const fam = row.styleFamily || row.recipe.styleFamily || "modern";
     if (mode === "newFamily" && usedFamilies.has(fam) && usedFamilies.size < count) return false;
     if (mode === "sameMood" && primaryMood && fam !== primaryMood && !styleMoods.includes(fam)) return false;
-    const sig = outfitSignature(row.items);
-    const core = row.items.filter((k) => !ACCESSORY_KEYS.has(k)).join("+");
+    const remapped = remapOutfitItemsToLive(row.items, prompt, promptOccasions, profile);
+    const sanitized = sanitizeOutfitForOccasion(
+      {
+        id: `${row.recipe.id}-${stylistTurn}-${picked.length}`,
+        option: picked.length + 1,
+        items: remapped.length ? remapped : row.items,
+        rationale: buildRationale(row.recipe, occasions, lang, profile),
+        recipeId: row.recipe.id,
+        styleFamily: fam,
+        occasion: resolveHeroOccasionSlug({
+          styleFamily: fam,
+          occasions: promptOccasions,
+          prompt,
+        }),
+        score: row.score,
+      },
+      prompt,
+      promptOccasions,
+      profile,
+    );
+    if (!sanitized?.items?.length) return false;
+    const sig = outfitSignature(sanitized.items);
+    const core = sanitized.items.filter((k) => !ACCESSORY_KEYS.has(k)).join("+");
     if (usedSigs.has(sig) || usedSigs.has(`core:${core}`) || usedRecipeIds.has(row.recipe.id)) return false;
     usedSigs.add(sig);
     usedSigs.add(`core:${core}`);
     usedRecipeIds.add(row.recipe.id);
     usedFamilies.add(fam);
-    picked.push({
-      id: `${row.recipe.id}-${stylistTurn}-${picked.length}`,
-      option: picked.length + 1,
-      items: row.items,
-      rationale: buildRationale(row.recipe, occasions, lang, profile),
-      recipeId: row.recipe.id,
-      styleFamily: fam,
-      occasion: resolveHeroOccasionSlug({
-        styleFamily: fam,
-        occasions: promptOccasions,
-        prompt,
-      }),
-      score: row.score,
-    });
+    picked.push(sanitized);
     return true;
   };
 
@@ -2039,16 +2050,32 @@ function composeOutfits(prompt, profile, lang = "en", count = 3) {
     tryTake(row, "any");
   }
 
-  while (picked.length < count && scored[picked.length]) {
-    const row = scored[picked.length];
-    picked.push({
-      id: `${row.recipe.id}-fill-${picked.length}`,
-      option: picked.length + 1,
-      items: [...row.items],
-      rationale: buildRationale(row.recipe, occasions, lang, profile),
-      recipeId: row.recipe.id,
-      styleFamily: row.styleFamily,
-    });
+  for (const row of scored) {
+    if (picked.length >= count) break;
+    const remapped = remapOutfitItemsToLive(row.items, prompt, promptOccasions, profile);
+    const sanitized = sanitizeOutfitForOccasion(
+      {
+        id: `${row.recipe.id}-fill-${picked.length}`,
+        option: picked.length + 1,
+        items: remapped.length ? remapped : row.items,
+        rationale: buildRationale(row.recipe, occasions, lang, profile),
+        recipeId: row.recipe.id,
+        styleFamily: row.styleFamily,
+        occasion: resolveHeroOccasionSlug({
+          styleFamily: row.styleFamily,
+          occasions: promptOccasions,
+          prompt,
+        }),
+      },
+      prompt,
+      promptOccasions,
+      profile,
+    );
+    if (!sanitized?.items?.length) continue;
+    const sig = outfitSignature(sanitized.items);
+    if (usedSigs.has(sig)) continue;
+    usedSigs.add(sig);
+    picked.push(sanitized);
   }
   return picked;
 }
@@ -2164,21 +2191,29 @@ function composeWeekPlan(prompt, profile, lang = "en") {
     usedRecipeIds.add(row.recipe.id);
     usedFamilies.add(fam);
     const dayIndex = picked.length;
-    picked.push({
-      id: `week-${row.recipe.id}-${stylistTurn}-${dayIndex}`,
-      option: dayIndex + 1,
-      day: dayLabels[dayIndex] || `Day ${dayIndex + 1}`,
-      items: row.items,
-      rationale: buildRationale(row.recipe, occasions, lang, profile),
-      recipeId: row.recipe.id,
-      silhouette: tunedSil,
-      styleFamily: fam,
-      occasion: resolveHeroOccasionSlug({
+    const remapped = remapOutfitItemsToLive(row.items, workPrompt, promptOccasions, profile);
+    const sanitized = sanitizeOutfitForOccasion(
+      {
+        id: `week-${row.recipe.id}-${stylistTurn}-${dayIndex}`,
+        option: dayIndex + 1,
+        day: dayLabels[dayIndex] || `Day ${dayIndex + 1}`,
+        items: remapped.length ? remapped : row.items,
+        rationale: buildRationale(row.recipe, occasions, lang, profile),
+        recipeId: row.recipe.id,
+        silhouette: tunedSil,
         styleFamily: fam,
-        occasions: dayIndex === 4 ? ["dinner", "sexy"] : promptOccasions,
-        prompt: workPrompt,
-      }),
-    });
+        occasion: resolveHeroOccasionSlug({
+          styleFamily: fam,
+          occasions: dayIndex === 4 ? ["dinner", "sexy"] : promptOccasions,
+          prompt: workPrompt,
+        }),
+      },
+      workPrompt,
+      promptOccasions,
+      profile,
+    );
+    if (!sanitized?.items?.length) continue;
+    picked.push(sanitized);
     if (picked.length >= 5) break;
   }
 
@@ -3853,21 +3888,24 @@ export default function VestraPrototype() {
     await ensureProductCatalog();
 
     // Try live Claude stylist (Netlify function / custom endpoint), else local composer
+    const promptOccasions = detectOccasions(finalText);
+    const { catalogKeys, catalogItems, formalityTarget } = catalogPayloadForStylist(finalText);
     const live = await fetchStylistLooks({
       prompt: finalText,
       profile: activeProfile,
       lang,
-      catalogKeys: catalogKeysForStylist(),
+      catalogKeys,
+      catalogItems,
+      formalityTarget,
       mode: weekPlan ? "week" : "looks",
     });
     if (live?.outfits?.length) {
       const dayLabels = WEEK_DAY_KEYS.map((k) => (UI[lang] && UI[lang][k]) || UI.en[k]);
       const isWeek = weekPlan || live.mode === "week";
-      const promptOccasions = detectOccasions(finalText);
       const outfits = live.outfits.map((o, i) => {
         // Prefer Claude's styleFamily; only fall back to prompt mood when model omitted it
         const styleFamily = o.styleFamily || primaryMood || undefined;
-        return {
+        const raw = {
           ...o,
           option: o.option || i + 1,
           day: isWeek ? (o.day || dayLabels[i]) : o.day,
@@ -3880,6 +3918,10 @@ export default function VestraPrototype() {
             occasions: isWeek && i === 4 ? ["dinner"] : promptOccasions,
             prompt: finalText,
           }),
+        };
+        return sanitizeOutfitForOccasion(raw, finalText, promptOccasions, activeProfile) || {
+          ...raw,
+          items: remapOutfitItemsToLive(raw.items, finalText, promptOccasions, activeProfile),
         };
       }).filter((o) => o.items.length >= 3);
       if (outfits.length) {
