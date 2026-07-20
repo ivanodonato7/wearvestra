@@ -108,7 +108,7 @@ exports.handler = async (event) => {
     };
   }
 
-  const items = loadStaticCatalog();
+  const items = await loadStaticCatalog(event);
   if (!items.length) {
     return {
       statusCode: 500,
