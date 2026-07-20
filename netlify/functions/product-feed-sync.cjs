@@ -26,7 +26,7 @@ exports.handler = async (event) => {
     return { statusCode: 204, headers, body: "" };
   }
 
-  const [status, cache] = await Promise.all([readSyncStatus(), readMenswearCache()]);
+  const [status, cache] = await Promise.all([readSyncStatus(event), readMenswearCache(event)]);
   const body = {
     feedConfigured: Boolean(resolveFeedUrl()),
     sync: status || null,
@@ -40,8 +40,6 @@ exports.handler = async (event) => {
     trigger: "POST /api/product-feed-sync (background) — returns 202, then poll this GET or /api/product-search",
   };
 
-  // POST on the non-background name: tell client to use background endpoint.
-  // (netlify.toml redirects /api/product-feed-sync → background, so this rarely runs in prod.)
   if (event.httpMethod === "POST") {
     return {
       statusCode: 200,

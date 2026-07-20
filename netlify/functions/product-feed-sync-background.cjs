@@ -6,6 +6,8 @@
  *
  * Trigger: POST /api/product-feed-sync  (redirect → this function)
  * Schedule: daily 07:00 UTC
+ *
+ * IMPORTANT: must call connectLambda(event) via write/read helpers so Blobs work.
  */
 const {
   streamMenswearFromFeedUrl,
@@ -22,7 +24,7 @@ function authorized(event) {
   return hdr === secret;
 }
 
-async function runSync() {
+async function runSync(event) {
   const feedUrl = resolveFeedUrl();
   if (!feedUrl) {
     return {
@@ -42,7 +44,7 @@ async function runSync() {
   await writeSyncStatus({
     status: "running",
     startedAt: new Date().toISOString(),
-  });
+  }, event);
 
   const maxTotal = Math.min(Math.max(Number(process.env.AWIN_MAX_PRODUCTS || 4000), 100), 8000);
   const { items, meta } = await streamMenswearFromFeedUrl(feedUrl, {
@@ -58,11 +60,11 @@ async function runSync() {
       message: "Feed downloaded but no menswear rows matched filters.",
       finishedAt: new Date().toISOString(),
     };
-    await writeSyncStatus({ status: "failed", ...result });
+    await writeSyncStatus({ status: "failed", ...result }, event);
     return result;
   }
 
-  const stored = await writeMenswearCache({ items, meta });
+  const stored = await writeMenswearCache({ items, meta }, event);
   const result = {
     ok: true,
     source: "awin",
@@ -71,23 +73,23 @@ async function runSync() {
     stored,
     finishedAt: new Date().toISOString(),
   };
-  await writeSyncStatus({ status: "ok", ...result });
+  await writeSyncStatus({ status: "ok", ...result }, event);
   return result;
 }
 
 exports.handler = async (event) => {
-  // Background functions still receive the event; auth gate for manual POSTs
   if (event.httpMethod === "OPTIONS") return;
   if (event.httpMethod && event.httpMethod !== "POST" && event.httpMethod !== "GET") return;
   if (event.httpMethod && !authorized(event)) return;
 
   try {
-    const result = await runSync();
+    const result = await runSync(event);
     console.log("product-feed-sync-background", JSON.stringify({
       ok: result.ok,
       count: result.count,
       reason: result.reason,
       scanned: result.meta?.scanned,
+      stored: result.stored,
     }));
   } catch (err) {
     console.error("product-feed-sync-background failed", err);
@@ -98,9 +100,9 @@ exports.handler = async (event) => {
         reason: "sync_error",
         message: err?.message || "Awin sync failed",
         finishedAt: new Date().toISOString(),
-      });
-    } catch {
-      /* ignore */
+      }, event);
+    } catch (e2) {
+      console.error("failed to persist sync status", e2);
     }
   }
 };

@@ -430,38 +430,46 @@ async function streamMenswearFromFeedUrl(feedUrl, {
   };
 }
 
-async function getBlobStore() {
+async function getBlobStore(event = null) {
   try {
-    const { getStore } = require("@netlify/blobs");
+    const { getStore, connectLambda } = require("@netlify/blobs");
+    // Classic Netlify Functions must wire Blobs credentials from the Lambda event
+    if (event?.blobs) {
+      connectLambda(event);
+    }
     return getStore({ name: CACHE_STORE, consistency: "strong" });
-  } catch {
+  } catch (err) {
+    console.error("getBlobStore failed", err?.message || err);
     return null;
   }
 }
 
-async function writeMenswearCache(payload) {
+async function writeMenswearCache(payload, event = null) {
   const body = {
     version: 1,
     source: "awin",
     ...payload,
   };
-  const store = await getBlobStore();
+  const store = await getBlobStore(event);
   if (store) {
     await store.setJSON(CACHE_KEY, body);
     return { via: "blobs", key: CACHE_KEY };
+  }
+  if (process.env.NETLIFY) {
+    throw new Error("Netlify Blobs unavailable — cannot persist menswear cache on NETLIFY");
   }
   fs.writeFileSync(LOCAL_CACHE_PATH, JSON.stringify(body));
   return { via: "tmp", path: LOCAL_CACHE_PATH };
 }
 
-async function readMenswearCache() {
-  const store = await getBlobStore();
+async function readMenswearCache(event = null) {
+  const store = await getBlobStore(event);
   if (store) {
     try {
       const data = await store.get(CACHE_KEY, { type: "json" });
       if (data?.items?.length) return data;
-    } catch {
-      /* fall through */
+    } catch (err) {
+      console.error("readMenswearCache blobs failed", err?.message || err);
     }
   }
   try {
@@ -475,25 +483,28 @@ async function readMenswearCache() {
   return null;
 }
 
-async function writeSyncStatus(payload) {
+async function writeSyncStatus(payload, event = null) {
   const body = { version: 1, updatedAt: new Date().toISOString(), ...payload };
-  const store = await getBlobStore();
+  const store = await getBlobStore(event);
   if (store) {
     await store.setJSON(SYNC_STATUS_KEY, body);
     return { via: "blobs" };
+  }
+  if (process.env.NETLIFY) {
+    throw new Error("Netlify Blobs unavailable — cannot persist sync status on NETLIFY");
   }
   fs.writeFileSync(LOCAL_SYNC_PATH, JSON.stringify(body));
   return { via: "tmp" };
 }
 
-async function readSyncStatus() {
-  const store = await getBlobStore();
+async function readSyncStatus(event = null) {
+  const store = await getBlobStore(event);
   if (store) {
     try {
       const data = await store.get(SYNC_STATUS_KEY, { type: "json" });
       if (data) return data;
-    } catch {
-      /* fall through */
+    } catch (err) {
+      console.error("readSyncStatus blobs failed", err?.message || err);
     }
   }
   try {
