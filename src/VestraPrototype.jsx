@@ -18,7 +18,9 @@ import {
   remapOutfitItemsToLive as remapOutfitItemsToLiveShared,
   sanitizeOutfitForOccasion as sanitizeOutfitForOccasionShared,
   catalogPayloadForStylist as catalogPayloadForStylistShared,
+  composeLiveOccasionOutfits,
 } from "./occasionPipeline";
+import { buildWhyThisWorks } from "./styleAttributes";
 
 // ==================== LANGUAGE / i18n ====================
 // A real backend barely needs any of this — Claude already answers fluently
@@ -2030,7 +2032,9 @@ function composeOutfits(prompt, profile, lang = "en", count = 3) {
     usedSigs.add(`core:${core}`);
     usedRecipeIds.add(row.recipe.id);
     usedFamilies.add(fam);
-    picked.push(sanitized);
+    const resolved = sanitized.items.map((k) => CATALOG[k]).filter(Boolean);
+    const why = buildWhyThisWorks(resolved, prompt, promptOccasions);
+    picked.push({ ...sanitized, rationale: why, whyThisWorks: why });
     return true;
   };
 
@@ -2075,7 +2079,9 @@ function composeOutfits(prompt, profile, lang = "en", count = 3) {
     const sig = outfitSignature(sanitized.items);
     if (usedSigs.has(sig)) continue;
     usedSigs.add(sig);
-    picked.push(sanitized);
+    const resolved = sanitized.items.map((k) => CATALOG[k]).filter(Boolean);
+    const why = buildWhyThisWorks(resolved, prompt, promptOccasions);
+    picked.push({ ...sanitized, rationale: why, whyThisWorks: why });
   }
   return picked;
 }
@@ -3919,11 +3925,14 @@ export default function VestraPrototype() {
             prompt: finalText,
           }),
         };
-        return sanitizeOutfitForOccasion(raw, finalText, promptOccasions, activeProfile) || {
+        const cleaned = sanitizeOutfitForOccasion(raw, finalText, promptOccasions, activeProfile) || {
           ...raw,
           items: remapOutfitItemsToLive(raw.items, finalText, promptOccasions, activeProfile),
         };
-      }).filter((o) => o.items.length >= 3);
+        const resolved = (cleaned.items || []).map((k) => CATALOG[k]).filter(Boolean);
+        const why = cleaned.whyThisWorks || cleaned.rationale || buildWhyThisWorks(resolved, finalText, promptOccasions);
+        return { ...cleaned, rationale: why, whyThisWorks: why };
+      }).filter((o) => o.items.length >= 3 && o.whyThisWorks);
       if (outfits.length) {
         const shoppingList = isWeek
           ? (Array.isArray(live.shoppingList) && live.shoppingList.length
@@ -3958,7 +3967,21 @@ export default function VestraPrototype() {
         weekPlan: true,
       }]);
     } else {
-      const outfits = composeOutfits(finalText, activeProfile, lang, 3);
+      // Prefer coordinated live outfits (formality + color + cut + whyThisWorks)
+      const liveLooks = catalogSource === "awin"
+        ? composeLiveOccasionOutfits(finalText, activeProfile, 3)
+        : [];
+      const outfits = liveLooks.length
+        ? liveLooks.map((o, i) => ({
+          ...o,
+          option: o.option || i + 1,
+          occasion: resolveHeroOccasionSlug({
+            styleFamily: o.styleFamily,
+            occasions: promptOccasions,
+            prompt: finalText,
+          }),
+        }))
+        : composeOutfits(finalText, activeProfile, lang, 3);
       setMessages((m) => [...m, {
         role: "assistant",
         text: primaryMood ? t("stylistMoodIntro") : undefined,

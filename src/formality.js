@@ -72,11 +72,18 @@ export function formalityScore(item) {
   // Family baselines
   const fam = item.family || item.type;
   if (fam === "blazer") score += 8;
+  // Soft shells / fleece are casual even when family=blazer from "jacket"
+  if (fam === "blazer" && /\b(fleece|synchilla|track\s*jacket|puffer|windbreaker|softshell|hoodie|sweat|rain\s*jacket|anorak)\b/i.test(text)) {
+    score -= 45;
+  }
   if (fam === "shoe" && /\b(sneaker|trainer|runner|boot)\b/i.test(text)) score -= 8;
   if (fam === "shoe" && /\b(oxford|derby|loafer|dress)\b/i.test(text)) score += 10;
+  if (fam === "shoe" && /\b(safety|composite|esd|steel\s*toe|holster)\b/i.test(text)) score -= 25;
   if (fam === "trouser" && /\b(suit|dress|wool|tuxedo)\b/i.test(text)) score += 12;
+  if (fam === "trouser" && /\b(holster|work\s*trouser|painter|hi[- ]?vis)\b/i.test(text)) score -= 30;
   if (fam === "shirt" && /\b(hoodie|sweat|tee|t-shirt)\b/i.test(text)) score -= 14;
   if (fam === "shirt" && /\b(dress\s*shirt|oxford|french\s*cuff)\b/i.test(text)) score += 12;
+  if (fam === "shirt" && /\bwalking\s*suit\b/i.test(text)) score -= 20;
 
   return Math.max(0, Math.min(100, score));
 }
@@ -105,7 +112,7 @@ export function occasionFormalityTarget(prompt = "", occasions = []) {
       max: 40,
       prefer: 18,
       label: "active",
-      hardBan: /\b(tuxedo|suit\b|blazer|sport\s*coat|dress\s*shoe|oxford|derby|loafer|wingtip|monk|tie|waistcoat|formal|wedding|prom)\b/i,
+      hardBan: /\b(tuxedo|suit\b|blazer|sport\s*coat|dress\s*shoe|oxford|derby|loafer|wingtip|monk|tie|waistcoat|formal|wedding|prom|holster|safety\s*shoe|steel\s*toe|brogue)\b/i,
       requireOuter: false,
       forbidOuter: true,
     };

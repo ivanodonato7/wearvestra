@@ -6,6 +6,7 @@
 import { BACKUP_CATALOG, BACKUP_FAMILY_VARIANTS } from "./backupCatalog.js";
 import { enrichItemFormality, formalityScore, itemFitsOccasion, occasionFormalityTarget } from "./formality.js";
 import { reclassifyItem, familyCoherent, isJunkProduct } from "./reclassify.js";
+import { enrichStyleAttributes } from "./styleAttributes.js";
 
 function cloneCatalog(src) {
   const out = {};
@@ -149,7 +150,7 @@ export function applyLiveProducts(liveItems = []) {
     if (!String(fixed.shopUrl || "").includes("awin1.com") && fixed.source === "awin") {
       // Still allow non-awin1 if present, but prefer awin1 for live feed
     }
-    const item = enrichItemFormality(fixed);
+    const item = enrichStyleAttributes(enrichItemFormality(fixed));
     next[key] = item;
     const fam = item.family;
     if (fam) {
@@ -196,7 +197,7 @@ export function applyLiveProducts(liveItems = []) {
 export function resetCatalog() {
   CATALOG = cloneCatalog(BACKUP_CATALOG);
   for (const [k, item] of Object.entries(CATALOG)) {
-    CATALOG[k] = enrichItemFormality(item);
+    CATALOG[k] = enrichStyleAttributes(enrichItemFormality(item));
   }
   ITEM_FAMILY_VARIANTS = { ...BACKUP_FAMILY_VARIANTS };
   catalogSource = "backup";
