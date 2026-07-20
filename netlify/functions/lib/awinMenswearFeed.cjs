@@ -10,7 +10,9 @@ const path = require("path");
 
 const CACHE_STORE = "vestra-catalog";
 const CACHE_KEY = "menswear-v1";
+const SYNC_STATUS_KEY = "menswear-sync-status-v1";
 const LOCAL_CACHE_PATH = path.join("/tmp", "vestra-awin-menswear-v1.json");
+const LOCAL_SYNC_PATH = path.join("/tmp", "vestra-awin-sync-status-v1.json");
 
 const PLACEHOLDER_RE = /\$\$PLACEHOLDER_\d+\$\$/i;
 
@@ -473,6 +475,37 @@ async function readMenswearCache() {
   return null;
 }
 
+async function writeSyncStatus(payload) {
+  const body = { version: 1, updatedAt: new Date().toISOString(), ...payload };
+  const store = await getBlobStore();
+  if (store) {
+    await store.setJSON(SYNC_STATUS_KEY, body);
+    return { via: "blobs" };
+  }
+  fs.writeFileSync(LOCAL_SYNC_PATH, JSON.stringify(body));
+  return { via: "tmp" };
+}
+
+async function readSyncStatus() {
+  const store = await getBlobStore();
+  if (store) {
+    try {
+      const data = await store.get(SYNC_STATUS_KEY, { type: "json" });
+      if (data) return data;
+    } catch {
+      /* fall through */
+    }
+  }
+  try {
+    if (fs.existsSync(LOCAL_SYNC_PATH)) {
+      return JSON.parse(fs.readFileSync(LOCAL_SYNC_PATH, "utf8"));
+    }
+  } catch {
+    /* empty */
+  }
+  return null;
+}
+
 function resolveFeedUrl() {
   return String(process.env.AWIN_FEED_URL || "").trim();
 }
@@ -480,11 +513,14 @@ function resolveFeedUrl() {
 module.exports = {
   CACHE_STORE,
   CACHE_KEY,
+  SYNC_STATUS_KEY,
   DEFAULT_CAPS,
   PLACEHOLDER_RE,
   streamMenswearFromFeedUrl,
   writeMenswearCache,
   readMenswearCache,
+  writeSyncStatus,
+  readSyncStatus,
   resolveFeedUrl,
   normalizeRow,
   isMenswearRow,
