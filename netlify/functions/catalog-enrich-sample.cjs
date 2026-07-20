@@ -45,7 +45,7 @@ function pickSample(items, n = 10) {
   return picked.slice(0, n);
 }
 
-function loadStaticCatalog() {
+function loadStaticCatalogFromDisk() {
   const candidates = [
     path.join(__dirname, "..", "..", "public", "data", "menswear-catalog.json"),
     path.join(__dirname, "..", "..", "dist", "data", "menswear-catalog.json"),
@@ -58,6 +58,33 @@ function loadStaticCatalog() {
         const raw = JSON.parse(fs.readFileSync(p, "utf8"));
         return Array.isArray(raw) ? raw : (raw.items || []);
       }
+    } catch { /* try next */ }
+  }
+  return [];
+}
+
+async function loadStaticCatalog(event) {
+  const fromDisk = loadStaticCatalogFromDisk();
+  if (fromDisk.length) return fromDisk;
+
+  // On Netlify, functions don't ship the publish dir — fetch the static asset.
+  const host = event.headers?.["x-forwarded-host"]
+    || event.headers?.host
+    || event.headers?.Host
+    || "";
+  const proto = event.headers?.["x-forwarded-proto"] || "https";
+  const urls = [];
+  if (host) urls.push(`${proto}://${host}/data/menswear-catalog.json`);
+  urls.push("https://wearvestra.com/data/menswear-catalog.json");
+  urls.push("https://www.wearvestra.com/data/menswear-catalog.json");
+
+  for (const url of urls) {
+    try {
+      const res = await fetch(url, { headers: { accept: "application/json" } });
+      if (!res.ok) continue;
+      const raw = await res.json();
+      const items = Array.isArray(raw) ? raw : (raw.items || []);
+      if (items.length) return items;
     } catch { /* try next */ }
   }
   return [];
