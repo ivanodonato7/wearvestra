@@ -14,11 +14,20 @@
 
 [functions."product-feed-sync-background"]
   # Daily 07:00 UTC — long-running Create-a-Feed stream (background, up to ~15 min)
+  # Optional Claude enrichment: set CATALOG_ENRICH=1 after reviewing /api/catalog-enrich-sample
   schedule = "0 7 * * *"
+
+[functions."catalog-enrich-sample"]
+  timeout = 26
 
 [[redirects]]
   from = "/api/stylist"
   to = "/.netlify/functions/stylist"
+  status = 200
+
+[[redirects]]
+  from = "/api/catalog-enrich-sample"
+  to = "/.netlify/functions/catalog-enrich-sample"
   status = 200
 
 [[redirects]]

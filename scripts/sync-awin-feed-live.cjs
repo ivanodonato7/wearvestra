@@ -14,6 +14,10 @@ const {
   readMenswearCache,
   DEFAULT_CAPS,
 } = require("../netlify/functions/lib/awinMenswearFeed.cjs");
+const {
+  enrichCatalogItems,
+  enrichmentEnabled,
+} = require("../netlify/functions/lib/catalogEnrich.cjs");
 
 async function main() {
   const feedUrl = String(process.env.AWIN_FEED_URL || "").trim();
@@ -43,11 +47,30 @@ async function main() {
     process.exit(2);
   }
 
-  const payload = { version: 1, source: "awin", items, meta };
+  let finalItems = items;
+  let enrichStats = { enabled: false };
+  if (enrichmentEnabled()) {
+    console.log("CATALOG_ENRICH=1 — running Claude enrichment pass…");
+    const enriched = await enrichCatalogItems(items, {
+      onProgress: (p) => console.log("  enrich", p),
+    });
+    finalItems = enriched.items;
+    enrichStats = { enabled: true, ...enriched.stats };
+    console.log("enrichment stats", enrichStats);
+  } else {
+    console.log("Skipping Claude enrichment (set CATALOG_ENRICH=1 to enable).");
+  }
+
+  const payload = {
+    version: 1,
+    source: "awin",
+    items: finalItems,
+    meta: { ...meta, enrichment: enrichStats },
+  };
   const publicPath = path.join(__dirname, "..", "public", "data", "menswear-catalog.json");
   fs.mkdirSync(path.dirname(publicPath), { recursive: true });
   fs.writeFileSync(publicPath, JSON.stringify(payload));
-  console.log("wrote", publicPath, "count", items.length, "bytes", fs.statSync(publicPath).size);
+  console.log("wrote", publicPath, "count", finalItems.length, "bytes", fs.statSync(publicPath).size);
 
   const stored = await writeMenswearCache(payload);
   console.log("local cache", stored);

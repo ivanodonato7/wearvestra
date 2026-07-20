@@ -15,6 +15,10 @@ const {
   DEFAULT_CAPS,
   writeSyncStatus,
 } = require("./lib/awinMenswearFeed.cjs");
+const {
+  enrichCatalogItems,
+  enrichmentEnabled,
+} = require("./lib/catalogEnrich.cjs");
 
 function authorized(event) {
   const secret = process.env.AWIN_SYNC_SECRET || "";
@@ -64,15 +68,32 @@ async function runSync(event) {
     return result;
   }
 
+  // Claude enrichment pass (formality / colors / fit / category).
+  // Off by default — set CATALOG_ENRICH=1 after reviewing sample + cost.
+  let enrichStats = { enabled: false };
+  let finalItems = items;
+  if (enrichmentEnabled()) {
+    try {
+      const enriched = await enrichCatalogItems(items, {
+        onProgress: (p) => console.log("enrich", JSON.stringify(p)),
+      });
+      finalItems = enriched.items;
+      enrichStats = { enabled: true, ...enriched.stats };
+    } catch (err) {
+      console.error("enrichment failed (continuing with raw items)", err?.message || err);
+      enrichStats = { enabled: true, error: err?.message || String(err) };
+    }
+  }
+
   let stored = null;
   try {
-    stored = await writeMenswearCache({ items, meta }, event);
+    stored = await writeMenswearCache({ items: finalItems, meta: { ...meta, enrichment: enrichStats } }, event);
   } catch (err) {
     console.error("blobs write failed", err?.message || err);
     try {
       fs.writeFileSync(
         path.join("/tmp", "vestra-awin-menswear-v1.json"),
-        JSON.stringify({ version: 1, source: "awin", items, meta }),
+        JSON.stringify({ version: 1, source: "awin", items: finalItems, meta: { ...meta, enrichment: enrichStats } }),
       );
       stored = { via: "tmp-only", error: err?.message || String(err) };
     } catch { /* ignore */ }
@@ -81,8 +102,9 @@ async function runSync(event) {
   const result = {
     ok: true,
     source: "awin",
-    count: items.length,
-    meta,
+    count: finalItems.length,
+    meta: { ...meta, enrichment: enrichStats },
+    enrichment: enrichStats,
     stored,
     finishedAt: new Date().toISOString(),
   };
