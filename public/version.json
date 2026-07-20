@@ -1,5 +1,5 @@
 {
   "name": "vestra",
-  "build": "stylist-occasion-fix-2026-07-20",
-  "features": ["mens-only", "occasion-first", "weekwardrobe", "streetwear", "classy", "sexy", "modern", "edgy", "genre-shopping", "200-plus-stores", "app-download", "deletable-profile", "honest-labels", "stock-heroes", "perf-snappy", "welcome-cta-fix", "no-stale-sw"]
+  "build": "awin-feed-stream-2026-07-20",
+  "features": ["mens-only", "awin-catalog", "awin-feed-stream", "occasion-first", "weekwardrobe", "streetwear", "classy", "sexy", "modern", "edgy", "genre-shopping", "200-plus-stores", "app-download", "deletable-profile", "honest-labels", "stock-heroes", "perf-snappy", "welcome-cta-fix", "no-stale-sw"]
 }

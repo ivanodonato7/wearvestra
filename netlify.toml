@@ -6,9 +6,27 @@
 [functions."generate-hero"]
   timeout = 26
 
+[functions."product-search"]
+  timeout = 26
+
+[functions."product-feed-sync"]
+  # Daily 07:00 UTC — refresh filtered menswear cache from Awin Create-a-Feed
+  schedule = "0 7 * * *"
+  timeout = 300
+
 [[redirects]]
   from = "/api/stylist"
   to = "/.netlify/functions/stylist"
+  status = 200
+
+[[redirects]]
+  from = "/api/product-search"
+  to = "/.netlify/functions/product-search"
+  status = 200
+
+[[redirects]]
+  from = "/api/product-feed-sync"
+  to = "/.netlify/functions/product-feed-sync"
   status = 200
 
 [[redirects]]

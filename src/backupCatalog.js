@@ -1,0 +1,39 @@
+/**
+ * Hardcoded men's backup catalog — used when Awin / live feed is unavailable.
+ * Shape matches live products so the stylist + shop UI keep working offline.
+ */
+const ASSET_V = "backup-1";
+const assetUrl = (path) => `${path}?v=${ASSET_V}`;
+
+export const BACKUP_CATALOG = {
+  blazer: { key: "blazer", id: "p1", name: "Wool-Blend Tailored Blazer", price: 320, retailer: "Considered Studio", type: "blazer", family: "blazer", color: "#3E4228", paletteTags: ["Olive", "Forest Green"], image: assetUrl("/products/blazer.jpg"), searchQuery: "olive green wool tailored blazer", searchNoun: "wool tailored blazer", shopUrl: null, source: "backup" },
+  blazerAlt: { key: "blazerAlt", id: "p1b", name: "Unstructured Linen Blazer", price: 265, retailer: "North & Field", type: "blazer", family: "blazer", color: "#cbb994", paletteTags: ["Sand / Beige", "Camel / Tan", "Ivory / Cream"], image: assetUrl("/products/blazer-alt.jpg"), searchQuery: "sand beige unstructured linen blazer", searchNoun: "unstructured linen blazer", shopUrl: null, source: "backup" },
+  blazerNavy: { key: "blazerNavy", id: "p1c", name: "Navy Wool Tailored Blazer", price: 310, retailer: "Considered Studio", type: "blazer", family: "blazer", color: "#1f2a44", paletteTags: ["Navy"], image: assetUrl("/products/blazer-navy.jpg"), searchQuery: "navy wool tailored blazer", searchNoun: "wool tailored blazer", shopUrl: null, source: "backup" },
+  blazerBlack: { key: "blazerBlack", id: "p1d", name: "Black Wool Tailored Blazer", price: 315, retailer: "Considered Studio", type: "blazer", family: "blazer", color: "#161616", paletteTags: ["Black"], image: assetUrl("/products/blazer-black.jpg"), searchQuery: "black wool tailored blazer", searchNoun: "wool tailored blazer", shopUrl: null, source: "backup" },
+  shirt: { key: "shirt", id: "p2", name: "Crisp Cotton Shirt", price: 95, retailer: "Considered Studio", type: "shirt", family: "shirt", color: "#F5F2E9", paletteTags: ["Ivory / Cream", "White"], image: assetUrl("/products/shirt.jpg"), searchQuery: "ivory crisp cotton dress shirt", searchNoun: "crisp cotton dress shirt", shopUrl: null, source: "backup" },
+  shirtAlt: { key: "shirtAlt", id: "p2b", name: "Fine Merino Turtleneck", price: 110, retailer: "North & Field", type: "shirt", family: "shirt", color: "#4a4a48", paletteTags: ["Grey / Charcoal", "Black"], image: assetUrl("/products/shirt-alt.jpg"), searchQuery: "charcoal fine merino turtleneck sweater", searchNoun: "fine merino turtleneck sweater", shopUrl: null, source: "backup" },
+  trouser: { key: "trouser", id: "p3", name: "Tailored Straight Trouser", price: 140, retailer: "Considered Studio", type: "trouser", family: "trouser", color: "#3E4228", paletteTags: ["Olive", "Forest Green"], image: assetUrl("/products/trouser.jpg"), searchQuery: "olive tailored straight leg trousers", searchNoun: "tailored straight leg trousers", shopUrl: null, source: "backup" },
+  trouserAlt: { key: "trouserAlt", id: "p3b", name: "Wide-Leg Wool Trouser", price: 165, retailer: "Considered Studio", type: "trouser", family: "trouser", color: "#6b6b63", paletteTags: ["Grey / Charcoal"], image: assetUrl("/products/trouser-alt.jpg"), searchQuery: "grey wide leg wool trousers", searchNoun: "wide leg wool trousers", shopUrl: null, source: "backup" },
+  trouserNavy: { key: "trouserNavy", id: "p3c", name: "Navy Tailored Trouser", price: 145, retailer: "Considered Studio", type: "trouser", family: "trouser", color: "#1f2a44", paletteTags: ["Navy"], image: assetUrl("/products/trouser-navy.jpg"), searchQuery: "navy tailored dress trousers", searchNoun: "tailored dress trousers", shopUrl: null, source: "backup" },
+  trouserBlack: { key: "trouserBlack", id: "p3d", name: "Black Tailored Trouser", price: 145, retailer: "Considered Studio", type: "trouser", family: "trouser", color: "#161616", paletteTags: ["Black"], image: assetUrl("/products/trouser-black.jpg"), searchQuery: "black tailored dress trousers", searchNoun: "tailored dress trousers", shopUrl: null, source: "backup" },
+  shoe: { key: "shoe", id: "p4", name: "Leather Derby Shoe", price: 210, retailer: "Aldern & Co.", type: "shoe", family: "shoe", color: "#6b3f22", paletteTags: ["Camel / Tan", "Rust / Terracotta"], image: assetUrl("/products/shoe.jpg"), searchQuery: "brown leather derby dress shoes", searchNoun: "leather derby dress shoes", shopUrl: null, source: "backup" },
+  shoeAlt: { key: "shoeAlt", id: "p4b", name: "Suede Chelsea Boot", price: 245, retailer: "Aldern & Co.", type: "shoe", family: "shoe", color: "#4a3527", paletteTags: ["Camel / Tan", "Black"], image: assetUrl("/products/shoe-alt.jpg"), searchQuery: "dark brown suede chelsea boots", searchNoun: "suede chelsea boots", shopUrl: null, source: "backup" },
+  shoeBlack: { key: "shoeBlack", id: "p4c", name: "Black Leather Derby", price: 220, retailer: "Aldern & Co.", type: "shoe", family: "shoe", color: "#161616", paletteTags: ["Black"], image: assetUrl("/products/shoe-black.jpg"), searchQuery: "black leather derby dress shoes", searchNoun: "leather derby dress shoes", shopUrl: null, source: "backup" },
+  scarf: { key: "scarf", id: "p5", name: "Fine Wool Scarf", price: 85, retailer: "North & Field", type: "accessory", family: "scarf", color: "#b08a5c", paletteTags: ["Camel / Tan"], image: assetUrl("/products/scarf.jpg"), searchQuery: "camel tan fine wool scarf", searchNoun: "fine wool scarf", shopUrl: null, source: "backup" },
+  scarfAlt: { key: "scarfAlt", id: "p5b", name: "Cashmere Pocket Square", price: 65, retailer: "Aldern & Co.", type: "accessory", family: "scarf", color: "#C6A567", paletteTags: ["Bold Color", "Camel / Tan"], image: assetUrl("/products/scarf-alt.jpg"), searchQuery: "gold cashmere pocket square", searchNoun: "cashmere pocket square", shopUrl: null, source: "backup" },
+  scarfBurgundy: { key: "scarfBurgundy", id: "p5c", name: "Burgundy Wool Scarf", price: 88, retailer: "North & Field", type: "accessory", family: "scarf", color: "#5c1f2e", paletteTags: ["Burgundy"], image: assetUrl("/products/scarf-burgundy.jpg"), searchQuery: "burgundy wool scarf", searchNoun: "wool scarf", shopUrl: null, source: "backup" },
+  belt: { key: "belt", id: "p6", name: "Leather Belt", price: 95, retailer: "Aldern & Co.", type: "accessory", family: "belt", color: "#6b3f22", paletteTags: ["Camel / Tan", "Rust / Terracotta"], image: assetUrl("/products/belt.jpg"), searchQuery: "brown leather dress belt", searchNoun: "leather dress belt", shopUrl: null, source: "backup" },
+  beltAlt: { key: "beltAlt", id: "p6b", name: "Black Leather Belt", price: 90, retailer: "Aldern & Co.", type: "accessory", family: "belt", color: "#161616", paletteTags: ["Black"], image: assetUrl("/products/belt-alt.jpg"), searchQuery: "black leather dress belt", searchNoun: "leather dress belt", shopUrl: null, source: "backup" },
+  sunglasses: { key: "sunglasses", id: "p7", name: "Acetate Sunglasses", price: 145, retailer: "North & Field", type: "accessory", family: "sunglasses", color: "#8B5A2B", paletteTags: ["Camel / Tan", "Rust / Terracotta"], image: assetUrl("/products/sunglasses.jpg"), searchQuery: "tortoise acetate sunglasses", searchNoun: "acetate sunglasses", shopUrl: null, source: "backup" },
+  sunglassesAlt: { key: "sunglassesAlt", id: "p7b", name: "Black Acetate Sunglasses", price: 135, retailer: "North & Field", type: "accessory", family: "sunglasses", color: "#0B0B0C", paletteTags: ["Black"], image: assetUrl("/products/sunglasses-alt.jpg"), searchQuery: "black acetate sunglasses", searchNoun: "acetate sunglasses", shopUrl: null, source: "backup" },
+};
+
+export const BACKUP_FAMILY_VARIANTS = {
+  blazer: ["blazer", "blazerAlt", "blazerNavy", "blazerBlack"],
+  shirt: ["shirt", "shirtAlt"],
+  trouser: ["trouser", "trouserAlt", "trouserNavy", "trouserBlack"],
+  shoe: ["shoe", "shoeAlt", "shoeBlack"],
+  scarf: ["scarf", "scarfAlt", "scarfBurgundy"],
+  belt: ["belt", "beltAlt"],
+  sunglasses: ["sunglasses", "sunglassesAlt"],
+};
