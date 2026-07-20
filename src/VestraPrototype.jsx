@@ -68,7 +68,7 @@ const UI = {
     oneMoreThing: "One More Thing", anythingHorizonLine1: "Anything on the", anythingHorizonLine2: "horizon?",
     occasionSub: "Tell us and we'll have a real outfit ready the moment you meet your stylist.",
     occasionPlaceholder: "e.g. wedding in June, semi-formal", meetYourStylist: "Meet Your Stylist", notSureYet: "Not sure yet — just exploring",
-    chipWedding: "Wedding", chipWorkEvent: "Work event", chipDateNight: "Date night", chipWeekendTrip: "Weekend trip",
+    chipWedding: "Wedding", chipWorkEvent: "Work event", chipDateNight: "Dinner plans", chipWeekendTrip: "Weekend trip",
     goodEvening: "Good evening", styleDnaLabel: "Style DNA", silhouettesWord: "silhouettes", budgetWord: "budget",
     askYourStylist: "Ask your stylist", askPlaceholder: "Tell your stylist what you need…",
     chipDressWedding: "Dress me for a wedding", chipWorkDinner: "Work dinner tonight", chipWeekendCasual: "Weekend, nothing fussy",
@@ -179,7 +179,7 @@ const UI = {
     oneMoreThing: "Una Cosa Más", anythingHorizonLine1: "¿Algo especial", anythingHorizonLine2: "próximamente?",
     occasionSub: "Cuéntanoslo y tendremos un look real listo en cuanto conozcas a tu estilista.",
     occasionPlaceholder: "ej. boda en junio, semi-formal", meetYourStylist: "Conoce a tu Estilista", notSureYet: "Aún no lo sé — solo estoy explorando",
-    chipWedding: "Boda", chipWorkEvent: "Evento de trabajo", chipDateNight: "Cita", chipWeekendTrip: "Viaje de fin de semana",
+    chipWedding: "Boda", chipWorkEvent: "Evento de trabajo", chipDateNight: "Planes de cena", chipWeekendTrip: "Viaje de fin de semana",
     goodEvening: "Buenas tardes", styleDnaLabel: "ADN de Estilo", silhouettesWord: "siluetas", budgetWord: "presupuesto",
     askYourStylist: "Pregunta a tu estilista", askPlaceholder: "Dile a tu estilista qué necesitas…",
     chipDressWedding: "Vísteme para una boda", chipWorkDinner: "Cena de trabajo esta noche", chipWeekendCasual: "Fin de semana, sin complicaciones",
@@ -290,7 +290,7 @@ const UI = {
     oneMoreThing: "Encore Une Chose", anythingHorizonLine1: "Quelque chose", anythingHorizonLine2: "à l'horizon ?",
     occasionSub: "Dites-le-nous et une vraie tenue sera prête dès que vous rencontrerez votre styliste.",
     occasionPlaceholder: "ex. mariage en juin, semi-habillé", meetYourStylist: "Rencontrer Votre Styliste", notSureYet: "Pas encore sûr — j'explore seulement",
-    chipWedding: "Mariage", chipWorkEvent: "Événement professionnel", chipDateNight: "Rendez-vous", chipWeekendTrip: "Week-end",
+    chipWedding: "Mariage", chipWorkEvent: "Événement professionnel", chipDateNight: "Dîner prévu", chipWeekendTrip: "Week-end",
     goodEvening: "Bonsoir", styleDnaLabel: "ADN Style", silhouettesWord: "silhouettes", budgetWord: "budget",
     askYourStylist: "Demandez à votre styliste", askPlaceholder: "Dites à votre styliste ce dont vous avez besoin…",
     chipDressWedding: "Habillez-moi pour un mariage", chipWorkDinner: "Dîner professionnel ce soir", chipWeekendCasual: "Week-end, sans prise de tête",
@@ -1504,30 +1504,53 @@ const OUTFIT_RECIPES = [
     lifestyles: ["Creative or flexible workplace", "Student life", "Remote, mostly at home"],
     structure: "relaxed",
   },
+  {
+    id: "gym-adjacent-easy",
+    outer: null, top: "shirtAlt", bottom: "trouserAlt", shoe: "shoeAlt", acc: "sunglassesAlt",
+    occasions: ["active", "weekend", "casual", "everyday", "street"],
+    vibe: ["street", "relaxed", "bold", "modern"],
+    styleFamily: "streetwear",
+    archetypes: ["Streetwear Cool", "Relaxed Considered", "Bold Expressive", "Minimal Directional"],
+    lifestyles: ["Student life", "Remote, mostly at home", "Creative or flexible workplace"],
+    structure: "relaxed",
+  },
+  {
+    id: "wedding-guest-soft",
+    outer: "blazerAlt", top: "shirt", bottom: "trouserNavy", shoe: "shoe", acc: "scarf",
+    occasions: ["wedding", "event", "formal", "celebration"],
+    vibe: ["romantic", "classy", "warm", "polished"],
+    styleFamily: "romantic",
+    archetypes: ["Romantic Soft", "Warm Layered", "Classic Polished", "Quiet Tailored"],
+    lifestyles: ["On the move — travel, events, varied", "Office / client-facing", "Creative or flexible workplace"],
+    structure: "relaxed",
+  },
 ];
 
 const OCCASION_KEYWORDS = [
   { id: "wedding", keys: ["wedding", "formal", "gala", "black tie", "ceremony", "boda", "mariage", "formel"] },
-  { id: "dinner", keys: ["dinner", "date", "evening", "restaurant", "cena", "dîner", "soir", "rendez"] },
+  { id: "dinner", keys: ["dinner", "date night", "evening", "restaurant", "cena", "dîner", "soirée", "rendez-vous"] },
   { id: "work", keys: ["work", "office", "meeting", "client", "interview", "trabajo", "bureau", "réunion"] },
   { id: "travel", keys: ["travel", "airport", "trip", "flight", "viaje", "voyage", "avion"] },
   { id: "weekend", keys: ["weekend", "casual", "brunch", "fin de semana", "week-end"] },
-  { id: "event", keys: ["event", "party", "celebration", "cocktail", "evento", "fête", "soirée"] },
+  { id: "event", keys: ["event", "party", "celebration", "cocktail", "evento", "fête"] },
   { id: "everyday", keys: ["everyday", "daily", "nothing fussy", "diario", "quotidien"] },
   { id: "street", keys: ["streetwear", "street", "urban", "hype", "sneaker", "urbano"] },
-  { id: "sexy", keys: ["sexy", "hot", "allure", "seductive", "club", "night out", "noche", "soirée sexy"] },
+  { id: "active", keys: ["gym", "workout", "athletic", "run", "sport", "ejercicio", "sportif", "active"] },
+  // Explicit sexy only — bare "hot"/"noche" false-positive on "photography" / "esta noche"
+  { id: "sexy", keys: ["sexy", "seductive", "club", "night out", "noche sexy", "soirée sexy"] },
 ];
 
 /** Style moods from free-text prompts — can override a quiet default profile. */
 const STYLE_MOOD_KEYWORDS = [
   { id: "streetwear", keys: ["streetwear", "street", "urban", "hype", "skate", "cool casual", "urbano", "streetwear vibes"] },
   { id: "classy", keys: ["classy", "elegant", "polished", "refined", "sophisticated", "clásico", "elegante", "classique"] },
-  { id: "sexy", keys: ["sexy", "hot", "seductive", "alluring", "night out", "date night", "sensual", "noche sexy"] },
+  // Require explicit sexy — "date night" is a dinner occasion, not a sexy mood lock
+  { id: "sexy", keys: ["sexy", "seductive", "alluring", "night out", "sensual", "noche sexy", "soirée sexy"] },
   { id: "modern", keys: ["modern", "contemporary", "sharp", "sleek", "clean modern", "moderno", "moderne", "affûté"] },
-  { id: "edgy", keys: ["edgy", "edge", "dark", "attitude", "rebel", "grunge soft", "audaz", "edgy"] },
-  { id: "romantic", keys: ["romantic", "soft", "dreamy", "delicate", "romántico", "romantique"] },
-  { id: "minimal", keys: ["minimal", "simple", "clean", "quiet luxury", "minimalista", "minimaliste"] },
-  { id: "bold", keys: ["bold", "statement", "loud", "expressive", "color pop", "audaz", "audacieux"] },
+  { id: "edgy", keys: ["edgy", "edge", "attitude", "rebel", "grunge soft"] },
+  { id: "romantic", keys: ["romantic", "dreamy", "romántico", "romantique"] },
+  { id: "minimal", keys: ["minimal", "quiet luxury", "minimalista", "minimaliste"] },
+  { id: "bold", keys: ["bold", "statement", "loud", "expressive", "color pop", "audacieux"] },
   { id: "relaxed", keys: ["relaxed", "easy", "nothing fussy", "chill", "laid back", "relajado", "détendu"] },
 ];
 
@@ -1535,7 +1558,13 @@ function detectOccasions(text) {
   const lower = (text || "").toLowerCase();
   const hits = [];
   for (const row of OCCASION_KEYWORDS) {
-    if (row.keys.some((k) => lower.includes(k))) hits.push(row.id);
+    if (row.keys.some((k) => {
+      // Prefer word-boundary-ish match for short keys that substrings poison
+      if (k.length <= 4) {
+        return new RegExp(`(?:^|[^a-z])${k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?:[^a-z]|$)`).test(lower);
+      }
+      return lower.includes(k);
+    })) hits.push(row.id);
   }
   return hits;
 }
@@ -1544,7 +1573,12 @@ function detectStyleMoods(text) {
   const lower = (text || "").toLowerCase();
   const hits = [];
   for (const row of STYLE_MOOD_KEYWORDS) {
-    if (row.keys.some((k) => lower.includes(k))) hits.push(row.id);
+    if (row.keys.some((k) => {
+      if (k.length <= 4) {
+        return new RegExp(`(?:^|[^a-z])${k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?:[^a-z]|$)`).test(lower);
+      }
+      return lower.includes(k);
+    })) hits.push(row.id);
   }
   return hits;
 }
@@ -1583,8 +1617,8 @@ function resolveHeroOccasionSlug({ occasion, styleFamily, occasions = [], prompt
     || styleFamily === "romantic") {
     return "date-night";
   }
-  if (/\b(casual|weekend|everyday|street|travel|work|office|modern|minimal|relaxed|edgy|bold|classy|trip)\b/.test(tokens)
-    || ["weekend", "everyday", "street", "travel", "work"].some((id) => occasions.includes(id))
+  if (/\b(casual|weekend|everyday|street|travel|work|office|modern|minimal|relaxed|edgy|bold|classy|trip|gym|workout)\b/.test(tokens)
+    || ["weekend", "everyday", "street", "travel", "work", "active"].some((id) => occasions.includes(id))
     || ["streetwear", "modern", "minimal", "relaxed", "edgy", "bold", "classy"].includes(styleFamily)) {
     return "casual";
   }
@@ -1668,7 +1702,7 @@ function recipeItems(recipe) {
 
 /** Pick the best color variant per family using palette first, then fit + style mood.
  *  Genre recipes pin intentional keys — do not collapse them back to the same tailored defaults. */
-function tuneItemsToProfile(itemKeys, profile, styleMoods = [], styleFamily = null) {
+function tuneItemsToProfile(itemKeys, profile, styleMoods = [], styleFamily = null, { occasionDriven = false } = {}) {
   const palette = profile?.palette || [];
   const avoid = profile?.avoid || [];
   const fit = fitSignals(profile?.fit);
@@ -1678,8 +1712,8 @@ function tuneItemsToProfile(itemKeys, profile, styleMoods = [], styleFamily = nu
   const family = styleFamily || moods[0] || null;
   const genreLocked = family && ["streetwear", "sexy", "edgy", "classy", "modern"].includes(family);
 
-  // Keep the recipe's chosen silhouette/color keys for strong style genres
-  if (genreLocked) {
+  // Keep the recipe's chosen silhouette/color keys for strong style genres or clear occasions
+  if (genreLocked || occasionDriven) {
     return itemKeys.map((key) => (CATALOG[key] ? key : key));
   }
 
@@ -1743,6 +1777,7 @@ function buildRationale(recipe, occasionIds, lang, profile = {}) {
     evening: `Evening polish for your ${arch} style — ${colorHint || "your palette"}, wearable in low light.`,
     casual: `Casual with your point of view (${arch}) — easy pieces in ${colorHint || "your colors"}.`,
     street: `Streetwear energy for your ${arch} taste —${fitBit} looser attitude in ${colorHint || "your palette"}, sunglasses on.`,
+    active: `Gym-adjacent casual — easy layers in ${colorHint || "neutrals"} you can actually move in.`,
     sexy: `Sexy, intentional evening read for ${arch} —${fitBit} darker lines in ${colorHint || "your colors"} that still feel wearable.`,
     classy: `Classy polish for your ${arch} profile —${fitBit} clean structure in ${colorHint || "your palette"}.`,
     modern: `Modern & sharp for your ${arch} DNA —${fitBit} crisp shapes in ${colorHint || "your palette"}.`,
@@ -1760,6 +1795,7 @@ function buildRationale(recipe, occasionIds, lang, profile = {}) {
     evening: `Noche según tu estilo ${arch} — ${colorHint || "tu paleta"}.`,
     casual: `Casual con tu criterio (${arch}) — ${colorHint || "tus colores"}.`,
     street: `Energía streetwear para tu estilo ${arch} — actitud más suelta en ${colorHint || "tu paleta"}.`,
+    active: `Casual tipo gym — capas fáciles en ${colorHint || "neutros"} con las que puedes moverte.`,
     sexy: `Lectura sexy de noche para ${arch} — líneas más oscuras en ${colorHint || "tus colores"}.`,
     classy: `Elegancia clásica para tu perfil ${arch} — estructura limpia en ${colorHint || "tu paleta"}.`,
     modern: `Moderno y definido para tu ADN ${arch} — formas nítidas en ${colorHint || "tu paleta"}.`,
@@ -1777,6 +1813,7 @@ function buildRationale(recipe, occasionIds, lang, profile = {}) {
     evening: `Soir selon votre style ${arch} — ${colorHint || "votre palette"}.`,
     casual: `Casual avec votre point de vue (${arch}) — ${colorHint || "vos couleurs"}.`,
     street: `Énergie streetwear pour votre style ${arch} — attitude plus ample dans ${colorHint || "votre palette"}.`,
+    active: `Casual type sport — couches faciles dans ${colorHint || "les neutres"} pour vraiment bouger.`,
     sexy: `Lecture sexy du soir pour ${arch} — lignes plus sombres dans ${colorHint || "vos couleurs"}.`,
     classy: `Élégance classique pour votre profil ${arch} — structure nette dans ${colorHint || "votre palette"}.`,
     modern: `Moderne et affûté pour votre ADN ${arch} — formes précises dans ${colorHint || "votre palette"}.`,
@@ -1808,6 +1845,9 @@ function composeOutfits(prompt, profile, lang = "en", count = 3) {
   const avoid = profile?.avoid || [];
   const budget = profile?.budget || "balanced";
   const moodDriven = styleMoods.length > 0;
+  // Request text drives silhouette/formality first; Style DNA is a light nudge
+  const occasionDriven = promptOccasions.length > 0 || moodDriven
+    || /\b(look good|help me|dress me|tonight|no idea|ayúdame|habille|aide)\b/i.test(prompt || "");
   // Seed from full profile so different quiz answers shuffle differently
   const seed = hashSeed([
     prompt,
@@ -1816,6 +1856,7 @@ function composeOutfits(prompt, profile, lang = "en", count = 3) {
     profile?.lifestyle,
     budget,
     styleMoods.join(","),
+    promptOccasions.join(","),
     (profileOccasions || []).join(","),
     palette.join(","),
     (avoid || []).join(","),
@@ -1824,18 +1865,25 @@ function composeOutfits(prompt, profile, lang = "en", count = 3) {
 
   const scored = OUTFIT_RECIPES.map((recipe, i) => {
     let items = recipeItems(recipe);
-    items = tuneItemsToProfile(items, profile, styleMoods, recipe.styleFamily);
+    items = tuneItemsToProfile(items, profile, styleMoods, recipe.styleFamily, { occasionDriven });
     let score = (seed + i * 31) % 11; // light shuffle only
+
+    // --- REQUEST FIRST: prompt occasions beat Style DNA ---
+    for (const o of recipe.occasions || []) {
+      if (promptOccasions.includes(o)) score += 52;
+      else if (profileOccasions.includes(o)) score += 6;
+      else if (occasions.includes(o)) score += 4;
+    }
 
     // --- Archetype (important, but not absolute — leave room for other styles) ---
     const recipeArch = (recipe.archetypes || []).map(normalizeArchetype);
-    if (arch && recipeArch.includes(arch)) score += 28;
-    else if (arch && recipeArch.some((a) => a.split(" ")[0] === arch.split(" ")[0])) score += 12;
-    else score -= moodDriven ? 0 : 2;
+    if (arch && recipeArch.includes(arch)) score += occasionDriven ? 12 : 28;
+    else if (arch && recipeArch.some((a) => a.split(" ")[0] === arch.split(" ")[0])) score += occasionDriven ? 4 : 12;
+    else score -= moodDriven || occasionDriven ? 0 : 2;
     for (const v of recipe.vibe || []) {
-      if (vibes.includes(v)) score += 8;
+      if (vibes.includes(v)) score += occasionDriven ? 3 : 8;
     }
-    if (preferredFamilies.includes(recipe.styleFamily)) score += 10;
+    if (preferredFamilies.includes(recipe.styleFamily)) score += occasionDriven ? 4 : 10;
 
     // --- Prompt style moods (beat a locked-in default DNA) ---
     if (styleMoods.length) {
@@ -1864,45 +1912,51 @@ function composeOutfits(prompt, profile, lang = "en", count = 3) {
 
     // --- Lifestyle ---
     const recipeLife = recipe.lifestyles || [];
-    if (profile?.lifestyle && recipeLife.includes(profile.lifestyle)) score += 18;
+    if (profile?.lifestyle && recipeLife.includes(profile.lifestyle)) score += occasionDriven ? 6 : 18;
     else if (profile?.lifestyle) score -= 2;
     for (const o of life.occasions) {
       if ((recipe.occasions || []).includes(o)) score += 8;
     }
 
     // --- Fit / structure ---
-    if (fit.structure && recipe.structure === fit.structure) score += 16;
+    if (fit.structure && recipe.structure === fit.structure) score += occasionDriven ? 6 : 16;
     else if (fit.structure === "tailored" && recipe.structure === "structured") score += 10;
     else if (fit.structure === "structured" && recipe.structure === "tailored") score += 10;
-    else if (fit.structure && recipe.structure && fit.structure !== recipe.structure) score -= moodDriven ? 4 : 10;
+    else if (fit.structure && recipe.structure && fit.structure !== recipe.structure) score -= moodDriven || occasionDriven ? 4 : 10;
 
     const hasOuter = items.some((k) => familyOfKey(k) === "blazer");
     if (fit.preferOuter === true && hasOuter) score += 8;
     if (fit.preferOuter === false && !hasOuter) score += 8;
-    if (fit.preferOuter === true && !hasOuter) score -= moodDriven ? 2 : 5;
+    if (fit.preferOuter === true && !hasOuter) score -= moodDriven || occasionDriven ? 2 : 5;
     if (life.preferOuter === true && hasOuter) score += 4;
     if (life.preferOuter === false && !hasOuter) score += 4;
 
     // Prefer base vs alt pieces per fit
     const altCount = items.filter((k) => ALT_MAP_REV[k]).length;
-    if (fit.preferBase === true && !moodDriven) score += Math.max(0, 4 - altCount) * 2;
-    if (fit.preferBase === false || styleMoods.includes("streetwear")) score += altCount * 3;
+    if (fit.preferBase === true && !moodDriven && !occasionDriven) score += Math.max(0, 4 - altCount) * 2;
+    if (fit.preferBase === false || styleMoods.includes("streetwear") || promptOccasions.includes("active")) score += altCount * 3;
 
-    // --- Occasions (prompt beats profile) ---
-    for (const o of recipe.occasions || []) {
-      if (promptOccasions.includes(o)) score += 24;
-      else if (profileOccasions.includes(o)) score += 12;
-      else if (occasions.includes(o)) score += 4;
+    // Formality gates from the request
+    if (promptOccasions.includes("weekend") || promptOccasions.includes("everyday") || promptOccasions.includes("street") || promptOccasions.includes("active") || styleMoods.includes("streetwear")) {
+      if ((recipe.occasions || []).includes("wedding") || (recipe.occasions || []).includes("formal")) score -= 28;
     }
-    // Penalize formal recipes for casual/street prompts and vice versa
-    if (promptOccasions.includes("weekend") || promptOccasions.includes("everyday") || promptOccasions.includes("street") || styleMoods.includes("streetwear")) {
-      if ((recipe.occasions || []).includes("wedding") || (recipe.occasions || []).includes("formal")) score -= 12;
+    if (promptOccasions.includes("wedding") || promptOccasions.includes("event")) {
+      if ((recipe.occasions || []).some((o) => ["wedding", "event", "formal", "celebration"].includes(o))) score += 18;
+      if (!hasOuter && recipe.styleFamily !== "sexy" && recipe.styleFamily !== "romantic") score -= 10;
     }
-    if (promptOccasions.includes("wedding") || promptOccasions.includes("formal") || styleMoods.includes("classy")) {
-      if (!hasOuter && recipe.styleFamily !== "sexy") score -= 6;
+    if (promptOccasions.includes("active")) {
+      if (recipe.styleFamily === "streetwear" || recipe.structure === "relaxed") score += 30;
+      if (hasOuter && recipe.styleFamily === "classy") score -= 22;
     }
     if (promptOccasions.includes("sexy") || styleMoods.includes("sexy")) {
-      if ((recipe.vibe || []).includes("sexy") || recipe.styleFamily === "sexy") score += 20;
+      if ((recipe.vibe || []).includes("sexy") || recipe.styleFamily === "sexy") score += 24;
+    }
+    if (promptOccasions.includes("work") && !promptOccasions.includes("dinner")) {
+      if ((recipe.occasions || []).includes("work") || recipe.styleFamily === "classy" || recipe.styleFamily === "modern") score += 16;
+      if (recipe.styleFamily === "sexy" || recipe.styleFamily === "streetwear") score -= 12;
+    }
+    if (promptOccasions.includes("dinner") || promptOccasions.includes("work")) {
+      if ((recipe.occasions || []).includes("dinner") || (recipe.occasions || []).includes("work") || (recipe.occasions || []).includes("evening")) score += 14;
     }
 
     // --- Palette (hard constraint — green only when chosen) ---
@@ -3798,6 +3852,7 @@ export default function VestraPrototype() {
       const isWeek = weekPlan || live.mode === "week";
       const promptOccasions = detectOccasions(finalText);
       const outfits = live.outfits.map((o, i) => {
+        // Prefer Claude's styleFamily; only fall back to prompt mood when model omitted it
         const styleFamily = o.styleFamily || primaryMood || undefined;
         return {
           ...o,
@@ -3809,7 +3864,7 @@ export default function VestraPrototype() {
           occasion: resolveHeroOccasionSlug({
             occasion: o.occasion,
             styleFamily,
-            occasions: isWeek && i === 4 ? ["dinner", "sexy"] : promptOccasions,
+            occasions: isWeek && i === 4 ? ["dinner"] : promptOccasions,
             prompt: finalText,
           }),
         };
