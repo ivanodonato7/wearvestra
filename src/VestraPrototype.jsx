@@ -2225,10 +2225,10 @@ function resolveModelImage(itemKeys) {
 }
 
 // ==================== ONBOARDING DATA ====================
-/** Prefer men's photography for quiz cards; fall back to any available image. */
+/** Prefer men's photography for quiz cards. */
 function resolveStepImage(meta) {
   if (!meta) return "";
-  return meta.image || meta.man || meta.woman || "";
+  return meta.image || meta.man || "";
 }
 
 const LIFESTYLE_OPTIONS = ["Office / client-facing", "Creative or flexible workplace", "Remote, mostly at home", "On the move — travel, events, varied", "Student life"];
@@ -2412,27 +2412,50 @@ const EMPTY_PROFILE = {
 const APP_STAGES = new Set(["welcome", "signup", "onboarding", "reveal", "occasion", "app"]);
 const STORAGE_KEY = "vestra.profile.v1";
 
+/** Strip legacy gender/audience fields from profiles saved before men's-only. */
+function sanitizeProfile(profile) {
+  if (!profile || typeof profile !== "object") return { ...EMPTY_PROFILE };
+  const {
+    audience: _audience,
+    modelGender: _modelGender,
+    ...rest
+  } = profile;
+  return rest;
+}
+
+function sanitizeAnswers(answers) {
+  if (!answers || typeof answers !== "object") {
+    return {
+      name: "", lifestyle: null, archetype: null, fit: null, palette: [], avoid: [], budget: null, occasions: [], sizes: {},
+    };
+  }
+  const { audience: _audience, ...rest } = answers;
+  return rest;
+}
+
 function loadStoredState() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw);
     const hadAudienceStep = !!(parsed?.answers && "audience" in parsed.answers)
-      || !!(parsed?.profile && ("audience" in parsed.profile || "modelGender" in parsed.profile));
+      || !!(parsed?.profile && ("audience" in (parsed.profile || {}) || "modelGender" in (parsed.profile || {})));
     if (hadAudienceStep && Number.isFinite(parsed?.step) && parsed.step > 0) {
       // Old quizzes started with audience at index 0 — shift down one step
       parsed.step = Math.max(0, parsed.step - 1);
     }
-    if (parsed?.profile) {
-      const { audience, modelGender, ...rest } = parsed.profile;
-      parsed.profile = rest;
-    }
-    if (parsed?.answers && "audience" in parsed.answers) {
-      const { audience, ...rest } = parsed.answers;
-      parsed.answers = rest;
-    }
+    if (parsed?.profile) parsed.profile = sanitizeProfile(parsed.profile);
+    if (parsed?.answers) parsed.answers = sanitizeAnswers(parsed.answers);
     if (Number.isFinite(parsed?.step) && parsed.step >= STEPS.length) {
       parsed.step = Math.max(0, STEPS.length - 1);
+    }
+    // Rewrite storage immediately so stale "Ladies" / modelGender never linger
+    if (hadAudienceStep) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+      } catch {
+        /* ignore */
+      }
     }
     return parsed;
   } catch {
@@ -2485,10 +2508,10 @@ function persistBootstrap({ stage, profile, lang = "en", tab = "home", step = 0,
       stage,
       step,
       tab,
-      profile: profile || prev.profile || EMPTY_PROFILE,
-      answers: answers || prev.answers || {
+      profile: sanitizeProfile(profile || prev.profile || EMPTY_PROFILE),
+      answers: sanitizeAnswers(answers || prev.answers || {
         name: "", lifestyle: null, archetype: null, fit: null, palette: [], avoid: [], budget: null, occasions: [], sizes: {},
-      },
+      }),
       savedOutfits: prev.savedOutfits || [],
       messages,
     };
@@ -3671,11 +3694,11 @@ export default function VestraPrototype() {
   const [lang, setLang] = useState(stored?.lang || "en");
   const [stage, setStage] = useState(() => initialStageFromStorage(stored));
   const [step, setStep] = useState(() => (Number.isFinite(stored?.step) ? stored.step : 0));
-  const [answers, setAnswers] = useState(() => stored?.answers || {
+  const [answers, setAnswers] = useState(() => sanitizeAnswers(stored?.answers || {
     name: "", lifestyle: null, archetype: null, fit: null, palette: [], avoid: [], budget: null, occasions: [], sizes: {},
-  });
+  }));
   // Fresh visitors start empty — DEFAULT_PROFILE is only for "Skip for testing"
-  const [profile, setProfile] = useState(() => stored?.profile || EMPTY_PROFILE);
+  const [profile, setProfile] = useState(() => sanitizeProfile(stored?.profile || EMPTY_PROFILE));
 
   const [tab, setTab] = useState(stored?.tab || "home");
   const [messages, setMessages] = useState(stored?.messages || []);
@@ -3699,8 +3722,8 @@ export default function VestraPrototype() {
           stage,
           step,
           tab,
-          profile,
-          answers,
+          profile: sanitizeProfile(profile),
+          answers: sanitizeAnswers(answers),
           savedOutfits: savedOutfits.slice(-20),
           messages: messages.slice(-30),
         };
