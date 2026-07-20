@@ -10,9 +10,11 @@
   timeout = 26
 
 [functions."product-feed-sync"]
-  # Daily 07:00 UTC — refresh filtered menswear cache from Awin Create-a-Feed
+  timeout = 10
+
+[functions."product-feed-sync-background"]
+  # Daily 07:00 UTC — long-running Create-a-Feed stream (background, up to ~15 min)
   schedule = "0 7 * * *"
-  timeout = 300
 
 [[redirects]]
   from = "/api/stylist"
@@ -24,8 +26,14 @@
   to = "/.netlify/functions/product-search"
   status = 200
 
+# Long sync — background function (202 Accepted, continues server-side)
 [[redirects]]
   from = "/api/product-feed-sync"
+  to = "/.netlify/functions/product-feed-sync-background"
+  status = 200
+
+[[redirects]]
+  from = "/api/product-feed-status"
   to = "/.netlify/functions/product-feed-sync"
   status = 200
 
