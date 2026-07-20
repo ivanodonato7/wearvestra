@@ -1,6 +1,7 @@
 /**
- * Client for /api/product-search (Awin product feed proxy).
- * Session-caches the mens catalog so we don't hammer the API every stylist turn.
+ * Client for /api/product-search (cached Awin menswear feed).
+ * Session-caches the response so we don't re-hit Netlify on every stylist turn.
+ * The heavy Create-a-Feed download runs on a daily sync job, not here.
  */
 import { applyLiveProducts, resetCatalog } from "./catalogStore.js";
 
