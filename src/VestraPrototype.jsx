@@ -1050,11 +1050,11 @@ function variantsForKey(key) {
   return fam ? (ITEM_FAMILY_VARIANTS[fam] || [key]) : [key];
 }
 
-/** Cap keys sent to Claude — stubs first, then a sample of live ss-* products. */
+/** Cap keys sent to Claude — stubs first, then a sample of live aw-/ss-* products. */
 function catalogKeysForStylist(maxLive = 180) {
   const all = Object.keys(CATALOG);
-  const stubs = all.filter((k) => !String(k).startsWith("ss-"));
-  const live = all.filter((k) => String(k).startsWith("ss-"));
+  const stubs = all.filter((k) => !/^(aw|ss)-/i.test(String(k)));
+  const live = all.filter((k) => /^(aw|ss)-/i.test(String(k)));
   if (live.length <= maxLive) return all;
   // Round-robin by family so Claude sees blazers, shirts, trousers, etc.
   const byFam = {};
@@ -3767,7 +3767,7 @@ export default function VestraPrototype() {
   const [savedIds, setSavedIds] = useState(new Set());
   const [savedOutfits, setSavedOutfits] = useState(stored?.savedOutfits || []);
 
-  // Pull live ShopStyle feed (session-cached); falls back to backup catalog on failure
+  // Pull live Awin feed (session-cached); falls back to backup catalog on failure
   useEffect(() => {
     ensureProductCatalog().catch(() => {});
   }, []);

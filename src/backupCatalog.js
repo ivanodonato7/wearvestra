@@ -1,5 +1,5 @@
 /**
- * Hardcoded men's backup catalog — used when ShopStyle / live feed is unavailable.
+ * Hardcoded men's backup catalog — used when Awin / live feed is unavailable.
  * Shape matches live products so the stylist + shop UI keep working offline.
  */
 const ASSET_V = "backup-1";

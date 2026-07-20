@@ -1,6 +1,6 @@
 /**
  * Mutable product catalog used by the stylist UI.
- * Starts as the hardcoded backup; `applyLiveProducts` merges ShopStyle (or any
+ * Starts as the hardcoded backup; `applyLiveProducts` merges Awin (or any
  * live feed) items in without breaking recipe stub keys.
  */
 import { BACKUP_CATALOG, BACKUP_FAMILY_VARIANTS } from "./backupCatalog.js";
@@ -113,7 +113,7 @@ export function applyLiveProducts(liveItems = []) {
       searchNoun: raw.searchNoun || raw.name,
       shopUrl: raw.shopUrl || raw.clickUrl || null,
       inStock: raw.inStock !== false,
-      source: raw.source || "shopstyle",
+      source: raw.source || "awin",
     };
     next[key] = item;
     if (family) {
@@ -150,14 +150,14 @@ export function applyLiveProducts(liveItems = []) {
       searchNoun: best.searchNoun || stub.searchNoun,
       shopUrl: best.shopUrl,
       inStock: best.inStock !== false,
-      source: best.source || "shopstyle",
+      source: best.source || "awin",
       liveKey: best.key,
     };
   }
 
   CATALOG = next;
   ITEM_FAMILY_VARIANTS = rebuildFamilyVariants(next);
-  catalogSource = "shopstyle";
+  catalogSource = "awin";
   return { count: Object.keys(CATALOG).length, source: catalogSource };
 }
 

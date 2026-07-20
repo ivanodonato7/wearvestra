@@ -1,10 +1,10 @@
 /**
- * Client for /api/product-search (ShopStyle Collective proxy).
+ * Client for /api/product-search (Awin product feed proxy).
  * Session-caches the mens catalog so we don't hammer the API every stylist turn.
  */
 import { applyLiveProducts, resetCatalog } from "./catalogStore.js";
 
-const CACHE_KEY = "vestra_product_catalog_v1";
+const CACHE_KEY = "vestra_product_catalog_awin_v1";
 const CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutes per session/tab
 
 function endpoint() {
@@ -75,7 +75,7 @@ export async function ensureProductCatalog({ force = false } = {}) {
       writeCache({
         fetchedAt: Date.now(),
         items,
-        source: data.source || "shopstyle",
+        source: data.source || "awin",
         reason: null,
       });
       return { ...applied, cached: false, reason: null };

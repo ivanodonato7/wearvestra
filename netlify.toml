@@ -6,6 +6,9 @@
 [functions."generate-hero"]
   timeout = 26
 
+[functions."product-search"]
+  timeout = 26
+
 [[redirects]]
   from = "/api/stylist"
   to = "/.netlify/functions/stylist"
