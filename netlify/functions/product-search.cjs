@@ -89,10 +89,10 @@ exports.handler = async (event) => {
         caps: DEFAULT_CAPS,
         maxTotal,
       });
-      if (items.length) await writeMenswearCache({ items, meta });
+      if (items.length) await writeMenswearCache({ items, meta }, event);
     }
 
-    const cache = await readMenswearCache();
+    const cache = await readMenswearCache(event);
     if (!cache?.items?.length) {
       return {
         statusCode: 200,
