@@ -12,6 +12,11 @@
   status = 200
 
 [[redirects]]
+  from = "/api/product-search"
+  to = "/.netlify/functions/product-search"
+  status = 200
+
+[[redirects]]
   from = "/api/generate-hero"
   to = "/.netlify/functions/generate-hero"
   status = 200

@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect, useCallback, useMemo, memo, createC
 import { Home, MessageCircle, Bookmark, ShoppingBag, User, Send, RefreshCw, Check, Sparkles, ArrowLeft, ExternalLink, X } from "lucide-react";
 import { fetchStylistLooks, isWeekPlanPrompt } from "./stylistApi";
 import { clearHeroCache } from "./heroApi";
+import { CATALOG, ITEM_FAMILY_VARIANTS } from "./catalogStore";
+import { ensureProductCatalog } from "./productCatalogApi";
 
 // ==================== LANGUAGE / i18n ====================
 // A real backend barely needs any of this — Claude already answers fluently
@@ -481,29 +483,6 @@ const assetUrl = (path) => `${path}?v=${ASSET_V}`;
 
 const GREEN_PALETTE = new Set(["Olive", "Forest Green"]);
 const NEUTRAL_PALETTE = new Set(["Black", "Ivory / Cream", "White", "Grey / Charcoal"]);
-
-const CATALOG = {
-  blazer: { key: "blazer", id: "p1", name: "Wool-Blend Tailored Blazer", price: 320, retailer: "Considered Studio", type: "blazer", color: "#3E4228", paletteTags: ["Olive", "Forest Green"], image: assetUrl("/products/blazer.jpg"), searchQuery: "olive green wool tailored blazer", searchNoun: "wool tailored blazer" },
-  blazerAlt: { key: "blazerAlt", id: "p1b", name: "Unstructured Linen Blazer", price: 265, retailer: "North & Field", type: "blazer", color: "#cbb994", paletteTags: ["Sand / Beige", "Camel / Tan", "Ivory / Cream"], image: assetUrl("/products/blazer-alt.jpg"), searchQuery: "sand beige unstructured linen blazer", searchNoun: "unstructured linen blazer" },
-  blazerNavy: { key: "blazerNavy", id: "p1c", name: "Navy Wool Tailored Blazer", price: 310, retailer: "Considered Studio", type: "blazer", color: "#1f2a44", paletteTags: ["Navy"], image: assetUrl("/products/blazer-navy.jpg"), searchQuery: "navy wool tailored blazer", searchNoun: "wool tailored blazer" },
-  blazerBlack: { key: "blazerBlack", id: "p1d", name: "Black Wool Tailored Blazer", price: 315, retailer: "Considered Studio", type: "blazer", color: "#161616", paletteTags: ["Black"], image: assetUrl("/products/blazer-black.jpg"), searchQuery: "black wool tailored blazer", searchNoun: "wool tailored blazer" },
-  shirt: { key: "shirt", id: "p2", name: "Crisp Cotton Shirt", price: 95, retailer: "Considered Studio", type: "shirt", color: "#F5F2E9", paletteTags: ["Ivory / Cream", "White"], image: assetUrl("/products/shirt.jpg"), searchQuery: "ivory crisp cotton dress shirt", searchNoun: "crisp cotton dress shirt" },
-  shirtAlt: { key: "shirtAlt", id: "p2b", name: "Fine Merino Turtleneck", price: 110, retailer: "North & Field", type: "shirt", color: "#4a4a48", paletteTags: ["Grey / Charcoal", "Black"], image: assetUrl("/products/shirt-alt.jpg"), searchQuery: "charcoal fine merino turtleneck sweater", searchNoun: "fine merino turtleneck sweater" },
-  trouser: { key: "trouser", id: "p3", name: "Tailored Straight Trouser", price: 140, retailer: "Considered Studio", type: "trouser", color: "#3E4228", paletteTags: ["Olive", "Forest Green"], image: assetUrl("/products/trouser.jpg"), searchQuery: "olive tailored straight leg trousers", searchNoun: "tailored straight leg trousers" },
-  trouserAlt: { key: "trouserAlt", id: "p3b", name: "Wide-Leg Wool Trouser", price: 165, retailer: "Considered Studio", type: "trouser", color: "#6b6b63", paletteTags: ["Grey / Charcoal"], image: assetUrl("/products/trouser-alt.jpg"), searchQuery: "grey wide leg wool trousers", searchNoun: "wide leg wool trousers" },
-  trouserNavy: { key: "trouserNavy", id: "p3c", name: "Navy Tailored Trouser", price: 145, retailer: "Considered Studio", type: "trouser", color: "#1f2a44", paletteTags: ["Navy"], image: assetUrl("/products/trouser-navy.jpg"), searchQuery: "navy tailored dress trousers", searchNoun: "tailored dress trousers" },
-  trouserBlack: { key: "trouserBlack", id: "p3d", name: "Black Tailored Trouser", price: 145, retailer: "Considered Studio", type: "trouser", color: "#161616", paletteTags: ["Black"], image: assetUrl("/products/trouser-black.jpg"), searchQuery: "black tailored dress trousers", searchNoun: "tailored dress trousers" },
-  shoe: { key: "shoe", id: "p4", name: "Leather Derby Shoe", price: 210, retailer: "Aldern & Co.", type: "shoe", color: "#6b3f22", paletteTags: ["Camel / Tan", "Rust / Terracotta"], image: assetUrl("/products/shoe.jpg"), searchQuery: "brown leather derby dress shoes", searchNoun: "leather derby dress shoes" },
-  shoeAlt: { key: "shoeAlt", id: "p4b", name: "Suede Chelsea Boot", price: 245, retailer: "Aldern & Co.", type: "shoe", color: "#4a3527", paletteTags: ["Camel / Tan", "Black"], image: assetUrl("/products/shoe-alt.jpg"), searchQuery: "dark brown suede chelsea boots", searchNoun: "suede chelsea boots" },
-  shoeBlack: { key: "shoeBlack", id: "p4c", name: "Black Leather Derby", price: 220, retailer: "Aldern & Co.", type: "shoe", color: "#161616", paletteTags: ["Black"], image: assetUrl("/products/shoe-black.jpg"), searchQuery: "black leather derby dress shoes", searchNoun: "leather derby dress shoes" },
-  scarf: { key: "scarf", id: "p5", name: "Fine Wool Scarf", price: 85, retailer: "North & Field", type: "accessory", color: "#b08a5c", paletteTags: ["Camel / Tan"], image: assetUrl("/products/scarf.jpg"), searchQuery: "camel tan fine wool scarf", searchNoun: "fine wool scarf" },
-  scarfAlt: { key: "scarfAlt", id: "p5b", name: "Cashmere Pocket Square", price: 65, retailer: "Aldern & Co.", type: "accessory", color: "#C6A567", paletteTags: ["Bold Color", "Camel / Tan"], image: assetUrl("/products/scarf-alt.jpg"), searchQuery: "gold cashmere pocket square", searchNoun: "cashmere pocket square" },
-  scarfBurgundy: { key: "scarfBurgundy", id: "p5c", name: "Burgundy Wool Scarf", price: 88, retailer: "North & Field", type: "accessory", color: "#5c1f2e", paletteTags: ["Burgundy"], image: assetUrl("/products/scarf-burgundy.jpg"), searchQuery: "burgundy wool scarf", searchNoun: "wool scarf" },
-  belt: { key: "belt", id: "p6", name: "Leather Belt", price: 95, retailer: "Aldern & Co.", type: "accessory", color: "#6b3f22", paletteTags: ["Camel / Tan", "Rust / Terracotta"], image: assetUrl("/products/belt.jpg"), searchQuery: "brown leather dress belt", searchNoun: "leather dress belt" },
-  beltAlt: { key: "beltAlt", id: "p6b", name: "Black Leather Belt", price: 90, retailer: "Aldern & Co.", type: "accessory", color: "#161616", paletteTags: ["Black"], image: assetUrl("/products/belt-alt.jpg"), searchQuery: "black leather dress belt", searchNoun: "leather dress belt" },
-  sunglasses: { key: "sunglasses", id: "p7", name: "Acetate Sunglasses", price: 145, retailer: "North & Field", type: "accessory", color: "#8B5A2B", paletteTags: ["Camel / Tan", "Rust / Terracotta"], image: assetUrl("/products/sunglasses.jpg"), searchQuery: "tortoise acetate sunglasses", searchNoun: "acetate sunglasses" },
-  sunglassesAlt: { key: "sunglassesAlt", id: "p7b", name: "Black Acetate Sunglasses", price: 135, retailer: "North & Field", type: "accessory", color: "#0B0B0C", paletteTags: ["Black"], image: assetUrl("/products/sunglasses-alt.jpg"), searchQuery: "black acetate sunglasses", searchNoun: "acetate sunglasses" },
-};
 
 /** Search phrases for each palette swatch — used to make shopping precise. */
 const COLOR_SEARCH_TERMS = {
@@ -1052,28 +1031,47 @@ const ALT_MAP = {
 };
 const ALT_MAP_REV = Object.fromEntries(Object.entries(ALT_MAP).map(([k, v]) => [v, k]));
 
-/** All color/cut variants per garment family — palette picker chooses among these. */
-const ITEM_FAMILY_VARIANTS = {
-  blazer: ["blazer", "blazerAlt", "blazerNavy", "blazerBlack"],
-  shirt: ["shirt", "shirtAlt"],
-  trouser: ["trouser", "trouserAlt", "trouserNavy", "trouserBlack"],
-  shoe: ["shoe", "shoeAlt", "shoeBlack"],
-  scarf: ["scarf", "scarfAlt", "scarfBurgundy"],
-  belt: ["belt", "beltAlt"],
-  sunglasses: ["sunglasses", "sunglassesAlt"],
-};
-const KEY_TO_FAMILY = Object.fromEntries(
-  Object.entries(ITEM_FAMILY_VARIANTS).flatMap(([fam, keys]) => keys.map((k) => [k, fam]))
-);
-
 function familyOfKey(key) {
   if (!key) return null;
-  return KEY_TO_FAMILY[key] || (ITEM_FAMILY_VARIANTS[key] ? key : null);
+  const item = CATALOG[key];
+  if (item?.family) return item.family;
+  if (item?.type && item.type !== "accessory") return item.type;
+  for (const [fam, keys] of Object.entries(ITEM_FAMILY_VARIANTS)) {
+    if (keys.includes(key)) return fam;
+  }
+  if (ITEM_FAMILY_VARIANTS[key]) return key;
+  // Live keys: ss-12345 — infer from prefix conventions when catalog row missing
+  if (/^ss-/i.test(String(key))) return null;
+  return null;
 }
 
 function variantsForKey(key) {
   const fam = familyOfKey(key);
-  return fam ? ITEM_FAMILY_VARIANTS[fam] : [key];
+  return fam ? (ITEM_FAMILY_VARIANTS[fam] || [key]) : [key];
+}
+
+/** Cap keys sent to Claude — stubs first, then a sample of live ss-* products. */
+function catalogKeysForStylist(maxLive = 180) {
+  const all = Object.keys(CATALOG);
+  const stubs = all.filter((k) => !String(k).startsWith("ss-"));
+  const live = all.filter((k) => String(k).startsWith("ss-"));
+  if (live.length <= maxLive) return all;
+  // Round-robin by family so Claude sees blazers, shirts, trousers, etc.
+  const byFam = {};
+  for (const k of live) {
+    const fam = familyOfKey(k) || "other";
+    if (!byFam[fam]) byFam[fam] = [];
+    byFam[fam].push(k);
+  }
+  const picked = [];
+  const fams = Object.keys(byFam);
+  let i = 0;
+  while (picked.length < maxLive && fams.some((f) => byFam[f].length)) {
+    const fam = fams[i % fams.length];
+    if (byFam[fam].length) picked.push(byFam[fam].shift());
+    i += 1;
+  }
+  return [...stubs, ...picked];
 }
 
 /** Best catalog variant for a family given the user's palette. */
@@ -3132,6 +3130,7 @@ function ShopSheet({ item, onClose, favoriteStores = [], palette = [], avoid = [
 
   const searchQuery = buildItemSearchQuery(item, palette, avoid, styleFamily);
   const paletteLabels = (palette || []).filter((p) => !(avoid || []).includes(p));
+  const affiliateUrl = item.shopUrl || item.clickUrl || null;
 
   useEffect(() => {
     if (!item) return undefined;
@@ -3175,7 +3174,7 @@ function ShopSheet({ item, onClose, favoriteStores = [], palette = [], avoid = [
 
   if (!item) return null;
   const links = storeLinksForItem(item, palette, avoid, styleFamily);
-  const shoppingUrl = googleShoppingUrl(searchQuery);
+  const shoppingUrl = affiliateUrl || googleShoppingUrl(searchQuery);
   const favSet = new Set(favoriteStores);
   const favoriteLinks = links.filter((s) => favSet.has(s.id));
   const paletteHint = paletteLabels.slice(0, 4).map((l) => tOpt(l)).join(", ");
@@ -3238,9 +3237,15 @@ function ShopSheet({ item, onClose, favoriteStores = [], palette = [], avoid = [
           )}
         </div>
 
-        <a className="shop-google" href={shoppingUrl} target="_blank" rel="noopener noreferrer">
-          {t("shopOpenAll")} <ExternalLink size={13} />
-        </a>
+        {affiliateUrl ? (
+          <a className="shop-google" href={affiliateUrl} target="_blank" rel="noopener noreferrer">
+            {t("viewProduct")} <ExternalLink size={13} />
+          </a>
+        ) : (
+          <a className="shop-google" href={shoppingUrl} target="_blank" rel="noopener noreferrer">
+            {t("shopOpenAll")} <ExternalLink size={13} />
+          </a>
+        )}
 
         <button type="button" className="shop-more-toggle" onClick={() => setShowStores((v) => !v)}>
           {t("shopMoreStores")} ({t("shopStoreCount").replace("{count}", String(links.length))}) {showStores ? "−" : "+"}
@@ -3595,7 +3600,7 @@ function WardrobeScreen({ savedOutfits, favoriteStores, palette = [], avoid = []
 function BagScreen({ savedOutfits, favoriteStores, palette = [], avoid = [] }) {
   const { t, tName } = useLang();
   const [shopItem, setShopItem] = useState(null);
-  const allItems = savedOutfits.flatMap((o) => o.items.map((k) => CATALOG[k]));
+  const allItems = savedOutfits.flatMap((o) => o.items.map((k) => CATALOG[k]).filter(Boolean));
   const byRetailer = allItems.reduce((acc, item) => {
     acc[item.retailer] = acc[item.retailer] || [];
     acc[item.retailer].push(item);
@@ -3762,6 +3767,11 @@ export default function VestraPrototype() {
   const [savedIds, setSavedIds] = useState(new Set());
   const [savedOutfits, setSavedOutfits] = useState(stored?.savedOutfits || []);
 
+  // Pull live ShopStyle feed (session-cached); falls back to backup catalog on failure
+  useEffect(() => {
+    ensureProductCatalog().catch(() => {});
+  }, []);
+
   const t = useCallback((key) => (UI[lang] && UI[lang][key]) || UI.en[key] || key, [lang]);
   const tOpt = useCallback((value) => (OPTIONS_I18N[lang] && OPTIONS_I18N[lang][value]) || value, [lang]);
   const tName = useCallback((item) => (PRODUCT_NAMES_I18N[lang] && PRODUCT_NAMES_I18N[lang][item.id]) || item.name, [lang]);
@@ -3839,12 +3849,15 @@ export default function VestraPrototype() {
     const styleMoods = detectStyleMoods(finalText);
     const primaryMood = styleMoods[0] || null;
 
+    // Refresh live catalog if needed (uses session cache — cheap after first load)
+    await ensureProductCatalog();
+
     // Try live Claude stylist (Netlify function / custom endpoint), else local composer
     const live = await fetchStylistLooks({
       prompt: finalText,
       profile: activeProfile,
       lang,
-      catalogKeys: Object.keys(CATALOG),
+      catalogKeys: catalogKeysForStylist(),
       mode: weekPlan ? "week" : "looks",
     });
     if (live?.outfits?.length) {
