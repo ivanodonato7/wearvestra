@@ -1,21 +1,13 @@
 /**
  * product-search — serve cached Awin menswear (fast path).
  *
- * Reads the filtered subset written by product-feed-sync (Netlify Blobs /tmp).
- * Does NOT re-download the ~900MB Create-a-Feed on each request.
- *
- * Returns Vestra-shaped items, or { source: "backup", items: [] } when the
- * cache is empty so the client keeps using BACKUP_CATALOG.
- *
- * Optional: POST { "sync": true } triggers a sync first (slow; for admin use).
- * Prefer the daily scheduled product-feed-sync instead.
+ * Primary cache: /data/menswear-catalog.json (shipped with the site after sync).
+ * Secondary: Netlify Blobs (if connectLambda works).
+ * Fallback: empty → client uses BACKUP_CATALOG.
  */
 const {
   readMenswearCache,
   resolveFeedUrl,
-  streamMenswearFromFeedUrl,
-  writeMenswearCache,
-  DEFAULT_CAPS,
 } = require("./lib/awinMenswearFeed.cjs");
 
 function corsHeaders() {
@@ -30,7 +22,6 @@ function corsHeaders() {
 function sampleItems(items, limit) {
   if (!items?.length) return [];
   if (items.length <= limit) return items;
-  // Round-robin by family so the stylist sees jackets + shirts + shoes, not one category
   const byFam = {};
   for (const item of items) {
     const fam = item.family || "other";
@@ -46,6 +37,29 @@ function sampleItems(items, limit) {
     i += 1;
   }
   return out;
+}
+
+function siteOrigin(event) {
+  const proto = event.headers?.["x-forwarded-proto"] || "https";
+  const host = event.headers?.["x-forwarded-host"] || event.headers?.host;
+  if (host) return `${proto}://${host}`;
+  return "https://wearvestra.com";
+}
+
+async function readStaticCatalog(event) {
+  const url = `${siteOrigin(event)}/data/menswear-catalog.json`;
+  try {
+    const res = await fetch(url, {
+      headers: { Accept: "application/json" },
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (Array.isArray(data?.items) && data.items.length) return data;
+  } catch (err) {
+    console.error("readStaticCatalog failed", err?.message || err);
+  }
+  return null;
 }
 
 exports.handler = async (event) => {
@@ -67,32 +81,15 @@ exports.handler = async (event) => {
   }
 
   const limit = Math.min(Math.max(Number(body.limit || body.maxProducts || 500), 20), 1200);
-  const wantSync = Boolean(body.sync);
 
   try {
-    if (wantSync) {
-      const feedUrl = resolveFeedUrl();
-      if (!feedUrl) {
-        return {
-          statusCode: 200,
-          headers,
-          body: JSON.stringify({
-            source: "backup",
-            reason: "missing_feed_url",
-            items: [],
-            message: "Set AWIN_FEED_URL before forcing a sync.",
-          }),
-        };
-      }
-      const maxTotal = Math.min(Math.max(Number(process.env.AWIN_MAX_PRODUCTS || 4000), 100), 8000);
-      const { items, meta } = await streamMenswearFromFeedUrl(feedUrl, {
-        caps: DEFAULT_CAPS,
-        maxTotal,
-      });
-      if (items.length) await writeMenswearCache({ items, meta }, event);
+    let cache = await readStaticCatalog(event);
+    let cacheVia = cache ? "static" : null;
+    if (!cache) {
+      cache = await readMenswearCache(event);
+      if (cache) cacheVia = "blobs";
     }
 
-    const cache = await readMenswearCache(event);
     if (!cache?.items?.length) {
       return {
         statusCode: 200,
@@ -101,9 +98,7 @@ exports.handler = async (event) => {
           source: "backup",
           reason: resolveFeedUrl() ? "cache_empty" : "missing_feed_url",
           items: [],
-          message: resolveFeedUrl()
-            ? "Menswear cache empty — run /api/product-feed-sync (or wait for the daily job)."
-            : "Set AWIN_FEED_URL in Netlify, then run product-feed-sync once.",
+          message: "Menswear cache empty — deploy public/data/menswear-catalog.json or run product-feed-sync.",
         }),
       };
     }
@@ -117,6 +112,7 @@ exports.handler = async (event) => {
         reason: null,
         count: items.length,
         cachedTotal: cache.items.length,
+        cacheVia,
         fetchedAt: cache.meta?.fetchedAt || cache.fetchedAt || null,
         meta: cache.meta || null,
         items,
