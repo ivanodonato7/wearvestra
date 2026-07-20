@@ -91,14 +91,42 @@ function inferFamily(blob) {
   return null;
 }
 
+function fashionCell(row, suffix) {
+  // Create-a-Feed headers arrive as "Fashion:suitable_for" → normalized variously
+  return cell(
+    row,
+    `fashion:${suffix}`,
+    `fashion_${suffix}`,
+    `fashion%3a${suffix}`,
+    suffix,
+  );
+}
+
 function isMenswearRow(row) {
+  const suitable = fashionCell(row, "suitable_for");
+  const fashionCat = fashionCell(row, "category");
   const blob = [
+    suitable,
+    fashionCat,
     cell(row, "gender"),
     cell(row, "category_name", "category", "merchant_category", "product_type", "fashion_product_type"),
+    cell(row, "merchant_product_category_path", "merchant_product_second_category", "merchant_product_third_category"),
     cell(row, "product_name", "name", "title"),
-    cell(row, "description", "description_short"),
+    cell(row, "description", "description_short", "product_short_description"),
+    cell(row, "keywords"),
     cell(row, "custom_1", "custom_2", "custom_3"),
   ].join(" ");
+
+  // Fashion:suitable_for is the strongest signal in this Create-a-Feed
+  if (suitable) {
+    const s = suitable.toLowerCase();
+    if (/\b(women|womens|woman|ladies|female|girl|kids?|children|baby|infant)\b/.test(s) && !/\b(men|mens|man|male|unisex)\b/.test(s)) {
+      return false;
+    }
+    if (/\b(men|mens|man|male|unisex|him)\b/.test(s)) {
+      return Boolean(inferFamily(`${fashionCat} ${blob}`) || GARMENT_RE.test(blob));
+    }
+  }
 
   if (EXCLUDE_RE.test(blob) && !/\b(men|mens|man's|male|unisex)\b/i.test(blob)) {
     return false;
@@ -115,11 +143,11 @@ function isMenswearRow(row) {
 
 function normalizeRow(row) {
   const name = cell(row, "product_name", "name", "title");
-  const shopUrl = cell(row, "aw_deep_link", "deep_link", "merchant_deep_link", "aw_product_url", "product_url");
+  const shopUrl = cell(row, "aw_deep_link", "deep_link", "merchant_deep_link", "aw_product_url", "product_url", "basket_link");
   if (!name || !shopUrl) return null;
   if (PLACEHOLDER_RE.test(shopUrl) || PLACEHOLDER_RE.test(name)) return null;
 
-  const stock = cell(row, "in_stock", "stock_status", "availability").toLowerCase();
+  const stock = cell(row, "in_stock", "stock_status", "availability", "size_stock_status").toLowerCase();
   if (stock && /out\s*of\s*stock|unavailable|false|0\b|no\b/.test(stock) && !/in\s*stock|true|yes|1\b/.test(stock)) {
     return null;
   }
@@ -127,22 +155,24 @@ function normalizeRow(row) {
   if (!isMenswearRow(row)) return null;
 
   const blob = [
-    cell(row, "category_name", "category", "merchant_category"),
+    fashionCell(row, "category"),
+    cell(row, "category_name", "category", "merchant_category", "merchant_product_category_path"),
     name,
     cell(row, "product_type", "fashion_product_type"),
-    cell(row, "description"),
+    cell(row, "description", "product_short_description"),
+    fashionCell(row, "suitable_for"),
     cell(row, "gender"),
   ].join(" ");
   const meta = inferFamily(blob);
   if (!meta) return null;
 
-  const price = parsePrice(cell(row, "search_price", "store_price", "price", "display_price", "rrp_price"));
+  const price = parsePrice(cell(row, "search_price", "store_price", "price", "display_price", "rrp_price", "base_price"));
   // Keep items with placeholder/missing price — shop link still works; UI can hide $0
   const colourText = `${cell(row, "colour", "color", "colour_name")} ${name}`;
   const { paletteTags, color } = mapColors(colourText);
   const id = cell(row, "aw_product_id", "product_id", "merchant_product_id", "id")
     || `${meta.family}-${Buffer.from(name).toString("base64url").slice(0, 16)}`;
-  const image = cell(row, "aw_image_url", "merchant_image_url", "image_url", "large_image", "aw_thumb_url");
+  const image = cell(row, "aw_image_url", "merchant_image_url", "image_url", "large_image", "aw_thumb_url", "merchant_thumb_url");
 
   return {
     key: `aw-${id}`,
@@ -164,7 +194,7 @@ function normalizeRow(row) {
     inStock: true,
     source: "awin",
     merchantId: cell(row, "merchant_id", "advertiser_id") || null,
-    category: cell(row, "category_name", "category") || null,
+    category: cell(row, "category_name", "category", "merchant_category") || fashionCell(row, "category") || null,
   };
 }
 
@@ -308,6 +338,7 @@ async function streamMenswearFromFeedUrl(feedUrl, {
   let kept = 0;
   let skippedPlaceholderPrice = 0;
   const byFamily = Object.fromEntries(Object.keys(caps).map((k) => [k, []]));
+  const familySeen = Object.fromEntries(Object.keys(caps).map((k) => [k, 0]));
   const seen = new Set();
 
   try {
@@ -317,13 +348,18 @@ async function streamMenswearFromFeedUrl(feedUrl, {
         const headerLine = String(line).replace(/^\uFEFF/, "");
         delimiter = detectDelimiter(headerLine);
         headers = splitLine(headerLine, delimiter).map((h) =>
-          String(h || "").trim().toLowerCase().replace(/\s+/g, "_")
+          String(h || "")
+            .trim()
+            .toLowerCase()
+            .replace(/\s+/g, "_")
+            .replace(/:/g, "_")
+            .replace(/%3a/gi, "_")
         );
         continue;
       }
       scanned += 1;
       if (scanned % 25000 === 0 && typeof onProgress === "function") {
-        onProgress({ scanned, kept });
+        onProgress({ scanned, kept: Object.values(byFamily).reduce((n, a) => n + a.length, 0) });
       }
 
       const cols = splitLine(line, delimiter);
@@ -340,11 +376,28 @@ async function streamMenswearFromFeedUrl(feedUrl, {
       if (seen.has(item.id)) continue;
       const bucket = byFamily[item.family];
       if (!bucket) continue;
-      if (bucket.length >= (caps[item.family] || 0)) continue;
-      seen.add(item.id);
-      bucket.push(item);
-      kept += 1;
-      if (kept >= maxTotal) break;
+      const cap = caps[item.family] || 0;
+      familySeen[item.family] = (familySeen[item.family] || 0) + 1;
+      const seenForFam = familySeen[item.family];
+
+      // Reservoir sample so late merchants aren't crowded out by the first 25k rows
+      if (bucket.length < cap) {
+        seen.add(item.id);
+        bucket.push(item);
+      } else {
+        const j = Math.floor(Math.random() * seenForFam);
+        if (j < cap) {
+          const prev = bucket[j];
+          if (prev?.id) seen.delete(prev.id);
+          seen.add(item.id);
+          bucket[j] = item;
+        }
+      }
+
+      const total = Object.values(byFamily).reduce((n, a) => n + a.length, 0);
+      // Never early-exit — we want reservoir coverage across the full feed.
+      // Soft stop only if somehow over maxTotal (shouldn't happen with caps).
+      if (total > maxTotal + 50) break;
     }
   } finally {
     rl.close();
