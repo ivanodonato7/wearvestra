@@ -266,8 +266,9 @@ function pickBest(pool, target, palette, avoid, structureHint, family) {
     if (formal) {
       if (/\b(suit|tuxedo|blazer|dress\s*(shirt|shoe|pant|trouser)|oxford|derby|wingtip|wool)\b/i.test(name)) s += 20;
       if (/\b(cargo|jogger|hoodie|sneaker|graphic\s*t-?shirt|novelty|walking\s*suit|denim\s*suit)\b/i.test(name)) s -= 40;
-      if (target.preferDark && /\b(black|navy|charcoal|dark|grey|gray)\b/i.test(name)) s += 18;
-      if (target.preferDark && /\b(red|pink|orange|neon|bright|white\s*prom|mint|mauve)\b/i.test(name)) s -= 30;
+      if (target.preferDark && /\b(black|navy|charcoal|dark|grey|gray)\b/i.test(name)) s += 22;
+      if (target.preferDark && /\b(red|pink|orange|neon|bright|white\s*prom|mint|mauve|coral|lattice)\b/i.test(name)) s -= 45;
+      if (target.label === "formal-dark" && family === "blazer" && /\bblack\b/i.test(name) && !/\bwhite\b/i.test(name)) s += 25;
       if (family === "trouser" && /\b(pant|trouser|chino)\b/i.test(name) && !/\b(suit|blazer)\b/i.test(name)) s += 12;
       if (family === "shirt" && /\bdress\s*shirt\b/i.test(name)) s += 15;
       if (family === "belt" && !/\bbelts?\b/i.test(name)) s -= 80;
