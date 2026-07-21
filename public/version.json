@@ -1,6 +1,6 @@
 {
   "name": "vestra",
-  "build": "home-profile-polish-2026-07-21",
+  "build": "mens-stores-2026-07-21",
   "features": [
     "mens-only",
     "awin-catalog",
@@ -9,6 +9,7 @@
     "stripe-billing",
     "catalog-image-fallback",
     "home-polish",
-    "profile-polish"
+    "profile-polish",
+    "mens-store-directory"
   ]
 }
