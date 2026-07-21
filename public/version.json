@@ -1,15 +1,14 @@
 {
   "name": "vestra",
-  "build": "mens-stores-2026-07-21",
+  "build": "legal-pages-2026-07-21",
   "features": [
     "mens-only",
     "awin-catalog",
-    "awin-static-catalog",
     "supabase-auth",
     "stripe-billing",
-    "catalog-image-fallback",
     "home-polish",
     "profile-polish",
-    "mens-store-directory"
+    "mens-store-directory",
+    "legal-pages"
   ]
 }

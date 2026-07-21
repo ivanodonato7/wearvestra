@@ -73,6 +73,10 @@ const UI = {
     namePlaceholder: "Your first name", emailPlaceholder: "your@email.com", continueBtn: "Continue",
     signupEmailLabel: "Email", signupPasswordLabel: "Password", passwordPlaceholder: "At least 6 characters",
     signupNote: "Guests can still skip — Style DNA stays on this device until you create an account.",
+    signupLegalAgree: "By signing up, you agree to our {terms} and {privacy}.",
+    footerTerms: "Terms",
+    footerPrivacy: "Privacy",
+    footerSupport: "Support",
     nameRequired: "Please enter your name to continue.",
     emailRequired: "Add a valid email.",
     passwordRequired: "Password must be at least 6 characters.",
@@ -219,6 +223,10 @@ const UI = {
     namePlaceholder: "Tu nombre", emailPlaceholder: "tu@email.com", continueBtn: "Continuar",
     signupEmailLabel: "Email", signupPasswordLabel: "Contraseña", passwordPlaceholder: "Mínimo 6 caracteres",
     signupNote: "También puedes saltar — tu ADN de estilo queda en este dispositivo.",
+    signupLegalAgree: "Al registrarte, aceptas nuestros {terms} y la {privacy}.",
+    footerTerms: "Términos",
+    footerPrivacy: "Privacidad",
+    footerSupport: "Soporte",
     nameRequired: "Escribe tu nombre para continuar.",
     emailRequired: "Añade un email válido.",
     passwordRequired: "La contraseña debe tener al menos 6 caracteres.",
@@ -365,6 +373,10 @@ const UI = {
     namePlaceholder: "Votre prénom", emailPlaceholder: "votre@email.com", continueBtn: "Continuer",
     signupEmailLabel: "Email", signupPasswordLabel: "Mot de passe", passwordPlaceholder: "Au moins 6 caractères",
     signupNote: "Vous pouvez aussi passer — l’ADN Style reste sur cet appareil.",
+    signupLegalAgree: "En vous inscrivant, vous acceptez nos {terms} et notre {privacy}.",
+    footerTerms: "Conditions",
+    footerPrivacy: "Confidentialité",
+    footerSupport: "Support",
     nameRequired: "Indiquez votre prénom pour continuer.",
     emailRequired: "Ajoutez un email valide.",
     passwordRequired: "Le mot de passe doit contenir au moins 6 caractères.",
@@ -2736,6 +2748,19 @@ function InstallSheet({ platform, onClose, deferredPrompt, onPromptInstall }) {
 }
 
 // ==================== ONBOARDING SCREENS ====================
+function SiteFooter({ className = "" }) {
+  const { t } = useLang();
+  return (
+    <footer className={`site-footer ${className}`.trim()}>
+      <a href="/terms">{t("footerTerms")}</a>
+      <span className="site-footer-sep" aria-hidden="true">·</span>
+      <a href="/privacy">{t("footerPrivacy")}</a>
+      <span className="site-footer-sep" aria-hidden="true">·</span>
+      <a href="mailto:support@wearvestra.com">{t("footerSupport")}</a>
+    </footer>
+  );
+}
+
 function WelcomeScreen({ onStart, onSkip }) {
   const { t } = useLang();
   const [installPlatform, setInstallPlatform] = useState(null);
@@ -2833,6 +2858,8 @@ function WelcomeScreen({ onStart, onSkip }) {
       >
         {t("skipTesting")}
       </button>
+
+      <SiteFooter className="site-footer-onboarding" />
 
       {installPlatform && (
         <InstallSheet
@@ -3039,6 +3066,17 @@ function SignupScreen({ onContinue, onBack, onAuthSuccess }) {
                   <button className="onb-primary-btn" type="submit" disabled={busy} style={{ marginTop: 20 }}>
                     {busy ? t("authBusy") : (mode === "signup" ? t("authSubmitSignup") : t("authSubmitLogin"))}
                   </button>
+                  {mode === "signup" ? (
+                    <p className="auth-legal-agree">
+                      {t("signupLegalAgree")
+                        .split(/(\{terms\}|\{privacy\})/)
+                        .map((part, i) => {
+                          if (part === "{terms}") return <a key={i} href="/terms">{t("footerTerms")}</a>;
+                          if (part === "{privacy}") return <a key={i} href="/privacy">{t("footerPrivacy")}</a>;
+                          return <span key={i}>{part}</span>;
+                        })}
+                    </p>
+                  ) : null}
                 </>
               ) : (
                 <>
@@ -3053,11 +3091,21 @@ function SignupScreen({ onContinue, onBack, onAuthSuccess }) {
                   />
                   {hint ? <p className="auth-error-box" role="alert">{hint}</p> : null}
                   <button className="onb-primary-btn" type="submit" style={{ marginTop: 20 }}>{t("continueBtn")}</button>
+                  <p className="auth-legal-agree">
+                    {t("signupLegalAgree")
+                      .split(/(\{terms\}|\{privacy\})/)
+                      .map((part, i) => {
+                        if (part === "{terms}") return <a key={i} href="/terms">{t("footerTerms")}</a>;
+                        if (part === "{privacy}") return <a key={i} href="/privacy">{t("footerPrivacy")}</a>;
+                        return <span key={i}>{part}</span>;
+                      })}
+                  </p>
                   <p className="onb-fine-print">{t("authCloudOff")}</p>
                 </>
               )}
             </form>
             <p className="onb-fine-print">{t("signupNote")}</p>
+            <SiteFooter className="site-footer-onboarding" />
           </>
         )}
       </div>
@@ -4110,6 +4158,8 @@ function ProfileScreen({
           </div>
         )}
       </div>
+
+      <SiteFooter className="site-footer-profile" />
     </div>
   );
 }
@@ -4724,6 +4774,7 @@ export default function VestraPrototype() {
                 </button>
               ))}
             </nav>
+            <SiteFooter className="site-footer-desktop" />
           </aside>
         )}
         <div className="phone-body">
