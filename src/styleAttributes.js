@@ -188,7 +188,7 @@ function shortName(item) {
   const color = colors[0] ? colors[0].split(" / ")[0] : null;
   const fam = item.family || item.type || "piece";
   const noun = {
-    blazer: "blazer",
+    blazer: /\b(suits?|tuxedo|tux)\b/i.test(item.name || "") ? "suit" : "blazer",
     shirt: /\b(hoodie|sweat)\b/i.test(item.name || "") ? "hoodie" : /\bturtleneck|jumper|sweater\b/i.test(item.name || "") ? "knit" : "shirt",
     trouser: /\b(short)\b/i.test(item.name || "") ? "shorts" : /\bchino\b/i.test(item.name || "") ? "chinos" : "trousers",
     shoe: /\b(sneaker|trainer)\b/i.test(item.name || "") ? "sneakers" : "shoes",

@@ -125,6 +125,13 @@ function applyEnrichmentToItem(item, enrich) {
     out.enrichmentOk = false;
     return out;
   }
+  // Non-apparel / unusable category — keep for audit but mark unusable
+  if (!enrich.family || enrich.categoryCorrected === "other") {
+    out.enrichmentConfidence = enrich.confidence === "high" ? "medium" : enrich.confidence;
+    out.enrichmentOk = false;
+    out.categoryCorrected = enrich.categoryCorrected || "other";
+    return out;
+  }
   out.enrichmentConfidence = enrich.confidence;
   out.enrichmentOk = true;
   out.formality = enrich.formality;

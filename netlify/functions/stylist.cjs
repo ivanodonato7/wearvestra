@@ -5,6 +5,7 @@
  * Catalog arrives as product cards (name, family, colors, cut, formality) so the
  * model can coordinate outfits — not bare stub keys from the old fictional catalog.
  */
+const { enforceOnePerCategory, isNonApparelMeta } = require("./lib/outfitAssembly.cjs");
 const SYSTEM_LOOKS = `You are Vestra, a men's stylist for guys who do NOT already know how to dress.
 They will trust your picks completely. A bad combination is a core failure — not a minor miss.
 You ONLY use catalog product keys from the provided list.
@@ -40,13 +41,17 @@ STYLIST RULES (hard — never break)
    - Avoid all-fitted stacks AND all-loose stacks unless the user explicitly asked for that mood (e.g. streetwear oversized).
    - One clear silhouette story per look (outer on/off is fine for variety across the 3 options).
 
-4) ONE KEY PER GARMENT FAMILY
+4) ONE KEY PER GARMENT FAMILY — NEVER STACK COMPETING OUTERS
    At most one of: blazer, shirt, trouser, shoe, and one accessory (belt|scarf|sunglasses).
+   Never put two jackets/suits/blazers/linen sets in the same look.
+   A full suit OR tuxedo counts as the blazer slot — do NOT also add another suit or separate jacket.
+   Trouser slot must be trousers/chinos/pants — never a second full suit.
+   Never include non-clothing (cologne, fragrance, mugs, watches, bags, gift sets).
    items[] must be catalog keys only.
 
 5) WHY THIS WORKS (required)
    whyThisWorks AND rationale must be the SAME single plain sentence (≤160 chars).
-   Explain coordination in human words — name garments/colors/formality, NEVER catalog keys.
+   Explain coordination in human words — name the ACTUAL garments/colors you picked, NEVER catalog keys.
    Good: "Navy blazer keeps this formal enough for a wedding; ivory shirt keeps it from feeling heavy."
    Bad: "Looks nice." / "aw-123 with shirtAlt."
    If you cannot write a honest whyThisWorks for the combo, the outfit is wrong — rebuild it.
@@ -278,12 +283,15 @@ Build 3 coordinated outfits for someone who does not know how to dress. Each nee
 
     const mapped = (parsed.outfits || [])
       .map((o, i) => {
-        const items = (o.items || []).filter((k) => {
+        const filtered = (o.items || []).filter((k) => {
           if (!allowed.has(k)) return false;
           const meta = byKey.get(k);
+          if (!meta || isNonApparelMeta(meta)) return false;
           if (meta && target && itemBlockedByTarget(meta, formalityTarget || target)) return false;
           return true;
         });
+        // Hard enforce ≤1 per family (Claude sometimes stacks suits)
+        const items = enforceOnePerCategory(filtered, byKey);
         const why = normalizeWhy(o);
         const silhouette = o.silhouette || silhouetteOf(items, byKey);
         const recentHits = items.reduce((n, k) => n + (avoidItems.has(k) ? 1 : 0), 0);

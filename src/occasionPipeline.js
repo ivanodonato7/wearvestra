@@ -14,6 +14,13 @@ import { formalityScore } from "./formality.js";
 import { composeCoordinatedOutfits } from "./outfitCoordinator.js";
 import { buildWhyThisWorks } from "./styleAttributes.js";
 import { detectOccasions, OCCASION_KEYWORDS } from "./occasions.js";
+import {
+  enforceOnePerCategory,
+  fillMissingCoreSlots,
+  apparelEligible,
+  validateLookShape,
+  isFullSuitProduct,
+} from "./outfitAssembly.js";
 
 export { detectOccasions, OCCASION_KEYWORDS };
 
@@ -83,7 +90,7 @@ function templatesForPrompt(prompt, occasions) {
 
 export function remapOutfitItemsToLive(itemKeys, prompt, occasions, profile = {}) {
   if (catalogSource !== "awin" || !liveCatalogItems().length) {
-    return (itemKeys || []).filter((k) => CATALOG[k]);
+    return (itemKeys || []).filter((k) => CATALOG[k] && apparelEligible(CATALOG[k]));
   }
   const used = new Set();
   const palette = profile?.palette || [];
@@ -92,6 +99,7 @@ export function remapOutfitItemsToLive(itemKeys, prompt, occasions, profile = {}
   const out = [];
   for (const key of itemKeys || []) {
     const existing = CATALOG[key];
+    if (existing && !apparelEligible(existing)) continue;
     const fam = familyOfKey(key) || existing?.family || existing?.type;
     if (!fam) continue;
     // Keep a live item that already fits — don't reshuffle to the same top pick
@@ -100,6 +108,7 @@ export function remapOutfitItemsToLive(itemKeys, prompt, occasions, profile = {}
       && existing.shopUrl
       && (existing.brand || existing.retailer)
       && itemFitsOccasion(existing, target).ok
+      && apparelEligible(existing)
     ) {
       used.add(key);
       out.push(key);
@@ -115,12 +124,12 @@ export function remapOutfitItemsToLive(itemKeys, prompt, occasions, profile = {}
     if (picked?.key) {
       used.add(picked.key);
       out.push(picked.key);
-    } else if (existing?.shopUrl) {
+    } else if (existing?.shopUrl && apparelEligible(existing)) {
       used.add(key);
       out.push(key);
     }
   }
-  return out;
+  return enforceOnePerCategory(out, (k) => CATALOG[k]);
 }
 
 export function sanitizeOutfitForOccasion(outfit, prompt, occasions, profile = {}) {
@@ -148,6 +157,9 @@ export function sanitizeOutfitForOccasion(outfit, prompt, occasions, profile = {
     }
   }
 
+  // Hard rule: ≤1 per core family, ≤1 accessory, apparel only
+  remapped = enforceOnePerCategory(remapped, (k) => CATALOG[k]);
+
   let hasOuter = remapped.some((k) => (CATALOG[k]?.family || familyOfKey(k)) === "blazer");
   if (target.requireOuter && !hasOuter) {
     const blazer = pickLiveForFamily("blazer", {
@@ -158,6 +170,7 @@ export function sanitizeOutfitForOccasion(outfit, prompt, occasions, profile = {
       avoid: profile?.avoid || [],
     });
     if (blazer) remapped = [blazer.key, ...remapped];
+    remapped = enforceOnePerCategory(remapped, (k) => CATALOG[k]);
   }
   if (target.forbidOuter) {
     remapped = remapped.filter((k) => (CATALOG[k]?.family || familyOfKey(k)) !== "blazer");
@@ -166,6 +179,7 @@ export function sanitizeOutfitForOccasion(outfit, prompt, occasions, profile = {
   const used = new Set(remapped);
   remapped = remapped.map((k) => {
     const item = CATALOG[k];
+    if (!item || !apparelEligible(item)) return null;
     if (!item?.shopUrl) {
       const fam = familyOfKey(k) || item?.family;
       const alt = fam
@@ -205,12 +219,45 @@ export function sanitizeOutfitForOccasion(outfit, prompt, occasions, profile = {
     return k;
   }).filter(Boolean);
 
+  remapped = enforceOnePerCategory(remapped, (k) => CATALOG[k]);
+  remapped = fillMissingCoreSlots(remapped, {
+    resolve: (k) => CATALOG[k],
+    requireOuter: !!target.requireOuter,
+    pickFamily: (fam, usedKeys) => {
+      // When outer is already a full suit, never refill trousers with another suit
+      const blazerKey = [...usedKeys].find((k) => CATALOG[k]?.family === "blazer");
+      const blazer = blazerKey ? CATALOG[blazerKey] : null;
+      const picked = pickLiveForFamily(fam, {
+        prompt,
+        occasions,
+        palette: profile?.palette || [],
+        avoid: profile?.avoid || [],
+        usedKeys,
+      });
+      if (fam === "trouser" && blazer && isFullSuitProduct(blazer) && picked && isFullSuitProduct(picked)) {
+        usedKeys.add(picked.key);
+        const alt = pickLiveForFamily(fam, {
+          prompt,
+          occasions,
+          palette: profile?.palette || [],
+          avoid: profile?.avoid || [],
+          usedKeys,
+        });
+        return alt && !isFullSuitProduct(alt) ? alt : null;
+      }
+      return picked;
+    },
+  });
+
   if (remapped.length < 3) return null;
   for (const k of remapped) {
     const item = CATALOG[k];
     if (!item?.shopUrl || !(item.brand || item.retailer)) return null;
+    if (!apparelEligible(item)) return null;
     if (itemFitsOccasion(item, target).reason === "hardBan") return null;
   }
+  const shape = validateLookShape(remapped.map((k) => CATALOG[k]).filter(Boolean));
+  if (!shape.ok) return null;
   return { ...outfit, items: remapped };
 }
 
