@@ -288,6 +288,22 @@
 }
 .auth-field-label:first-of-type{ margin-top:4px !important; }
 .auth-error{ color:#a85832 !important; }
+.auth-error-box{
+  width:100%; max-width:320px; margin:12px auto 0; text-align:left;
+  background:#f8ebe4; border:1px solid #e2b5a0; color:#8a3b22;
+  border-radius:4px; padding:10px 12px; font-size:12.5px; line-height:1.4;
+}
+.auth-status-banner{
+  width:100%; max-width:320px; margin:8px auto 18px; text-align:left;
+  background:#eef6ea; border:1px solid #b7d0a8; border-radius:4px; padding:14px 14px 16px;
+}
+.auth-status-title{
+  font-family:'Fraunces',serif; font-size:20px; color:#0B0B0C; margin-bottom:8px;
+}
+.auth-status-body{
+  font-size:13px; color:#5b5748; font-weight:300; line-height:1.45; margin:0 0 8px;
+}
+.auth-form{ width:100%; max-width:320px; margin:0 auto; display:flex; flex-direction:column; align-items:center; }
 .profile-reset-block .empty-note{ margin:0 0 14px; }
 .profile-reset-btn{
   width:100%; box-sizing:border-box; font-size:11px; letter-spacing:0.06em; text-transform:uppercase;

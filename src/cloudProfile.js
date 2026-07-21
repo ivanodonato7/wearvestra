@@ -42,13 +42,14 @@ export async function getSessionUser() {
   return data.user;
 }
 
-export async function signUpWithEmail({ email, password, name }) {
+export async function signUpWithEmail({ email, password, name, emailRedirectTo }) {
   if (!supabase) throw new Error("Supabase is not configured");
   const { data, error } = await supabase.auth.signUp({
-    email: String(email || "").trim(),
+    email: String(email || "").trim().toLowerCase(),
     password: String(password || ""),
     options: {
       data: { name: String(name || "").trim() },
+      emailRedirectTo: emailRedirectTo || undefined,
     },
   });
   if (error) throw error;
@@ -58,7 +59,7 @@ export async function signUpWithEmail({ email, password, name }) {
 export async function signInWithEmail({ email, password }) {
   if (!supabase) throw new Error("Supabase is not configured");
   const { data, error } = await supabase.auth.signInWithPassword({
-    email: String(email || "").trim(),
+    email: String(email || "").trim().toLowerCase(),
     password: String(password || ""),
   });
   if (error) throw error;
