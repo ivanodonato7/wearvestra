@@ -7,6 +7,7 @@ import { BACKUP_CATALOG, BACKUP_FAMILY_VARIANTS } from "./backupCatalog.js";
 import { enrichItemFormality, formalityScore, itemFitsOccasion, occasionFormalityTarget } from "./formality.js";
 import { reclassifyItem, familyCoherent, isJunkProduct } from "./reclassify.js";
 import { enrichStyleAttributes } from "./styleAttributes.js";
+import { apparelEligible, isNonApparelProduct, isFullSuitProduct } from "./outfitAssembly.js";
 
 function cloneCatalog(src) {
   const out = {};
@@ -120,6 +121,7 @@ export function applyLiveProducts(liveItems = []) {
     if (!raw || raw.id == null) continue;
     if (!raw.shopUrl && !raw.clickUrl) continue;
     if (isJunkProduct(raw)) continue;
+    if (isNonApparelProduct(raw)) continue;
     const key = raw.key || `aw-${raw.id}`;
     const tags = raw.paletteTags?.length ? raw.paletteTags : ["Grey / Charcoal"];
     const base = {
@@ -147,6 +149,9 @@ export function applyLiveProducts(liveItems = []) {
     // Otherwise fall back to name-based reclassify + keyword formality/cut.
     const hasClaude = raw.enrichmentOk && raw.enrichmentConfidence && raw.enrichmentConfidence !== "low"
       && Number.isFinite(raw.formality);
+    // Claude tagged as "other" / non-apparel — never enter stylist pool
+    const corrected = String(raw.enrichment?.categoryCorrected || raw.categoryCorrected || raw.category || "").toLowerCase();
+    if (corrected === "other" || isNonApparelProduct(raw)) continue;
     let fixed = base;
     if (hasClaude) {
       fixed = {
@@ -253,7 +258,7 @@ export function getCatalogKeys() {
   return Object.keys(CATALOG);
 }
 
-/** Live shoppable items only (no fictional backup stubs). */
+/** Live shoppable apparel only (no fictional stubs, no mugs/cologne/other). */
 export function liveCatalogItems() {
   return Object.values(CATALOG).filter(
     (i) => i
@@ -261,8 +266,8 @@ export function liveCatalogItems() {
       && i.shopUrl
       && (i.brand || i.retailer)
       && /^(aw|ss)-/i.test(i.key)
-      // Deprioritize/exclude Claude low-confidence rather than risk bad matches
-      && i.enrichmentConfidence !== "low",
+      && i.enrichmentConfidence !== "low"
+      && apparelEligible(i),
   );
 }
 
@@ -298,6 +303,8 @@ function pickBest(pool, target, palette, avoid, structureHint, family) {
   const formal = target?.label === "formal" || target?.label === "formal-dark" || target?.label === "smart";
   for (const item of pool) {
     if (!familyCoherent(item, family || item.family)) continue;
+    // Never use a full suit SKU as the trouser slot — that stacks competing outers
+    if ((family || item.family) === "trouser" && isFullSuitProduct(item)) continue;
     const fit = itemFitsOccasion(item, target);
     if (!fit.ok && fit.score < -100) continue;
     let s = fit.score;
@@ -325,6 +332,7 @@ function pickBest(pool, target, palette, avoid, structureHint, family) {
       if (target.preferDark && /\b(red|pink|orange|neon|bright|white\s*prom|mint|mauve|coral|lattice)\b/i.test(name)) s -= 45;
       if (target.label === "formal-dark" && family === "blazer" && /\bblack\b/i.test(name) && !/\bwhite\b/i.test(name)) s += 25;
       if (family === "trouser" && /\b(pant|trouser|chino)\b/i.test(name) && !/\b(suit|blazer)\b/i.test(name)) s += 12;
+      if (family === "trouser" && isFullSuitProduct(item)) s -= 80;
       if (family === "shirt" && /\bdress\s*shirt\b/i.test(name)) s += 15;
       if (family === "belt" && !/\bbelts?\b/i.test(name)) s -= 80;
     }

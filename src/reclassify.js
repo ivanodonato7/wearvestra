@@ -3,7 +3,7 @@
  * Awin / merchant categories are messy — name-first rules prevent jeans-as-shoes.
  */
 
-const JUNK_RE = /\b(socks?|shoelaces?|boot\s*laces?|gloves?|hi[- ]?vis|safety\s*boot|tool|framer|wrench|hammer|womens?|ladies|girls?|maternity|skirt|gown|boys?\b)\b/i;
+const JUNK_RE = /\b(socks?|shoelaces?|boot\s*laces?|gloves?|hi[- ]?vis|safety\s*boot|tool|framer|wrench|hammer|womens?|ladies|girls?|maternity|skirt|gown|boys?\b|cologne|perfume|fragrance|aftershave|eau\s*de|body\s*spray|cufflinks?|tie\s*clip|mugs?\b|phone\s*case|luggage\s*tag|smartwatch|timepiece)\b/i;
 
 function isWomensOrNonGarment(name = "") {
   const n = String(name || "");
@@ -49,8 +49,8 @@ function nameLooksLikeFamily(name, family) {
     return /\b(shoe|boots?|sneaker|trainer|loafer|derby|oxfords?\b(?!\s*shirt)|monk|footwear|wingtip|brogue)\b/i.test(n);
   }
   if (family === "trouser") {
-    if (/\b(dress)\b/i.test(n) && !/\b(trouser|pant|chino|jean|suit)\b/i.test(n)) return false;
-    return /\b(trouser|chino|jean|pant|jogger|sweatpant|cargo|shorts?)\b/i.test(n)
+    if (/\b(dress)\b/i.test(n) && !/\b(trousers?|pant|chino|jean|suit)\b/i.test(n)) return false;
+    return /\b(trousers?|chinos?|jeans?|pants?|joggers?|sweatpants?|cargos?|shorts?)\b/i.test(n)
       && !/\b(dress\s*shoes?|sneakers?|loafer|derby)\b/i.test(n);
   }
   if (family === "shirt") return /\b(shirt|tee|t-shirt|polo|hoodie|sweater|jumper|turtleneck|knit|sweatshirt)\b/i.test(n) && !/\bsock/i.test(n);
@@ -66,6 +66,13 @@ export function isJunkProduct(item = {}) {
   if (JUNK_RE.test(blob)) return true;
   if (isWomensOrNonGarment(item.name || "")) return true;
   if (/\bwomens?\b/i.test(blob) && !/\bmens?\b/i.test(blob)) return true;
+  // Non-apparel enrichment / merchant categories
+  const corrected = String(item.enrichment?.categoryCorrected || item.categoryCorrected || "").toLowerCase();
+  if (corrected === "other") return true;
+  const cat = String(item.category || "");
+  if (/\b(bags?|watches?)\b/i.test(cat)) return true;
+  if (/^novelty/i.test(cat) && /\bmugs?\b/i.test(item.name || "")) return true;
+  if (/\bmugs?\.\s*$/i.test(item.name || "") || /\bmugs?\b/i.test(item.name || "")) return true;
   return false;
 }
 

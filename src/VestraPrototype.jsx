@@ -3930,7 +3930,8 @@ export default function VestraPrototype() {
           items: remapOutfitItemsToLive(raw.items, finalText, promptOccasions, activeProfile),
         };
         const resolved = (cleaned.items || []).map((k) => CATALOG[k]).filter(Boolean);
-        const why = cleaned.whyThisWorks || cleaned.rationale || buildWhyThisWorks(resolved, finalText, promptOccasions);
+        // Always describe the FINAL pieces — never keep a stale Claude why after remaps
+        const why = buildWhyThisWorks(resolved, finalText, promptOccasions);
         return { ...cleaned, rationale: why, whyThisWorks: why };
       }).filter((o) => o.items.length >= 3 && o.whyThisWorks);
       if (outfits.length) {

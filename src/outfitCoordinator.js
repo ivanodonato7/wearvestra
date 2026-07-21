@@ -11,6 +11,12 @@ import {
   isNeutralTag,
   outfitColorStats,
 } from "./styleAttributes.js";
+import {
+  apparelEligible,
+  isFullSuitProduct,
+  validateLookShape,
+  enforceOnePerCategory,
+} from "./outfitAssembly.js";
 
 const FORMAL_OCCASIONS = new Set(["wedding", "funeral", "event", "work"]);
 const ACTIVE_OCCASIONS = new Set(["active"]);
@@ -77,6 +83,7 @@ function scoreCandidate(item, {
   occasions,
 }) {
   if (!item || usedKeys.has(item.key)) return -Infinity;
+  if (!apparelEligible(item)) return -Infinity;
   const fit = itemFitsOccasion(item, target);
   if (!fit.ok && fit.score < -100) return -Infinity;
   let s = fit.score;
@@ -93,6 +100,7 @@ function scoreCandidate(item, {
     if (family === "shirt" && /\bdress\s*shirt\b/i.test(name)) s += 22;
     if (family === "shirt" && /\b(walking\s*suit|graphic|novelty|hoodie|tee)\b/i.test(name)) s -= 40;
     if (family === "trouser" && /\b(chino|dress|wool|trouser|pant)\b/i.test(name)) s += 12;
+    if (family === "trouser" && isFullSuitProduct(item)) s -= 90;
     if (family === "shoe" && /\b(dress\s*shoe|oxford|derby|loafer|wingtip)\b/i.test(name)) s += 18;
     if (target.preferDark) {
       if (/\b(black|charcoal|navy)\b/i.test(name)) s += 20;
@@ -130,6 +138,8 @@ function pickCoordinated(family, ctx) {
 
 function validateOutfit(items, target, occasions) {
   if (!items.length || items.length < 3) return { ok: false, reason: "too-few" };
+  const shape = validateLookShape(items);
+  if (!shape.ok) return shape;
   const formalities = items.map((i) => i.formality ?? 50);
   const spread = Math.max(...formalities) - Math.min(...formalities);
   // Hard: no wild formality mix (cargo + blazer)
@@ -137,6 +147,7 @@ function validateOutfit(items, target, occasions) {
     return { ok: false, reason: `formality-spread-${spread}` };
   }
   for (const item of items) {
+    if (!apparelEligible(item)) return { ok: false, reason: "non-apparel" };
     const fit = itemFitsOccasion(item, target);
     if (fit.reason === "hardBan") return { ok: false, reason: `ban:${item.name}` };
   }
@@ -256,9 +267,13 @@ export function composeCoordinatedOutfits(prompt, profile = {}, count = 3) {
       }
 
       if (picked.length < 3) continue;
-      const check = validateOutfit(picked, target, occasions);
+      // Harden against any accidental duplicate families from picks
+      const uniqueKeys = enforceOnePerCategory(picked.map((i) => i.key), (k) => CATALOG[k] || picked.find((p) => p.key === k));
+      const uniqueItems = uniqueKeys.map((k) => CATALOG[k] || picked.find((p) => p.key === k)).filter(Boolean);
+      if (uniqueItems.length < 3) continue;
+      const check = validateOutfit(uniqueItems, target, occasions);
       if (!check.ok) continue;
-      built = picked;
+      built = uniqueItems;
     }
 
     if (!built) continue;
