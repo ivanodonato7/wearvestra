@@ -1,0 +1,14 @@
+{
+  "generatedAt": "2026-07-21T16:48:12.563Z",
+  "catalogPath": "public/data/menswear-catalog.json",
+  "totalChecked": 2542,
+  "brokenCount": 0,
+  "okCount": 2542,
+  "percentBroken": 0,
+  "elapsedMs": 4106,
+  "concurrency": 40,
+  "timeoutMs": 12000,
+  "deep": true,
+  "byError": {},
+  "broken": []
+}

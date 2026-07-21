@@ -3,6 +3,7 @@ import { Home, MessageCircle, Bookmark, ShoppingBag, User, Send, RefreshCw, Chec
 import { fetchStylistLooks, isWeekPlanPrompt } from "./stylistApi";
 import { clearHeroCache } from "./heroApi";
 import { supabase, supabaseConfigured } from "./supabaseClient";
+import { CatalogImage } from "./CatalogImage";
 import {
   signUpWithEmail,
   signInWithEmail,
@@ -3547,7 +3548,7 @@ function ShopSheet({ item, onClose, favoriteStores = [], palette = [], avoid = [
           <X size={16} />
         </button>
         <div className="shop-hero">
-          <img className="shop-hero-image" src={item.image} alt={tName(item)} />
+          <CatalogImage className="shop-hero-image" src={item.image} alt={tName(item)} />
           <div className="shop-hero-copy">
             <div className="shop-hero-brand">{genreLabel || item.retailer}</div>
             <div className="shop-hero-name">{tName(item)}</div>
@@ -3573,7 +3574,7 @@ function ShopSheet({ item, onClose, favoriteStores = [], palette = [], avoid = [
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <img className="shop-stock-image" src={productThumb(product)} alt="" loading="lazy" />
+                  <CatalogImage className="shop-stock-image" src={productThumb(product)} alt="" loading="lazy" />
                   <div className="shop-stock-info">
                     <div className="shop-stock-merchant">{product.merchant || "Retailer"}</div>
                     <div className="shop-stock-title">{product.title}</div>
@@ -3705,7 +3706,7 @@ const OutfitCard = memo(function OutfitCard({
                   onClick={() => setShopItem(item)}
                   title={t("viewProduct")}
                 >
-                  <img className="item-row-image" src={item.image} alt={item.name || tName(base)} loading="lazy" decoding="async" />
+                  <CatalogImage className="item-row-image" src={item.image} alt={item.name || tName(base)} loading="lazy" decoding="async" />
                   <div className="item-row-info">
                     <div className="item-row-brand">{genreLabel || item.retailer}</div>
                     <div className="item-row-name">{item.name || tName(base)}</div>
@@ -3800,7 +3801,7 @@ function WeekShoppingList({ shoppingList, favoriteStores, palette = [], avoid = 
               className="week-shop-row"
               onClick={() => setShopItem(item)}
             >
-              <img className="week-shop-image" src={item.image} alt={tName(item)} loading="lazy" />
+              <CatalogImage className="week-shop-image" src={item.image} alt={tName(item)} loading="lazy" />
               <div className="week-shop-info">
                 <div className="week-shop-brand">{item.retailer}</div>
                 <div className="week-shop-name">{tName(item)}</div>
@@ -3977,7 +3978,7 @@ function BagScreen({ savedOutfits, favoriteStores, palette = [], avoid = [] }) {
                 onClick={() => setShopItem(item)}
                 title={t("viewProduct")}
               >
-                <img className="bag-image" src={item.image} alt={tName(item)} loading="lazy" />
+                <CatalogImage className="bag-image" src={item.image} alt={tName(item)} loading="lazy" />
                 <div className="bag-info">
                   <div className="bag-brand">{item.retailer}</div>
                   <div className="bag-name">{tName(item)}</div>
