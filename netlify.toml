@@ -34,6 +34,26 @@
   status = 200
 
 [[redirects]]
+  from = "/api/stripe-checkout"
+  to = "/.netlify/functions/stripe-checkout"
+  status = 200
+
+[[redirects]]
+  from = "/api/stripe-portal"
+  to = "/.netlify/functions/stripe-portal"
+  status = 200
+
+[[redirects]]
+  from = "/api/stripe-webhook"
+  to = "/.netlify/functions/stripe-webhook"
+  status = 200
+
+[[redirects]]
+  from = "/api/billing-status"
+  to = "/.netlify/functions/billing-status"
+  status = 200
+
+[[redirects]]
   from = "/api/catalog-enrich-sample"
   to = "/.netlify/functions/catalog-enrich-sample"
   status = 200

@@ -80,6 +80,10 @@ VITE_SUPABASE_ANON_KEY=eyJ…
 
 Once those are in Netlify (and redeployed), Sign up / Log in on wearvestra.com will talk to your Supabase project. Guests who tap **Skip for testing** keep using this-device localStorage only.
 
+## Billing (optional)
+
+For Vestra Pro ($8.99/mo or $69/yr), also run `supabase/billing.sql` and follow **`docs/STRIPE_SETUP.md`**.
+
 ## How data maps
 
 | App (today) | Supabase |

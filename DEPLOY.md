@@ -65,6 +65,15 @@ Without the key, looks still show the catalog collage + item list (no blocking e
    - `VITE_SUPABASE_ANON_KEY` = anon / publishable key
 3. Redeploy. Guests / “Skip for testing” still use `localStorage` only.
 
+## Stripe (Vestra Pro)
+
+Follow **`docs/STRIPE_SETUP.md`**. Required Netlify secrets (test mode first):
+
+- `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`
+- `STRIPE_PRICE_MONTHLY`, `STRIPE_PRICE_YEARLY`
+- `STRIPE_WEBHOOK_SECRET`
+- `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`
+
 Without these vars, the app behaves as before (device-only Style DNA).
 
 ---

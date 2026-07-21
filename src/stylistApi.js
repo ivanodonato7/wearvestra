@@ -7,6 +7,9 @@
  * Modes:
  *   - "looks" (default): 3 outfit options
  *   - "week": Mon–Fri week wardrobe plan (5 looks, no repeat silhouettes, shopping list)
+ *
+ * When Stripe billing is on, pass accessToken so the server can enforce the free cap.
+ * Quota / auth errors return { error, code, ... } instead of null (so UI can upgrade-prompt).
  */
 
 export function isWeekPlanPrompt(prompt) {
@@ -32,15 +35,26 @@ function stylistEndpoint() {
   return fromEnv || "/api/stylist";
 }
 
-async function postStylist(endpoint, payload, signal) {
+async function postStylist(endpoint, payload, signal, accessToken) {
+  const headers = { "Content-Type": "application/json" };
+  if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
   const res = await fetch(endpoint, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers,
     body: JSON.stringify(payload),
     signal,
   });
+  const data = await res.json().catch(() => ({}));
+  if (res.status === 401 || res.status === 402) {
+    return {
+      error: data.error || (res.status === 401 ? "Sign in required" : "Quota exceeded"),
+      code: data.code || (res.status === 401 ? "auth_required" : "quota_exceeded"),
+      used: data.used,
+      limit: data.limit,
+      remaining: data.remaining,
+    };
+  }
   if (!res.ok) return null;
-  const data = await res.json();
   if (!data?.outfits?.length) return null;
   return data;
 }
@@ -55,6 +69,7 @@ export async function fetchStylistLooks({
   mode,
   avoidRecentItems = [],
   avoidSilhouettes = [],
+  accessToken = null,
 }) {
   const resolvedMode = mode || (isWeekPlanPrompt(prompt) ? "week" : "looks");
   const timeoutMs = resolvedMode === "week" ? 22000 : 14000;
@@ -75,8 +90,9 @@ export async function fetchStylistLooks({
     avoidSilhouettes: [...new Set(avoidSilhouettes || [])].slice(0, 20),
   };
   try {
-    const data = await postStylist(stylistEndpoint(), payload, controller.signal);
+    const data = await postStylist(stylistEndpoint(), payload, controller.signal, accessToken);
     if (!data) return null;
+    if (data.error) return data;
     return {
       ...data,
       mode: data.mode || resolvedMode,

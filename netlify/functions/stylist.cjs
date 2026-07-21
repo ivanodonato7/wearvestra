@@ -6,6 +6,8 @@
  * model can coordinate outfits — not bare stub keys from the old fictional catalog.
  */
 const { enforceOnePerCategory, isNonApparelMeta } = require("./lib/outfitAssembly.cjs");
+const { getServiceClient, userFromAuthHeader } = require("./lib/supabaseAdmin.cjs");
+const { checkStylistQuota, consumeStylistRequest } = require("./lib/billing.cjs");
 const SYSTEM_LOOKS = `You are Vestra, a men's stylist for guys who do NOT already know how to dress.
 They will trust your picks completely. A bad combination is a core failure — not a minor miss.
 You ONLY use catalog product keys from the provided list.
@@ -177,7 +179,7 @@ function normalizeWhy(o) {
 exports.handler = async (event) => {
   const headers = {
     "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
     "Content-Type": "application/json",
   };
   if (event.httpMethod === "OPTIONS") {
@@ -190,6 +192,53 @@ exports.handler = async (event) => {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     return { statusCode: 503, headers, body: JSON.stringify({ error: "ANTHROPIC_API_KEY not configured" }) };
+  }
+
+  // When Stripe is configured, live stylist requires sign-in + free/Pro quota.
+  const billingOn = Boolean(String(process.env.STRIPE_SECRET_KEY || "").trim());
+  let billingUser = null;
+  let quotaMeta = null;
+  if (billingOn) {
+    billingUser = await userFromAuthHeader(event);
+    if (!billingUser) {
+      return {
+        statusCode: 401,
+        headers,
+        body: JSON.stringify({ error: "Sign in required for live stylist", code: "auth_required" }),
+      };
+    }
+    const admin = getServiceClient();
+    if (!admin) {
+      return {
+        statusCode: 503,
+        headers,
+        body: JSON.stringify({ error: "Billing backend not configured" }),
+      };
+    }
+    try {
+      const q = await checkStylistQuota(admin, billingUser.id);
+      if (!q.ok) {
+        return {
+          statusCode: 402,
+          headers,
+          body: JSON.stringify({
+            error: "Free stylist limit reached (6/month). Upgrade to Pro for unlimited.",
+            code: "quota_exceeded",
+            used: q.used,
+            limit: q.limit,
+            remaining: 0,
+            pro: false,
+          }),
+        };
+      }
+      quotaMeta = q;
+    } catch (err) {
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({ error: "Quota check failed", detail: String(err.message || err).slice(0, 200) }),
+      };
+    }
   }
 
   let body;
@@ -366,6 +415,16 @@ Build 3 coordinated outfits for someone who does not know how to dress. Each nee
         .filter((row) => allowed.has(row.key))
       : undefined;
 
+    let usage = quotaMeta;
+    if (billingOn && billingUser && !quotaMeta?.pro) {
+      try {
+        const admin = getServiceClient();
+        usage = await consumeStylistRequest(admin, billingUser.id);
+      } catch (err) {
+        console.error("consumeStylistRequest failed", err);
+      }
+    }
+
     return {
       statusCode: 200,
       headers,
@@ -374,6 +433,14 @@ Build 3 coordinated outfits for someone who does not know how to dress. Each nee
         shoppingList,
         mode: week ? "week" : "looks",
         source: "claude",
+        usage: usage
+          ? {
+            pro: !!usage.pro,
+            used: usage.used,
+            limit: usage.limit,
+            remaining: usage.remaining,
+          }
+          : undefined,
       }),
     };
   } catch (err) {
