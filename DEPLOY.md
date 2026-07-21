@@ -57,6 +57,18 @@ Without the key, looks still show the catalog collage + item list (no blocking e
 
 ---
 
+### Supabase accounts (Style DNA sync)
+
+1. Follow **`docs/SUPABASE_SETUP.md`** to create the project and run `supabase/schema.sql`.
+2. In Netlify → Environment variables, add:
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`
+3. Redeploy. Guests / “Skip for testing” still use `localStorage` only.
+
+Without these vars, the app behaves as before (device-only Style DNA).
+
+---
+
 ## Install as an app
 
 - iPhone: Safari → Share → **Add to Home Screen**

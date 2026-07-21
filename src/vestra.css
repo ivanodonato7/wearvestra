@@ -270,7 +270,17 @@
 .profile-row span:last-child{ text-align:right; }
 .profile-row:last-child{ border-bottom:none; }
 .profile-lang-row{ display:flex; align-items:center; justify-content:space-between; margin-top:16px; font-size:12.5px; }
-.profile-reset-block{ margin-top:28px; padding-top:20px; border-top:1px solid #e6e0d2; }
+.auth-mode-toggle{
+  display:flex; gap:8px; width:100%; max-width:320px; margin:0 auto 18px;
+}
+.auth-mode-btn{
+  flex:1; border:1px solid #ddd6c6; background:#fff; color:#5b5748;
+  border-radius:4px; padding:10px 12px; font-size:11px; letter-spacing:0.06em;
+  text-transform:uppercase; font-weight:600; cursor:pointer; font-family:'Inter',sans-serif;
+}
+.auth-mode-btn.active{ background:#0B0B0C; color:#C6A567; border-color:#0B0B0C; }
+.auth-account-row{ margin:16px 0 8px; }
+.auth-account-row .profile-reset-btn{ margin-top:10px; }
 .profile-reset-block .empty-note{ margin:0 0 14px; }
 .profile-reset-btn{
   width:100%; box-sizing:border-box; font-size:11px; letter-spacing:0.06em; text-transform:uppercase;

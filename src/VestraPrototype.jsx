@@ -2,6 +2,19 @@ import React, { useState, useRef, useEffect, useCallback, useMemo, memo, createC
 import { Home, MessageCircle, Bookmark, ShoppingBag, User, Send, RefreshCw, Check, Sparkles, ArrowLeft, ExternalLink, X } from "lucide-react";
 import { fetchStylistLooks, isWeekPlanPrompt } from "./stylistApi";
 import { clearHeroCache } from "./heroApi";
+import { supabase, supabaseConfigured } from "./supabaseClient";
+import {
+  signUpWithEmail,
+  signInWithEmail,
+  signOut,
+  getSessionUser,
+  fetchCloudProfile,
+  upsertCloudProfile,
+  fetchCloudSavedOutfits,
+  syncCloudSavedOutfits,
+  rowToProfile,
+  localHasImportableData,
+} from "./cloudProfile";
 import {
   CATALOG,
   ITEM_FAMILY_VARIANTS,
@@ -48,10 +61,25 @@ const UI = {
     downloadGotIt: "Got it",
     downloadOpenStore: "Open store",
     downloadUnavailable: "Store listing coming soon — install to your home screen for the full app.",
-    createAccountEyebrow: "Create Your Account", whereReachYouLine1: "What should we", whereReachYouLine2: "call you?",
+    createAccountEyebrow: "Account", whereReachYouLine1: "Create your account", whereReachYouLine2: "or log in to sync Style DNA.",
     namePlaceholder: "Your first name", emailPlaceholder: "your@email.com", continueBtn: "Continue",
-    signupEmailLabel: "Email (optional)", signupNote: "This is a prototype — no account is actually created.",
+    signupEmailLabel: "Email", signupPasswordLabel: "Password", passwordPlaceholder: "At least 6 characters",
+    signupNote: "Guests can still skip — Style DNA stays on this device until you create an account.",
     nameRequired: "Please enter your name to continue.",
+    emailRequired: "Add a valid email.",
+    passwordRequired: "Password must be at least 6 characters.",
+    authModeSignup: "Sign up", authModeLogin: "Log in",
+    authSubmitSignup: "Create account", authSubmitLogin: "Log in",
+    authBusy: "One moment…",
+    authErrorGeneric: "Couldn’t sign in. Check your email and password.",
+    authCloudOff: "Cloud accounts aren’t configured yet — continue with name only, or skip for testing.",
+    authSignedInAs: "Signed in as {email}",
+    authLogOut: "Log out",
+    authLocalOnly: "Saved on this device only",
+    importLocalTitle: "Save your Style DNA to this account?",
+    importLocalBody: "We found a style profile on this device. Import it so your looks sync when you log in elsewhere — or start fresh.",
+    importLocalYes: "Save to my account",
+    importLocalNo: "Start fresh",
     step0Title: "How would you describe your day-to-day?", step0Prompt: "Pick the photo that feels closest to your days.",
     lifeOfficeDesc: "Meetings, clients, and polished days that need to look intentional.",
     lifeCreativeDesc: "Flexible workplaces where you can dress with a little more ease.",
@@ -117,7 +145,7 @@ const UI = {
     profileTitle: "Profile", nameLabel: "Name", styleArchetypeLabel: "Style Archetype", fitPreferenceLabel: "Fit Preference",
     lifestyleLabel: "Day-to-day",
     paletteLabel: "Palette", budgetLabel: "Budget", dressesForLabel: "Dresses For",
-    prototypeNote: "Your Style DNA is saved on this device. Delete it anytime to start over.", languageLabel: "Language",
+    prototypeNote: "Guests: Style DNA stays on this device. Create an account to sync across phones.", languageLabel: "Language",
     deleteProfileLabel: "Start over",
     deleteProfileTitle: "Delete your style profile?",
     deleteProfileBody: "This clears your Style DNA, saved outfits, bag, and stylist chat so you can retake the quiz. Style changes — start fresh whenever you want.",
@@ -159,10 +187,25 @@ const UI = {
     downloadGotIt: "Entendido",
     downloadOpenStore: "Abrir tienda",
     downloadUnavailable: "La ficha en la tienda llega pronto — instálala en tu pantalla de inicio.",
-    createAccountEyebrow: "Crea tu cuenta", whereReachYouLine1: "¿Cómo te", whereReachYouLine2: "llamamos?",
+    createAccountEyebrow: "Cuenta", whereReachYouLine1: "Crea tu cuenta", whereReachYouLine2: "o inicia sesión.",
     namePlaceholder: "Tu nombre", emailPlaceholder: "tu@email.com", continueBtn: "Continuar",
-    signupEmailLabel: "Email (opcional)", signupNote: "Esto es un prototipo — no se crea ninguna cuenta real.",
+    signupEmailLabel: "Email", signupPasswordLabel: "Contraseña", passwordPlaceholder: "Mínimo 6 caracteres",
+    signupNote: "También puedes saltar — tu ADN de estilo queda en este dispositivo.",
     nameRequired: "Escribe tu nombre para continuar.",
+    emailRequired: "Añade un email válido.",
+    passwordRequired: "La contraseña debe tener al menos 6 caracteres.",
+    authModeSignup: "Crear cuenta", authModeLogin: "Entrar",
+    authSubmitSignup: "Crear cuenta", authSubmitLogin: "Entrar",
+    authBusy: "Un momento…",
+    authErrorGeneric: "No se pudo entrar. Revisa email y contraseña.",
+    authCloudOff: "Las cuentas en la nube aún no están configuradas — continúa con el nombre o salta para probar.",
+    authSignedInAs: "Sesión: {email}",
+    authLogOut: "Cerrar sesión",
+    authLocalOnly: "Solo en este dispositivo",
+    importLocalTitle: "¿Guardar tu ADN de estilo en esta cuenta?",
+    importLocalBody: "Hay un perfil en este dispositivo. Impórtalo para sincronizar, o empieza de cero.",
+    importLocalYes: "Guardar en mi cuenta",
+    importLocalNo: "Empezar de cero",
     step0Title: "¿Cómo describirías tu día a día?", step0Prompt: "Elige la foto que más se parezca a tus días.",
     lifeOfficeDesc: "Reuniones, clientes y días que piden un look intencional.",
     lifeCreativeDesc: "Espacios flexibles donde puedes vestirte con más soltura.",
@@ -228,7 +271,7 @@ const UI = {
     profileTitle: "Perfil", nameLabel: "Nombre", styleArchetypeLabel: "Arquetipo de Estilo", fitPreferenceLabel: "Preferencia de Ajuste",
     lifestyleLabel: "Día a día",
     paletteLabel: "Paleta", budgetLabel: "Presupuesto", dressesForLabel: "Se Viste Para",
-    prototypeNote: "Tu ADN de estilo se guarda en este dispositivo. Puedes borrarlo cuando quieras para empezar de nuevo.", languageLabel: "Idioma",
+    prototypeNote: "Invitados: el ADN de estilo queda en este dispositivo. Crea una cuenta para sincronizar.", languageLabel: "Idioma",
     deleteProfileLabel: "Empezar de nuevo",
     deleteProfileTitle: "¿Borrar tu perfil de estilo?",
     deleteProfileBody: "Esto borra tu ADN de estilo, looks guardados, bolsa y chat del estilista para que puedas repetir el cuestionario. El estilo cambia — empieza de cero cuando quieras.",
@@ -270,10 +313,25 @@ const UI = {
     downloadGotIt: "Compris",
     downloadOpenStore: "Ouvrir le store",
     downloadUnavailable: "Fiche store bientôt disponible — installez sur l'écran d'accueil.",
-    createAccountEyebrow: "Créez votre compte", whereReachYouLine1: "Comment devons-nous", whereReachYouLine2: "vous appeler ?",
+    createAccountEyebrow: "Compte", whereReachYouLine1: "Créez votre compte", whereReachYouLine2: "ou connectez-vous.",
     namePlaceholder: "Votre prénom", emailPlaceholder: "votre@email.com", continueBtn: "Continuer",
-    signupEmailLabel: "Email (optionnel)", signupNote: "Ceci est un prototype — aucun compte n'est réellement créé.",
+    signupEmailLabel: "Email", signupPasswordLabel: "Mot de passe", passwordPlaceholder: "Au moins 6 caractères",
+    signupNote: "Vous pouvez aussi passer — l’ADN Style reste sur cet appareil.",
     nameRequired: "Indiquez votre prénom pour continuer.",
+    emailRequired: "Ajoutez un email valide.",
+    passwordRequired: "Le mot de passe doit contenir au moins 6 caractères.",
+    authModeSignup: "S’inscrire", authModeLogin: "Connexion",
+    authSubmitSignup: "Créer le compte", authSubmitLogin: "Se connecter",
+    authBusy: "Un instant…",
+    authErrorGeneric: "Connexion impossible. Vérifiez email et mot de passe.",
+    authCloudOff: "Les comptes cloud ne sont pas encore configurés — continuez avec le prénom ou passez pour tester.",
+    authSignedInAs: "Connecté : {email}",
+    authLogOut: "Se déconnecter",
+    authLocalOnly: "Enregistré sur cet appareil seulement",
+    importLocalTitle: "Enregistrer votre ADN Style sur ce compte ?",
+    importLocalBody: "Un profil existe sur cet appareil. Importez-le pour synchroniser, ou repartez de zéro.",
+    importLocalYes: "Enregistrer sur mon compte",
+    importLocalNo: "Repartir de zéro",
     step0Title: "Comment décririez-vous votre quotidien ?", step0Prompt: "Choisissez la photo qui ressemble le plus à vos journées.",
     lifeOfficeDesc: "Réunions, clients, et des journées qui demandent une allure intentionnelle.",
     lifeCreativeDesc: "Espaces flexibles où l'on peut s'habiller avec plus de souplesse.",
@@ -339,7 +397,7 @@ const UI = {
     profileTitle: "Profil", nameLabel: "Prénom", styleArchetypeLabel: "Archétype de Style", fitPreferenceLabel: "Préférence de Coupe",
     lifestyleLabel: "Quotidien",
     paletteLabel: "Palette", budgetLabel: "Budget", dressesForLabel: "S'habille Pour",
-    prototypeNote: "Votre ADN Style est enregistré sur cet appareil. Supprimez-le quand vous voulez pour recommencer.", languageLabel: "Langue",
+    prototypeNote: "Invités : l’ADN Style reste sur cet appareil. Créez un compte pour synchroniser.", languageLabel: "Langue",
     deleteProfileLabel: "Recommencer",
     deleteProfileTitle: "Supprimer votre profil de style ?",
     deleteProfileBody: "Cela efface votre ADN Style, tenues enregistrées, panier et chat styliste pour refaire le quiz. Le style évolue — recommencez quand vous voulez.",
@@ -2799,48 +2857,166 @@ function WelcomeScreen({ onStart, onSkip }) {
   );
 }
 
-function SignupScreen({ onContinue, onBack }) {
+function SignupScreen({ onContinue, onBack, onAuthSuccess }) {
   const { t } = useLang();
+  const cloudOn = supabaseConfigured;
+  const [mode, setMode] = useState("signup"); // signup | login
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [hint, setHint] = useState(false);
-  function handleContinue() {
+  const [password, setPassword] = useState("");
+  const [hint, setHint] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  async function handleAuth() {
+    const trimmedName = name.trim();
+    const trimmedEmail = email.trim();
+    if (mode === "signup" && !trimmedName) {
+      setHint(t("nameRequired"));
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      setHint(t("emailRequired"));
+      return;
+    }
+    if (String(password).length < 6) {
+      setHint(t("passwordRequired"));
+      return;
+    }
+    setBusy(true);
+    setHint("");
+    try {
+      if (mode === "signup") {
+        const data = await signUpWithEmail({ email: trimmedEmail, password, name: trimmedName });
+        await onAuthSuccess?.({
+          user: data.user,
+          mode: "signup",
+          name: trimmedName,
+          email: trimmedEmail,
+        });
+      } else {
+        const data = await signInWithEmail({ email: trimmedEmail, password });
+        await onAuthSuccess?.({
+          user: data.user,
+          mode: "login",
+          name: data.user?.user_metadata?.name || trimmedEmail.split("@")[0],
+          email: trimmedEmail,
+        });
+      }
+    } catch (err) {
+      setHint(err?.message || t("authErrorGeneric"));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function handleGuestContinue() {
     const trimmed = name.trim();
     if (!trimmed) {
-      setHint(true);
+      setHint(t("nameRequired"));
       return;
     }
     onContinue({ name: trimmed, email: email.trim() });
   }
+
   return (
     <div className="onb-screen">
       <button className="onb-back" onClick={onBack}><ArrowLeft size={16} /></button>
-      <div className="onb-center" style={{ marginTop: 60 }}>
+      <div className="onb-center" style={{ marginTop: 48 }}>
         <div className="onb-eyebrow">{t("createAccountEyebrow")}</div>
         <h2 className="onb-title">{t("whereReachYouLine1")}<br />{t("whereReachYouLine2")}</h2>
-        <input
-          className="onb-input"
-          type="text"
-          autoComplete="given-name"
-          autoFocus
-          placeholder={t("namePlaceholder")}
-          value={name}
-          onChange={(e) => { setName(e.target.value); setHint(false); }}
-          onKeyDown={(e) => { if (e.key === "Enter") handleContinue(); }}
-        />
-        <div className="onb-mini-label" style={{ marginTop: 18, textAlign: "left", width: "100%", maxWidth: 320 }}>{t("signupEmailLabel")}</div>
-        <input
-          className="onb-input"
-          type="email"
-          autoComplete="email"
-          placeholder={t("emailPlaceholder")}
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter") handleContinue(); }}
-        />
-        {hint && <p className="onb-fine-print" style={{ color: "#a85832" }}>{t("nameRequired")}</p>}
-        <button className="onb-primary-btn" onClick={handleContinue} style={{ marginTop: 20 }}>{t("continueBtn")}</button>
+
+        {cloudOn && (
+          <div className="auth-mode-toggle" role="tablist">
+            <button
+              type="button"
+              className={`auth-mode-btn ${mode === "signup" ? "active" : ""}`}
+              onClick={() => { setMode("signup"); setHint(""); }}
+            >
+              {t("authModeSignup")}
+            </button>
+            <button
+              type="button"
+              className={`auth-mode-btn ${mode === "login" ? "active" : ""}`}
+              onClick={() => { setMode("login"); setHint(""); }}
+            >
+              {t("authModeLogin")}
+            </button>
+          </div>
+        )}
+
+        {(!cloudOn || mode === "signup") && (
+          <input
+            className="onb-input"
+            type="text"
+            autoComplete="given-name"
+            autoFocus
+            placeholder={t("namePlaceholder")}
+            value={name}
+            onChange={(e) => { setName(e.target.value); setHint(""); }}
+            onKeyDown={(e) => { if (e.key === "Enter") cloudOn ? handleAuth() : handleGuestContinue(); }}
+          />
+        )}
+
+        {cloudOn ? (
+          <>
+            <div className="onb-mini-label" style={{ marginTop: 18, textAlign: "left", width: "100%", maxWidth: 320 }}>{t("signupEmailLabel")}</div>
+            <input
+              className="onb-input"
+              type="email"
+              autoComplete="email"
+              placeholder={t("emailPlaceholder")}
+              value={email}
+              onChange={(e) => { setEmail(e.target.value); setHint(""); }}
+            />
+            <div className="onb-mini-label" style={{ marginTop: 14, textAlign: "left", width: "100%", maxWidth: 320 }}>{t("signupPasswordLabel")}</div>
+            <input
+              className="onb-input"
+              type="password"
+              autoComplete={mode === "signup" ? "new-password" : "current-password"}
+              placeholder={t("passwordPlaceholder")}
+              value={password}
+              onChange={(e) => { setPassword(e.target.value); setHint(""); }}
+              onKeyDown={(e) => { if (e.key === "Enter") handleAuth(); }}
+            />
+            {hint && <p className="onb-fine-print" style={{ color: "#a85832" }}>{hint}</p>}
+            <button className="onb-primary-btn" onClick={handleAuth} disabled={busy} style={{ marginTop: 20 }}>
+              {busy ? t("authBusy") : (mode === "signup" ? t("authSubmitSignup") : t("authSubmitLogin"))}
+            </button>
+          </>
+        ) : (
+          <>
+            <div className="onb-mini-label" style={{ marginTop: 18, textAlign: "left", width: "100%", maxWidth: 320 }}>{t("signupEmailLabel")}</div>
+            <input
+              className="onb-input"
+              type="email"
+              autoComplete="email"
+              placeholder={t("emailPlaceholder")}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") handleGuestContinue(); }}
+            />
+            {hint && <p className="onb-fine-print" style={{ color: "#a85832" }}>{hint}</p>}
+            <button className="onb-primary-btn" onClick={handleGuestContinue} style={{ marginTop: 20 }}>{t("continueBtn")}</button>
+            <p className="onb-fine-print">{t("authCloudOff")}</p>
+          </>
+        )}
         <p className="onb-fine-print">{t("signupNote")}</p>
+      </div>
+    </div>
+  );
+}
+
+function ImportLocalModal({ onYes, onNo }) {
+  const { t } = useLang();
+  return (
+    <div className="install-overlay" role="presentation">
+      <div className="install-sheet" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
+        <h3 className="install-sheet-title">{t("importLocalTitle")}</h3>
+        <p className="install-sheet-steps">{t("importLocalBody")}</p>
+        <div className="install-sheet-actions">
+          <button type="button" className="onb-primary-btn" onClick={onYes}>{t("importLocalYes")}</button>
+          <button type="button" className="profile-reset-cancel" onClick={onNo}>{t("importLocalNo")}</button>
+        </div>
       </div>
     </div>
   );
@@ -3689,7 +3865,7 @@ function BagScreen({ savedOutfits, favoriteStores, palette = [], avoid = [] }) {
   );
 }
 
-function ProfileScreen({ profile, onToggleFavoriteStore, onDeleteProfile }) {
+function ProfileScreen({ profile, onToggleFavoriteStore, onDeleteProfile, authUser, onLogOut }) {
   const { t, tOpt } = useLang();
   const [confirmDelete, setConfirmDelete] = useState(false);
   const favorites = profile.favoriteStores || [];
@@ -3714,6 +3890,17 @@ function ProfileScreen({ profile, onToggleFavoriteStore, onDeleteProfile }) {
         {rows.map(([label, val]) => (
           <div key={label} className="profile-row"><span className="muted">{label}</span><span>{val}</span></div>
         ))}
+      </div>
+
+      <div className="auth-account-row">
+        {authUser?.email ? (
+          <>
+            <p className="empty-note">{t("authSignedInAs").replace("{email}", authUser.email)}</p>
+            <button type="button" className="profile-reset-btn" onClick={() => onLogOut?.()}>{t("authLogOut")}</button>
+          </>
+        ) : (
+          <p className="empty-note">{t("authLocalOnly")}</p>
+        )}
       </div>
 
       <div className="fav-stores-block">
@@ -3807,18 +3994,67 @@ export default function VestraPrototype() {
   const [pending, setPending] = useState(false);
   const [savedIds, setSavedIds] = useState(new Set());
   const [savedOutfits, setSavedOutfits] = useState(stored?.savedOutfits || []);
+  const [authUser, setAuthUser] = useState(null);
+  const [showImportLocal, setShowImportLocal] = useState(false);
+  const cloudReadyRef = useRef(false);
 
   // Pull live Awin feed (session-cached); falls back to backup catalog on failure
   useEffect(() => {
     ensureProductCatalog().catch(() => {});
   }, []);
 
+  // Restore Supabase session (if configured) and hydrate Style DNA from the cloud.
+  useEffect(() => {
+    if (!supabaseConfigured || !supabase) return undefined;
+    let cancelled = false;
+
+    async function hydrateFromUser(user) {
+      if (!user || cancelled) return;
+      setAuthUser(user);
+      try {
+        const row = await fetchCloudProfile(user.id);
+        const cloudProfile = rowToProfile(row);
+        const cloudOutfits = await fetchCloudSavedOutfits(user.id);
+        if (cloudProfile && (cloudProfile.name || cloudProfile.archetype)) {
+          setProfile(sanitizeProfile(cloudProfile));
+          if (row?.answers && typeof row.answers === "object") {
+            setAnswers((a) => sanitizeAnswers({ ...a, ...row.answers }));
+          }
+          if (row?.lang) setLang(row.lang);
+        }
+        if (cloudOutfits.length) setSavedOutfits(cloudOutfits);
+        if (cloudProfile?.name || cloudOutfits.length) {
+          setStage((s) => (s === "welcome" || s === "signup" ? "app" : s));
+        }
+      } catch (err) {
+        console.warn("cloud hydrate failed", err?.message || err);
+      } finally {
+        cloudReadyRef.current = true;
+      }
+    }
+
+    getSessionUser().then((user) => {
+      if (user) hydrateFromUser(user);
+      else cloudReadyRef.current = true;
+    });
+
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      const user = session?.user || null;
+      setAuthUser(user);
+      if (user) hydrateFromUser(user);
+      else cloudReadyRef.current = true;
+    });
+    return () => {
+      cancelled = true;
+      sub?.subscription?.unsubscribe?.();
+    };
+  }, []);
+
   const t = useCallback((key) => (UI[lang] && UI[lang][key]) || UI.en[key] || key, [lang]);
   const tOpt = useCallback((value) => (OPTIONS_I18N[lang] && OPTIONS_I18N[lang][value]) || value, [lang]);
   const tName = useCallback((item) => (PRODUCT_NAMES_I18N[lang] && PRODUCT_NAMES_I18N[lang][item.id]) || item.name, [lang]);
 
-  // Debounce persistence so tab/toggle clicks don't sync-block the main thread.
-  // Stage transitions that matter for cold boot also call persistBootstrap sync.
+  // Debounce persistence: always mirror to localStorage; when signed in, also sync Style DNA + outfits to Supabase.
   useEffect(() => {
     const id = setTimeout(() => {
       try {
@@ -3836,9 +4072,17 @@ export default function VestraPrototype() {
       } catch {
         /* ignore quota */
       }
-    }, 250);
+      if (authUser?.id && cloudReadyRef.current && supabaseConfigured) {
+        upsertCloudProfile(authUser.id, sanitizeProfile(profile), {
+          lang,
+          answers: sanitizeAnswers(answers),
+        }).catch((err) => console.warn("cloud profile sync", err?.message || err));
+        syncCloudSavedOutfits(authUser.id, savedOutfits.slice(-40))
+          .catch((err) => console.warn("cloud outfits sync", err?.message || err));
+      }
+    }, 400);
     return () => clearTimeout(id);
-  }, [lang, stage, step, tab, profile, answers, savedOutfits, messages]);
+  }, [lang, stage, step, tab, profile, answers, savedOutfits, messages, authUser]);
 
   // Hash is a reload-safe stage backup (see goToSignup / skipToApp).
   useEffect(() => {
@@ -4088,6 +4332,104 @@ export default function VestraPrototype() {
     setStage("signup");
   }, [profile, lang, tab, step, answers, messages]);
 
+  const handleAuthSuccess = useCallback(async ({ user, mode, name }) => {
+    if (!user) return;
+    setAuthUser(user);
+    cloudReadyRef.current = false;
+    const local = loadStoredState();
+    const shouldOfferImport = mode === "signup" && localHasImportableData(local);
+
+    if (mode === "login") {
+      try {
+        const row = await fetchCloudProfile(user.id);
+        const cloudProfile = rowToProfile(row);
+        const cloudOutfits = await fetchCloudSavedOutfits(user.id);
+        if (cloudProfile && (cloudProfile.name || cloudProfile.archetype)) {
+          setProfile(sanitizeProfile(cloudProfile));
+          if (row?.answers) setAnswers(sanitizeAnswers(row.answers));
+          if (row?.lang) setLang(row.lang);
+          setSavedOutfits(cloudOutfits);
+          setStage("app");
+          setTab("home");
+        } else {
+          setProfile((p) => sanitizeProfile({ ...p, name: name || p.name }));
+          setStage(local?.profile?.archetype ? "app" : "onboarding");
+        }
+      } catch (err) {
+        console.warn("login hydrate", err?.message || err);
+        setStage("onboarding");
+      } finally {
+        cloudReadyRef.current = true;
+      }
+      return;
+    }
+
+    // signup
+    setAnswers((a) => ({ ...a, name, email: user.email || a.email }));
+    setProfile((p) => sanitizeProfile({ ...p, name: name || p.name }));
+    if (shouldOfferImport) {
+      setShowImportLocal(true);
+      cloudReadyRef.current = true;
+      return;
+    }
+    try {
+      await upsertCloudProfile(user.id, sanitizeProfile({ ...EMPTY_PROFILE, name }), {
+        lang,
+        answers: sanitizeAnswers({ ...answers, name }),
+      });
+    } catch (err) {
+      console.warn("signup profile seed", err?.message || err);
+    }
+    cloudReadyRef.current = true;
+    setStage("onboarding");
+  }, [answers, lang]);
+
+  const importLocalToAccount = useCallback(async (doImport) => {
+    setShowImportLocal(false);
+    const user = authUser || await getSessionUser();
+    if (!user) {
+      setStage("onboarding");
+      return;
+    }
+    const local = loadStoredState();
+    if (doImport && local) {
+      const nextProfile = sanitizeProfile(local.profile || profile);
+      const nextAnswers = sanitizeAnswers(local.answers || answers);
+      const nextOutfits = local.savedOutfits || savedOutfits;
+      setProfile(nextProfile);
+      setAnswers(nextAnswers);
+      setSavedOutfits(nextOutfits);
+      try {
+        await upsertCloudProfile(user.id, nextProfile, { lang, answers: nextAnswers });
+        await syncCloudSavedOutfits(user.id, nextOutfits);
+      } catch (err) {
+        console.warn("import local", err?.message || err);
+      }
+      setStage(nextProfile.archetype ? "app" : "onboarding");
+      if (nextProfile.archetype) setTab("home");
+      return;
+    }
+    try {
+      await upsertCloudProfile(user.id, sanitizeProfile({ ...EMPTY_PROFILE, name: profile.name || answers.name }), {
+        lang,
+        answers: sanitizeAnswers(answers),
+      });
+    } catch (err) {
+      console.warn("fresh account seed", err?.message || err);
+    }
+    setStage("onboarding");
+  }, [authUser, profile, answers, savedOutfits, lang]);
+
+  const handleLogOut = useCallback(async () => {
+    try {
+      await signOut();
+    } catch (err) {
+      console.warn("signOut", err?.message || err);
+    }
+    setAuthUser(null);
+    cloudReadyRef.current = true;
+  }, []);
+
   const skipToApp = useCallback(() => {
     const nextProfile = { ...DEFAULT_PROFILE };
     persistBootstrap({
@@ -4178,7 +4520,14 @@ export default function VestraPrototype() {
                 setProfile((p) => ({ ...p, name }));
                 setStage("onboarding");
               }}
+              onAuthSuccess={handleAuthSuccess}
               onBack={() => setStage("welcome")}
+            />
+          )}
+          {showImportLocal && (
+            <ImportLocalModal
+              onYes={() => importLocalToAccount(true)}
+              onNo={() => importLocalToAccount(false)}
             />
           )}
           {stage === "onboarding" && (
@@ -4231,6 +4580,8 @@ export default function VestraPrototype() {
               {tab === "profile" && (
                 <ProfileScreen
                   profile={profile}
+                  authUser={authUser}
+                  onLogOut={handleLogOut}
                   onToggleFavoriteStore={(storeId) => {
                     setProfile((p) => {
                       const current = p.favoriteStores || [];
