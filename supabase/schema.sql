@@ -1,7 +1,14 @@
--- Vestra Style DNA + saved outfits (run in Supabase SQL Editor)
--- Matches the app's vestra.profile.v1 localStorage shape.
+-- Vestra Style DNA + saved outfits
+-- Run this entire file once in Supabase → SQL Editor → New query → Run
+--
+-- Tables:
+--   profiles       — Style DNA per auth user (mirrors vestra.profile.v1 → profile)
+--   saved_outfits  — bookmarked outfits (mirrors vestra.profile.v1 → savedOutfits[])
+--
+-- RLS: enabled WITH explicit policies so each signed-in user can only
+-- read/write their own rows (not "RLS on with zero policies", which blocks everyone).
 
--- Profiles: one row per auth user (Style DNA)
+-- Profiles: one row per auth user
 create table if not exists public.profiles (
   id uuid primary key references auth.users (id) on delete cascade,
   name text not null default '',
@@ -13,7 +20,6 @@ create table if not exists public.profiles (
   budget text,
   occasions text[] not null default '{}',
   favorite_stores text[] not null default '{}',
-  -- quiz-in-progress + UI prefs (optional; mirrors localStorage answers/lang)
   answers jsonb not null default '{}'::jsonb,
   lang text not null default 'en',
   created_at timestamptz not null default now(),
@@ -24,7 +30,6 @@ create table if not exists public.profiles (
 create table if not exists public.saved_outfits (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users (id) on delete cascade,
-  -- Full outfit object as produced by the stylist (items[], whyThisWorks, etc.)
   outfit jsonb not null,
   created_at timestamptz not null default now()
 );
@@ -71,43 +76,61 @@ create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
 
--- Row Level Security: each user only sees their own data
+-- Privileges for the authenticated role (required alongside RLS)
+grant usage on schema public to authenticated;
+grant select, insert, update, delete on table public.profiles to authenticated;
+grant select, insert, update, delete on table public.saved_outfits to authenticated;
+
+-- Row Level Security + real per-user policies
 alter table public.profiles enable row level security;
 alter table public.saved_outfits enable row level security;
 
 drop policy if exists "profiles_select_own" on public.profiles;
 create policy "profiles_select_own"
   on public.profiles for select
+  to authenticated
   using (auth.uid() = id);
 
 drop policy if exists "profiles_insert_own" on public.profiles;
 create policy "profiles_insert_own"
   on public.profiles for insert
+  to authenticated
   with check (auth.uid() = id);
 
 drop policy if exists "profiles_update_own" on public.profiles;
 create policy "profiles_update_own"
   on public.profiles for update
+  to authenticated
   using (auth.uid() = id)
   with check (auth.uid() = id);
+
+drop policy if exists "profiles_delete_own" on public.profiles;
+create policy "profiles_delete_own"
+  on public.profiles for delete
+  to authenticated
+  using (auth.uid() = id);
 
 drop policy if exists "saved_outfits_select_own" on public.saved_outfits;
 create policy "saved_outfits_select_own"
   on public.saved_outfits for select
+  to authenticated
   using (auth.uid() = user_id);
 
 drop policy if exists "saved_outfits_insert_own" on public.saved_outfits;
 create policy "saved_outfits_insert_own"
   on public.saved_outfits for insert
+  to authenticated
+  with check (auth.uid() = user_id);
+
+drop policy if exists "saved_outfits_update_own" on public.saved_outfits;
+create policy "saved_outfits_update_own"
+  on public.saved_outfits for update
+  to authenticated
+  using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
 
 drop policy if exists "saved_outfits_delete_own" on public.saved_outfits;
 create policy "saved_outfits_delete_own"
   on public.saved_outfits for delete
+  to authenticated
   using (auth.uid() = user_id);
-
-drop policy if exists "saved_outfits_update_own" on public.saved_outfits;
-create policy "saved_outfits_update_own"
-  on public.saved_outfits for update
-  using (auth.uid() = user_id)
-  with check (auth.uid() = user_id);
