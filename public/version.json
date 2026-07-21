@@ -1,13 +1,14 @@
 {
   "name": "vestra",
-  "build": "broken-images-fallback-2026-07-21",
+  "build": "home-profile-polish-2026-07-21",
   "features": [
     "mens-only",
     "awin-catalog",
     "awin-static-catalog",
     "supabase-auth",
-    "supabase-url-normalize",
     "stripe-billing",
-    "catalog-image-fallback"
+    "catalog-image-fallback",
+    "home-polish",
+    "profile-polish"
   ]
 }
