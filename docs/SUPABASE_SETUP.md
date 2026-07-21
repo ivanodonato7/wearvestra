@@ -51,8 +51,10 @@ In [Netlify](https://app.netlify.com) → your Vestra site → **Site configurat
 
 | Key | Value |
 |-----|--------|
-| `VITE_SUPABASE_URL` | your Project URL |
-| `VITE_SUPABASE_ANON_KEY` | your anon public key |
+| `VITE_SUPABASE_URL` | Project URL only — `https://….supabase.co` (**no** `/rest/v1` at the end) |
+| `VITE_SUPABASE_ANON_KEY` | your anon public key (or `sb_publishable_…`) |
+
+If `VITE_SUPABASE_URL` includes `/rest/v1`, signup fails with **Invalid path specified in request URL**.
 
 Then **trigger a new deploy** (Deploys → Trigger deploy) so the Vite build picks them up.
 

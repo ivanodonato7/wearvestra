@@ -1,11 +1,12 @@
 {
   "name": "vestra",
-  "build": "supabase-auth-fix-2026-07-21",
+  "build": "supabase-url-fix-2026-07-21",
   "features": [
     "mens-only",
     "awin-catalog",
     "awin-static-catalog",
     "supabase-auth",
-    "supabase-auth-confirm-email-ux"
+    "supabase-auth-confirm-email-ux",
+    "supabase-url-normalize"
   ]
 }
