@@ -1,6 +1,6 @@
 {
   "name": "vestra",
-  "build": "home-polish-2026-07-21",
+  "build": "home-profile-polish-2026-07-21",
   "features": [
     "mens-only",
     "awin-catalog",
@@ -8,6 +8,7 @@
     "supabase-auth",
     "stripe-billing",
     "catalog-image-fallback",
-    "home-polish"
+    "home-polish",
+    "profile-polish"
   ]
 }

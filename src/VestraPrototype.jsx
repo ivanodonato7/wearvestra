@@ -4052,7 +4052,7 @@ function ProfileScreen({
   }
 
   return (
-    <div className="screen">
+    <div className="screen profile-screen">
       <h2 className="screen-title">{t("profileTitle")}</h2>
       <div className="profile-card">
         {rows.map(([label, val]) => (
