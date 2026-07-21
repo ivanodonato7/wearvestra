@@ -258,7 +258,7 @@ Build 3 coordinated outfits for someone who does not know how to dress. Each nee
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "claude-sonnet-5",
+        model: "claude-sonnet-4-6",
         max_tokens: week ? 2400 : 1600,
         system,
         messages: [{ role: "user", content: userMsg }],
