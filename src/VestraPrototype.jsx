@@ -16,6 +16,13 @@ import {
   localHasImportableData,
 } from "./cloudProfile";
 import {
+  fetchBillingStatus,
+  startCheckout,
+  openCustomerPortal,
+  getAccessToken,
+  FREE_STYLIST_LIMIT,
+} from "./billingApi";
+import {
   CATALOG,
   ITEM_FAMILY_VARIANTS,
   catalogSource,
@@ -176,6 +183,22 @@ const UI = {
     shopStoreCount: "{count} stores",
     shopPaletteFilter: "Colors: {colors}",
     shopSearchingAs: "Searching as: {query}",
+    billingTitle: "Plan & billing",
+    billingFreePlan: "Free",
+    billingProPlan: "Vestra Pro",
+    billingFreeBlurb: "{used} of {limit} stylist requests used this month. Pro unlocks unlimited styling and saved outfits.",
+    billingProBlurb: "Unlimited stylist requests and saved outfits.",
+    billingUpgradeMonthly: "Upgrade — $8.99/mo",
+    billingUpgradeYearly: "Upgrade — $69/yr",
+    billingManage: "Manage billing",
+    billingSignInHint: "Sign in to upgrade or track your free stylist allowance.",
+    billingBusy: "Opening Stripe…",
+    billingError: "Couldn’t open billing. Try again in a moment.",
+    billingQuotaTitle: "You’ve used your 6 free stylist looks this month.",
+    billingQuotaBody: "Upgrade to Vestra Pro for unlimited styling — or refine pieces on looks you already have.",
+    billingAuthRequired: "Create an account to use the live stylist (6 free looks/month).",
+    billingSaveProOnly: "Saved outfits are a Pro feature. Upgrade to keep looks across devices.",
+    billingSuccessNote: "Welcome to Pro — unlimited styling is on.",
   },
   es: {
     welcomeEyebrow: "Vestra", welcomeTitleLine1: "Vamos a vestirte", welcomeTitleLine2: "como es debido.",
@@ -306,6 +329,22 @@ const UI = {
     shopStoreCount: "{count} tiendas",
     shopPaletteFilter: "Colores: {colors}",
     shopSearchingAs: "Buscando: {query}",
+    billingTitle: "Plan y facturación",
+    billingFreePlan: "Gratis",
+    billingProPlan: "Vestra Pro",
+    billingFreeBlurb: "{used} de {limit} peticiones de estilista este mes. Pro desbloquea estilo ilimitado y looks guardados.",
+    billingProBlurb: "Estilista ilimitado y looks guardados.",
+    billingUpgradeMonthly: "Mejorar — 8,99 $/mes",
+    billingUpgradeYearly: "Mejorar — 69 $/año",
+    billingManage: "Gestionar facturación",
+    billingSignInHint: "Inicia sesión para mejorar o ver tu cupo gratis.",
+    billingBusy: "Abriendo Stripe…",
+    billingError: "No se pudo abrir la facturación. Inténtalo de nuevo.",
+    billingQuotaTitle: "Has usado tus 6 looks gratis de este mes.",
+    billingQuotaBody: "Pasa a Vestra Pro para estilo ilimitado — o ajusta piezas en looks que ya tengas.",
+    billingAuthRequired: "Crea una cuenta para el estilista en vivo (6 looks gratis/mes).",
+    billingSaveProOnly: "Guardar looks es Pro. Mejora tu plan para sincronizarlos.",
+    billingSuccessNote: "Bienvenido a Pro — estilo ilimitado activado.",
   },
   fr: {
     welcomeEyebrow: "Vestra", welcomeTitleLine1: "Habillons-vous", welcomeTitleLine2: "comme il se doit.",
@@ -436,6 +475,22 @@ const UI = {
     shopStoreCount: "{count} boutiques",
     shopPaletteFilter: "Couleurs : {colors}",
     shopSearchingAs: "Recherche : {query}",
+    billingTitle: "Offre et facturation",
+    billingFreePlan: "Gratuit",
+    billingProPlan: "Vestra Pro",
+    billingFreeBlurb: "{used} sur {limit} demandes styliste ce mois. Pro : stylisme illimité et looks enregistrés.",
+    billingProBlurb: "Stylisme illimité et looks enregistrés.",
+    billingUpgradeMonthly: "Passer Pro — 8,99 $/mois",
+    billingUpgradeYearly: "Passer Pro — 69 $/an",
+    billingManage: "Gérer la facturation",
+    billingSignInHint: "Connectez-vous pour passer Pro ou suivre votre quota gratuit.",
+    billingBusy: "Ouverture de Stripe…",
+    billingError: "Facturation indisponible. Réessayez dans un instant.",
+    billingQuotaTitle: "Vous avez utilisé vos 6 looks gratuits ce mois-ci.",
+    billingQuotaBody: "Passez à Vestra Pro pour un stylisme illimité — ou affinez les looks déjà obtenus.",
+    billingAuthRequired: "Créez un compte pour le styliste live (6 looks gratuits/mois).",
+    billingSaveProOnly: "Enregistrer des looks est réservé à Pro. Passez Pro pour synchroniser.",
+    billingSuccessNote: "Bienvenue sur Pro — stylisme illimité activé.",
   },
 };
 
@@ -3947,9 +4002,21 @@ function BagScreen({ savedOutfits, favoriteStores, palette = [], avoid = [] }) {
   );
 }
 
-function ProfileScreen({ profile, onToggleFavoriteStore, onDeleteProfile, authUser, onLogOut }) {
+function ProfileScreen({
+  profile,
+  onToggleFavoriteStore,
+  onDeleteProfile,
+  authUser,
+  onLogOut,
+  billing,
+  onRefreshBilling,
+  onUpgrade,
+  onManageBilling,
+}) {
   const { t, tOpt } = useLang();
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [billingBusy, setBillingBusy] = useState(null);
+  const [billingErr, setBillingErr] = useState("");
   const favorites = profile.favoriteStores || [];
   const favSet = new Set(favorites);
   const budgetLabel = tOpt((BUDGET_OPTIONS.find((b) => b.key === profile.budget) || {}).label || "Balanced");
@@ -3964,6 +4031,22 @@ function ProfileScreen({ profile, onToggleFavoriteStore, onDeleteProfile, authUs
     [t("dressesForLabel"), (profile.occasions || []).map(tOpt).join(", ") || "—"],
   ];
   const favoriteNames = STORE_DIRECTORY.filter((s) => favSet.has(s.id)).map((s) => s.name);
+  const isPro = Boolean(billing?.pro);
+  const used = billing?.stylist?.used ?? 0;
+  const limit = billing?.stylist?.limit ?? FREE_STYLIST_LIMIT;
+
+  async function runBilling(kind, fn) {
+    setBillingErr("");
+    setBillingBusy(kind);
+    try {
+      await fn();
+      await onRefreshBilling?.();
+    } catch (e) {
+      setBillingErr(e?.message || t("billingError"));
+    } finally {
+      setBillingBusy(null);
+    }
+  }
 
   return (
     <div className="screen">
@@ -3972,6 +4055,56 @@ function ProfileScreen({ profile, onToggleFavoriteStore, onDeleteProfile, authUs
         {rows.map(([label, val]) => (
           <div key={label} className="profile-row"><span className="muted">{label}</span><span>{val}</span></div>
         ))}
+      </div>
+
+      <div className="billing-card">
+        <div className="section-label">{t("billingTitle")}</div>
+        {!authUser?.email ? (
+          <p className="empty-note">{t("billingSignInHint")}</p>
+        ) : (
+          <>
+            <div className="billing-plan-row">
+              <span className={`billing-badge ${isPro ? "pro" : "free"}`}>
+                {isPro ? t("billingProPlan") : t("billingFreePlan")}
+              </span>
+            </div>
+            <p className="billing-blurb">
+              {isPro
+                ? t("billingProBlurb")
+                : t("billingFreeBlurb").replace("{used}", String(used)).replace("{limit}", String(limit))}
+            </p>
+            {billingErr ? <p className="billing-error">{billingErr}</p> : null}
+            {!isPro ? (
+              <div className="billing-actions">
+                <button
+                  type="button"
+                  className="billing-btn primary"
+                  disabled={!!billingBusy}
+                  onClick={() => runBilling("monthly", () => onUpgrade?.("monthly"))}
+                >
+                  {billingBusy === "monthly" ? t("billingBusy") : t("billingUpgradeMonthly")}
+                </button>
+                <button
+                  type="button"
+                  className="billing-btn"
+                  disabled={!!billingBusy}
+                  onClick={() => runBilling("yearly", () => onUpgrade?.("yearly"))}
+                >
+                  {billingBusy === "yearly" ? t("billingBusy") : t("billingUpgradeYearly")}
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                className="billing-btn"
+                disabled={!!billingBusy}
+                onClick={() => runBilling("portal", () => onManageBilling?.())}
+              >
+                {billingBusy === "portal" ? t("billingBusy") : t("billingManage")}
+              </button>
+            )}
+          </>
+        )}
       </div>
 
       <div className="auth-account-row">
@@ -4078,12 +4211,50 @@ export default function VestraPrototype() {
   const [savedOutfits, setSavedOutfits] = useState(stored?.savedOutfits || []);
   const [authUser, setAuthUser] = useState(null);
   const [showImportLocal, setShowImportLocal] = useState(false);
+  const [billing, setBilling] = useState(null);
+  const [billingToast, setBillingToast] = useState("");
   const cloudReadyRef = useRef(false);
+
+  const refreshBilling = useCallback(async () => {
+    if (!authUser?.id || !supabaseConfigured) {
+      setBilling(null);
+      return null;
+    }
+    try {
+      const data = await fetchBillingStatus();
+      setBilling(data);
+      return data;
+    } catch {
+      setBilling(null);
+      return null;
+    }
+  }, [authUser?.id]);
 
   // Pull live Awin feed (session-cached); falls back to backup catalog on failure
   useEffect(() => {
     ensureProductCatalog().catch(() => {});
   }, []);
+
+  // Stripe Checkout return (?billing=success|cancel)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const flag = params.get("billing");
+    if (!flag) return;
+    if (flag === "success") {
+      setBillingToast("success");
+      setTab("profile");
+      refreshBilling();
+    }
+    params.delete("billing");
+    const next = `${window.location.pathname}${params.toString() ? `?${params}` : ""}${window.location.hash || ""}`;
+    window.history.replaceState({}, "", next);
+  }, [refreshBilling]);
+
+  useEffect(() => {
+    if (authUser?.id) refreshBilling();
+    else setBilling(null);
+  }, [authUser?.id, refreshBilling]);
 
   // Restore Supabase session (if configured) and hydrate Style DNA from the cloud.
   useEffect(() => {
@@ -4159,12 +4330,15 @@ export default function VestraPrototype() {
           lang,
           answers: sanitizeAnswers(answers),
         }).catch((err) => console.warn("cloud profile sync", err?.message || err));
-        syncCloudSavedOutfits(authUser.id, savedOutfits.slice(-40))
-          .catch((err) => console.warn("cloud outfits sync", err?.message || err));
+        // Saved outfits are a Pro feature
+        if (billing?.pro) {
+          syncCloudSavedOutfits(authUser.id, savedOutfits.slice(-40))
+            .catch((err) => console.warn("cloud outfits sync", err?.message || err));
+        }
       }
     }, 400);
     return () => clearTimeout(id);
-  }, [lang, stage, step, tab, profile, answers, savedOutfits, messages, authUser]);
+  }, [lang, stage, step, tab, profile, answers, savedOutfits, messages, authUser, billing?.pro]);
 
   // Hash is a reload-safe stage backup (see goToSignup / skipToApp).
   useEffect(() => {
@@ -4222,6 +4396,7 @@ export default function VestraPrototype() {
     // Try live Claude stylist (Netlify function / custom endpoint), else local composer
     const promptOccasions = detectOccasions(finalText);
     const { catalogKeys, catalogItems, formalityTarget } = catalogPayloadForStylist(finalText);
+    const accessToken = await getAccessToken();
     const live = await fetchStylistLooks({
       prompt: finalText,
       profile: activeProfile,
@@ -4230,7 +4405,30 @@ export default function VestraPrototype() {
       catalogItems,
       formalityTarget,
       mode: weekPlan ? "week" : "looks",
+      accessToken,
     });
+    if (live?.code === "quota_exceeded") {
+      setMessages((m) => [...m, {
+        role: "assistant",
+        text: `${t("billingQuotaTitle")}\n\n${t("billingQuotaBody")}`,
+        billingGate: true,
+      }]);
+      refreshBilling();
+      setPending(false);
+      return;
+    }
+    // auth_required → fall through to local composer (guests / skip-for-testing)
+    if (live?.usage) {
+      setBilling((prev) => (prev ? {
+        ...prev,
+        stylist: {
+          used: live.usage.used,
+          limit: live.usage.limit,
+          remaining: live.usage.remaining,
+        },
+        pro: live.usage.pro ?? prev.pro,
+      } : prev));
+    }
     if (live?.outfits?.length) {
       const dayLabels = WEEK_DAY_KEYS.map((k) => (UI[lang] && UI[lang][k]) || UI.en[k]);
       const isWeek = weekPlan || live.mode === "week";
@@ -4357,6 +4555,16 @@ export default function VestraPrototype() {
   }
 
   const handleSave = useCallback((msgIndex, outfitIndex = 0) => {
+    // Saved outfits are Pro-only once billing is configured / user is signed in as free
+    if (authUser && billing && !billing.pro) {
+      setMessages((msgs) => [...msgs, {
+        role: "assistant",
+        text: t("billingSaveProOnly"),
+        billingGate: true,
+      }]);
+      setTab("profile");
+      return;
+    }
     setMessages((msgs) => {
       const msg = msgs[msgIndex];
       const outfit = msg?.outfits?.[outfitIndex] || msg?.outfit;
@@ -4366,7 +4574,7 @@ export default function VestraPrototype() {
       }
       return msgs;
     });
-  }, []);
+  }, [authUser, billing, t]);
 
   function finishOnboarding(occasionText) {
     const archetypeShortEn = answers.archetype.replace(" & ", " ");
@@ -4483,7 +4691,7 @@ export default function VestraPrototype() {
       setSavedOutfits(nextOutfits);
       try {
         await upsertCloudProfile(user.id, nextProfile, { lang, answers: nextAnswers });
-        await syncCloudSavedOutfits(user.id, nextOutfits);
+        // Cloud saved outfits stay Pro-only; local list remains until they upgrade
       } catch (err) {
         console.warn("import local", err?.message || err);
       }
@@ -4509,6 +4717,7 @@ export default function VestraPrototype() {
       console.warn("signOut", err?.message || err);
     }
     setAuthUser(null);
+    setBilling(null);
     cloudReadyRef.current = true;
   }, []);
 
@@ -4594,6 +4803,12 @@ export default function VestraPrototype() {
           </aside>
         )}
         <div className="phone-body">
+          {billingToast === "success" ? (
+            <div className="billing-toast" role="status">
+              <span>{t("billingSuccessNote")}</span>
+              <button type="button" className="billing-toast-close" onClick={() => setBillingToast("")} aria-label="Close">×</button>
+            </div>
+          ) : null}
           {stage === "welcome" && <WelcomeScreen onStart={goToSignup} onSkip={skipToApp} />}
           {stage === "signup" && (
             <SignupScreen
@@ -4663,6 +4878,10 @@ export default function VestraPrototype() {
                 <ProfileScreen
                   profile={profile}
                   authUser={authUser}
+                  billing={billing}
+                  onRefreshBilling={refreshBilling}
+                  onUpgrade={(price) => startCheckout(price)}
+                  onManageBilling={() => openCustomerPortal()}
                   onLogOut={handleLogOut}
                   onToggleFavoriteStore={(storeId) => {
                     setProfile((p) => {
