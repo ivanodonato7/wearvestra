@@ -69,7 +69,7 @@ async function runSync(event) {
   }
 
   // Claude enrichment pass (formality / colors / fit / category).
-  // Off by default — set CATALOG_ENRICH=1 after reviewing sample + cost.
+  // Enabled when CATALOG_ENRICH=1 (set in netlify.toml build.environment).
   let enrichStats = { enabled: false };
   let finalItems = items;
   if (enrichmentEnabled()) {

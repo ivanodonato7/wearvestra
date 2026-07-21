@@ -4,7 +4,7 @@
  *
  * Env:
  *   ANTHROPIC_API_KEY   required
- *   CATALOG_ENRICH=1    enable full-catalog enrichment in sync (default off)
+ *   CATALOG_ENRICH=1    enable full-catalog enrichment in sync (set in netlify.toml)
  *   CATALOG_ENRICH_MODEL  default claude-haiku-4-5
  *   CATALOG_ENRICH_BATCH  items per API call (default 20)
  */

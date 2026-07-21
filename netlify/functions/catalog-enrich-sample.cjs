@@ -81,7 +81,7 @@ exports.handler = async (event) => {
         costEstimateFullCatalog: cost,
         sampleStats: stats,
         sample: report,
-        note: "Full-catalog enrichment is gated by CATALOG_ENRICH=1 and was NOT run.",
+        note: "Sample only. Full-catalog enrichment runs when CATALOG_ENRICH=1 on daily sync.",
       }),
     };
   } catch (err) {
