@@ -3759,7 +3759,7 @@ function HomeScreen({ profile, onPrompt, homeInput, setHomeInput }) {
   const swatchHexes = (profile.palette || []).map((label) => (COLOR_OPTIONS.find((c) => c.label === label) || {}).hex).filter(Boolean).slice(0, 5);
 
   return (
-    <div className="screen">
+    <div className="screen home-screen">
       <div className="eyebrow muted">{t("goodEvening")}</div>
       <h1 className="home-name">{profile.name || DEFAULT_PROFILE.name}</h1>
       <div className="dna-card">
@@ -3773,10 +3773,12 @@ function HomeScreen({ profile, onPrompt, homeInput, setHomeInput }) {
       <div className="section-label">{t("askYourStylist")}</div>
       <form className="home-ask-row" onSubmit={(e) => { e.preventDefault(); if (homeInput.trim()) onPrompt(homeInput); }}>
         <input value={homeInput} onChange={(e) => setHomeInput(e.target.value)} placeholder={t("askPlaceholder")} className="home-ask-input" />
-        <button type="submit" className="send-btn"><Send size={15} /></button>
+        <button type="submit" className="send-btn home-ask-send" aria-label={t("askYourStylist")}>
+          <Send size={15} />
+        </button>
       </form>
-      <div className="chip-row">
-        {chipKeys.map((k) => <button key={k} className="chip" onClick={() => onPrompt(t(k))}>{t(k)}</button>)}
+      <div className="chip-row home-chip-row">
+        {chipKeys.map((k) => <button key={k} type="button" className="chip home-chip" onClick={() => onPrompt(t(k))}>{t(k)}</button>)}
       </div>
     </div>
   );
