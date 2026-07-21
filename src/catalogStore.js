@@ -143,14 +143,59 @@ export function applyLiveProducts(liveItems = []) {
       inStock: raw.inStock !== false,
       source: raw.source || "awin",
     };
-    // Name-first family correction — Awin categories are inconsistent
-    const fixed = reclassifyItem(base);
-    if (!fixed) continue;
-    if (!(fixed.brand || fixed.retailer)) continue;
-    if (!String(fixed.shopUrl || "").includes("awin1.com") && fixed.source === "awin") {
-      // Still allow non-awin1 if present, but prefer awin1 for live feed
+    // Prefer Claude enrichment tags from daily sync when present & confident.
+    // Otherwise fall back to name-based reclassify + keyword formality/cut.
+    const hasClaude = raw.enrichmentOk && raw.enrichmentConfidence && raw.enrichmentConfidence !== "low"
+      && Number.isFinite(raw.formality);
+    let fixed = base;
+    if (hasClaude) {
+      fixed = {
+        ...base,
+        family: raw.family || base.family,
+        type: raw.type || base.type,
+        category: raw.category || base.category,
+        categoryRaw: raw.categoryRaw || null,
+        formality: raw.formality,
+        formalityBand: raw.formalityBand || null,
+        formalityLabel: raw.formalityLabel || null,
+        cut: raw.cut || raw.fit || null,
+        fit: raw.fit || raw.cut || null,
+        colors: raw.colors || raw.paletteTags || tags,
+        paletteTags: raw.paletteTags || raw.colors || tags,
+        enrichmentOk: true,
+        enrichmentConfidence: raw.enrichmentConfidence,
+        enrichment: raw.enrichment || null,
+        styleSource: "claude",
+      };
+    } else {
+      fixed = reclassifyItem(base);
+      if (!fixed) continue;
+      // Keep low-confidence Claude flags so stylist can deprioritize
+      if (raw.enrichmentConfidence === "low" || raw.enrichmentOk === false) {
+        fixed = {
+          ...fixed,
+          enrichmentOk: false,
+          enrichmentConfidence: "low",
+          enrichment: raw.enrichment || null,
+          styleSource: "heuristic-low",
+        };
+      }
     }
-    const item = enrichStyleAttributes(enrichItemFormality(fixed));
+    if (!(fixed.brand || fixed.retailer)) continue;
+    const item = hasClaude
+      ? {
+        ...fixed,
+        isNeutral: (fixed.colors || []).every((c) => [
+          "Black", "White", "Ivory / Cream", "Grey / Charcoal", "Navy", "Camel / Tan", "Sand / Beige",
+        ].includes(c)),
+        accentColors: (fixed.colors || []).filter((c) => ![
+          "Black", "White", "Ivory / Cream", "Grey / Charcoal", "Navy", "Camel / Tan", "Sand / Beige",
+        ].includes(c)),
+        neutralColors: (fixed.colors || []).filter((c) => [
+          "Black", "White", "Ivory / Cream", "Grey / Charcoal", "Navy", "Camel / Tan", "Sand / Beige",
+        ].includes(c)),
+      }
+      : enrichStyleAttributes(enrichItemFormality(fixed));
     next[key] = item;
     const fam = item.family;
     if (fam) {
@@ -211,7 +256,13 @@ export function getCatalogKeys() {
 /** Live shoppable items only (no fictional backup stubs). */
 export function liveCatalogItems() {
   return Object.values(CATALOG).filter(
-    (i) => i && i.source === "awin" && i.shopUrl && (i.brand || i.retailer) && /^(aw|ss)-/i.test(i.key),
+    (i) => i
+      && i.source === "awin"
+      && i.shopUrl
+      && (i.brand || i.retailer)
+      && /^(aw|ss)-/i.test(i.key)
+      // Deprioritize/exclude Claude low-confidence rather than risk bad matches
+      && i.enrichmentConfidence !== "low",
   );
 }
 
@@ -256,6 +307,9 @@ function pickBest(pool, target, palette, avoid, structureHint, family) {
     }
     if (structureHint === "tailored" && (item.formality || formalityScore(item)) >= 60) s += 6;
     if (structureHint === "relaxed" && (item.formality || 50) <= 55) s += 4;
+    // Prefer Claude-enriched structured tags over keyword guesses
+    if (item.styleSource === "claude" || item.enrichmentOk) s += 10;
+    if (item.enrichmentConfidence === "medium") s += 3;
 
     const name = String(item.name || "");
     if (active) {

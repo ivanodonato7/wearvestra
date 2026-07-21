@@ -3,6 +3,11 @@
   publish = "dist"
   functions = "netlify/functions"
 
+# Approved: Claude catalog enrichment on daily Awin sync (formality/color/fit/category).
+[build.environment]
+  CATALOG_ENRICH = "1"
+  CATALOG_ENRICH_MODEL = "claude-haiku-4-5"
+
 [functions."generate-hero"]
   timeout = 26
 
@@ -14,11 +19,28 @@
 
 [functions."product-feed-sync-background"]
   # Daily 07:00 UTC — long-running Create-a-Feed stream (background, up to ~15 min)
+  # Claude enrichment enabled via CATALOG_ENRICH=1 (build.environment)
   schedule = "0 7 * * *"
+
+[functions."catalog-enrich-sample"]
+  timeout = 26
+
+[functions."catalog-enrich-batch"]
+  timeout = 26
 
 [[redirects]]
   from = "/api/stylist"
   to = "/.netlify/functions/stylist"
+  status = 200
+
+[[redirects]]
+  from = "/api/catalog-enrich-sample"
+  to = "/.netlify/functions/catalog-enrich-sample"
+  status = 200
+
+[[redirects]]
+  from = "/api/catalog-enrich-batch"
+  to = "/.netlify/functions/catalog-enrich-batch"
   status = 200
 
 [[redirects]]
