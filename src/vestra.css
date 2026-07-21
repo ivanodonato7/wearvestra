@@ -281,6 +281,13 @@
 .auth-mode-btn.active{ background:#0B0B0C; color:#C6A567; border-color:#0B0B0C; }
 .auth-account-row{ margin:16px 0 8px; }
 .auth-account-row .profile-reset-btn{ margin-top:10px; }
+.auth-screen .auth-center{ margin-top:48px; }
+.auth-eyebrow{ color:#C6A567 !important; }
+.auth-field-label{
+  margin-top:14px !important; text-align:left; width:100%; max-width:320px;
+}
+.auth-field-label:first-of-type{ margin-top:4px !important; }
+.auth-error{ color:#a85832 !important; }
 .profile-reset-block .empty-note{ margin:0 0 14px; }
 .profile-reset-btn{
   width:100%; box-sizing:border-box; font-size:11px; letter-spacing:0.06em; text-transform:uppercase;

@@ -73,6 +73,8 @@ const UI = {
     authBusy: "One moment…",
     authErrorGeneric: "Couldn’t sign in. Check your email and password.",
     authCloudOff: "Cloud accounts aren’t configured yet — continue with name only, or skip for testing.",
+    authCheckEmailTitle: "Check your email",
+    authCheckEmailBody: "We sent a confirmation link to {email}. Open it, then come back and log in.",
     authSignedInAs: "Signed in as {email}",
     authLogOut: "Log out",
     authLocalOnly: "Saved on this device only",
@@ -199,6 +201,8 @@ const UI = {
     authBusy: "Un momento…",
     authErrorGeneric: "No se pudo entrar. Revisa email y contraseña.",
     authCloudOff: "Las cuentas en la nube aún no están configuradas — continúa con el nombre o salta para probar.",
+    authCheckEmailTitle: "Revisa tu email",
+    authCheckEmailBody: "Enviamos un enlace a {email}. Ábrelo y luego vuelve a iniciar sesión.",
     authSignedInAs: "Sesión: {email}",
     authLogOut: "Cerrar sesión",
     authLocalOnly: "Solo en este dispositivo",
@@ -325,6 +329,8 @@ const UI = {
     authBusy: "Un instant…",
     authErrorGeneric: "Connexion impossible. Vérifiez email et mot de passe.",
     authCloudOff: "Les comptes cloud ne sont pas encore configurés — continuez avec le prénom ou passez pour tester.",
+    authCheckEmailTitle: "Vérifiez votre email",
+    authCheckEmailBody: "Nous avons envoyé un lien à {email}. Ouvrez-le, puis reconnectez-vous.",
     authSignedInAs: "Connecté : {email}",
     authLogOut: "Se déconnecter",
     authLocalOnly: "Enregistré sur cet appareil seulement",
@@ -2866,6 +2872,7 @@ function SignupScreen({ onContinue, onBack, onAuthSuccess }) {
   const [password, setPassword] = useState("");
   const [hint, setHint] = useState("");
   const [busy, setBusy] = useState(false);
+  const [checkEmail, setCheckEmail] = useState(false);
 
   async function handleAuth() {
     const trimmedName = name.trim();
@@ -2884,19 +2891,40 @@ function SignupScreen({ onContinue, onBack, onAuthSuccess }) {
     }
     setBusy(true);
     setHint("");
+    setCheckEmail(false);
     try {
       if (mode === "signup") {
         const data = await signUpWithEmail({ email: trimmedEmail, password, name: trimmedName });
+        const identities = data?.user?.identities;
+        if (Array.isArray(identities) && identities.length === 0) {
+          setHint(t("authErrorGeneric") + " Try Log in.");
+          return;
+        }
+        // Email confirmation ON → no session yet
+        if (!data?.session) {
+          setCheckEmail(true);
+          return;
+        }
+        if (!data?.user) {
+          setHint(t("authErrorGeneric"));
+          return;
+        }
         await onAuthSuccess?.({
           user: data.user,
+          session: data.session,
           mode: "signup",
           name: trimmedName,
           email: trimmedEmail,
         });
       } else {
         const data = await signInWithEmail({ email: trimmedEmail, password });
+        if (!data?.user) {
+          setHint(t("authErrorGeneric"));
+          return;
+        }
         await onAuthSuccess?.({
           user: data.user,
+          session: data.session,
           mode: "login",
           name: data.user?.user_metadata?.name || trimmedEmail.split("@")[0],
           email: trimmedEmail,
@@ -2918,17 +2946,41 @@ function SignupScreen({ onContinue, onBack, onAuthSuccess }) {
     onContinue({ name: trimmed, email: email.trim() });
   }
 
+  if (checkEmail) {
+    return (
+      <div className="onb-screen">
+        <button className="onb-back" onClick={onBack}><ArrowLeft size={16} /></button>
+        <div className="onb-center" style={{ marginTop: 60 }}>
+          <div className="onb-eyebrow">{t("createAccountEyebrow")}</div>
+          <h2 className="onb-title">{t("authCheckEmailTitle")}</h2>
+          <p className="onb-fine-print" style={{ maxWidth: 320, margin: "0 auto 20px", lineHeight: 1.5 }}>
+            {t("authCheckEmailBody").replace("{email}", email.trim())}
+          </p>
+          <button
+            className="onb-primary-btn"
+            type="button"
+            onClick={() => { setCheckEmail(false); setMode("login"); setPassword(""); }}
+          >
+            {t("authModeLogin")}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="onb-screen">
+    <div className="onb-screen auth-screen">
       <button className="onb-back" onClick={onBack}><ArrowLeft size={16} /></button>
-      <div className="onb-center" style={{ marginTop: 48 }}>
-        <div className="onb-eyebrow">{t("createAccountEyebrow")}</div>
+      <div className="onb-center auth-center">
+        <div className="onb-eyebrow auth-eyebrow">{t("createAccountEyebrow")}</div>
         <h2 className="onb-title">{t("whereReachYouLine1")}<br />{t("whereReachYouLine2")}</h2>
 
         {cloudOn && (
-          <div className="auth-mode-toggle" role="tablist">
+          <div className="auth-mode-toggle" role="tablist" aria-label="Account mode">
             <button
               type="button"
+              role="tab"
+              aria-selected={mode === "signup"}
               className={`auth-mode-btn ${mode === "signup" ? "active" : ""}`}
               onClick={() => { setMode("signup"); setHint(""); }}
             >
@@ -2936,6 +2988,8 @@ function SignupScreen({ onContinue, onBack, onAuthSuccess }) {
             </button>
             <button
               type="button"
+              role="tab"
+              aria-selected={mode === "login"}
               className={`auth-mode-btn ${mode === "login" ? "active" : ""}`}
               onClick={() => { setMode("login"); setHint(""); }}
             >
@@ -2945,30 +2999,34 @@ function SignupScreen({ onContinue, onBack, onAuthSuccess }) {
         )}
 
         {(!cloudOn || mode === "signup") && (
-          <input
-            className="onb-input"
-            type="text"
-            autoComplete="given-name"
-            autoFocus
-            placeholder={t("namePlaceholder")}
-            value={name}
-            onChange={(e) => { setName(e.target.value); setHint(""); }}
-            onKeyDown={(e) => { if (e.key === "Enter") cloudOn ? handleAuth() : handleGuestContinue(); }}
-          />
+          <>
+            <div className="onb-mini-label auth-field-label">{t("nameLabel")}</div>
+            <input
+              className="onb-input"
+              type="text"
+              autoComplete="given-name"
+              autoFocus={mode === "signup" || !cloudOn}
+              placeholder={t("namePlaceholder")}
+              value={name}
+              onChange={(e) => { setName(e.target.value); setHint(""); }}
+              onKeyDown={(e) => { if (e.key === "Enter") cloudOn ? handleAuth() : handleGuestContinue(); }}
+            />
+          </>
         )}
 
         {cloudOn ? (
           <>
-            <div className="onb-mini-label" style={{ marginTop: 18, textAlign: "left", width: "100%", maxWidth: 320 }}>{t("signupEmailLabel")}</div>
+            <div className="onb-mini-label auth-field-label">{t("signupEmailLabel")}</div>
             <input
               className="onb-input"
               type="email"
               autoComplete="email"
+              autoFocus={mode === "login"}
               placeholder={t("emailPlaceholder")}
               value={email}
               onChange={(e) => { setEmail(e.target.value); setHint(""); }}
             />
-            <div className="onb-mini-label" style={{ marginTop: 14, textAlign: "left", width: "100%", maxWidth: 320 }}>{t("signupPasswordLabel")}</div>
+            <div className="onb-mini-label auth-field-label">{t("signupPasswordLabel")}</div>
             <input
               className="onb-input"
               type="password"
@@ -2978,14 +3036,14 @@ function SignupScreen({ onContinue, onBack, onAuthSuccess }) {
               onChange={(e) => { setPassword(e.target.value); setHint(""); }}
               onKeyDown={(e) => { if (e.key === "Enter") handleAuth(); }}
             />
-            {hint && <p className="onb-fine-print" style={{ color: "#a85832" }}>{hint}</p>}
+            {hint && <p className="onb-fine-print auth-error">{hint}</p>}
             <button className="onb-primary-btn" onClick={handleAuth} disabled={busy} style={{ marginTop: 20 }}>
               {busy ? t("authBusy") : (mode === "signup" ? t("authSubmitSignup") : t("authSubmitLogin"))}
             </button>
           </>
         ) : (
           <>
-            <div className="onb-mini-label" style={{ marginTop: 18, textAlign: "left", width: "100%", maxWidth: 320 }}>{t("signupEmailLabel")}</div>
+            <div className="onb-mini-label auth-field-label">{t("signupEmailLabel")}</div>
             <input
               className="onb-input"
               type="email"
@@ -2995,7 +3053,7 @@ function SignupScreen({ onContinue, onBack, onAuthSuccess }) {
               onChange={(e) => setEmail(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter") handleGuestContinue(); }}
             />
-            {hint && <p className="onb-fine-print" style={{ color: "#a85832" }}>{hint}</p>}
+            {hint && <p className="onb-fine-print auth-error">{hint}</p>}
             <button className="onb-primary-btn" onClick={handleGuestContinue} style={{ marginTop: 20 }}>{t("continueBtn")}</button>
             <p className="onb-fine-print">{t("authCloudOff")}</p>
           </>
