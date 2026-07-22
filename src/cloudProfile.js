@@ -39,6 +39,20 @@ export async function getSessionUser() {
   if (!supabaseConfigured || !supabase) return null;
   const { data, error } = await supabase.auth.getUser();
   if (error || !data?.user) return null;
+  // Soft-deleted accounts should not keep an active session
+  try {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("deletion_requested_at")
+      .eq("id", data.user.id)
+      .maybeSingle();
+    if (profile?.deletion_requested_at) {
+      await supabase.auth.signOut();
+      return null;
+    }
+  } catch {
+    /* ignore — billing column may not exist until migration runs */
+  }
   return data.user;
 }
 
@@ -62,7 +76,34 @@ export async function signInWithEmail({ email, password }) {
     email: String(email || "").trim().toLowerCase(),
     password: String(password || ""),
   });
-  if (error) throw error;
+  if (error) {
+    const msg = String(error.message || "").toLowerCase();
+    if (msg.includes("banned") || msg.includes("disabled") || error.status === 403) {
+      const err = new Error(
+        "This account is scheduled for deletion. Contact support@wearvestra.com within 30 days if you want to keep it."
+      );
+      err.code = "account_deletion_pending";
+      throw err;
+    }
+    throw error;
+  }
+  // Belt-and-suspenders: profile soft-delete flag
+  const userId = data?.user?.id;
+  if (userId) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("deletion_requested_at")
+      .eq("id", userId)
+      .maybeSingle();
+    if (profile?.deletion_requested_at) {
+      await supabase.auth.signOut();
+      const err = new Error(
+        "This account is scheduled for deletion. Contact support@wearvestra.com within 30 days if you want to keep it."
+      );
+      err.code = "account_deletion_pending";
+      throw err;
+    }
+  }
   return data;
 }
 

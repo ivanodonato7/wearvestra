@@ -84,6 +84,8 @@ Once those are in Netlify (and redeployed), Sign up / Log in on wearvestra.com w
 
 For Vestra Pro ($8.99/mo or $69/yr), also run `supabase/billing.sql` and follow **`docs/STRIPE_SETUP.md`**.
 
+For **Delete Account** (30-day soft delete + scheduled purge), run `supabase/account_deletion.sql` and see **`docs/ACCOUNT_DELETION.md`**.
+
 ## How data maps
 
 | App (today) | Supabase |
