@@ -1,6 +1,6 @@
 {
   "name": "vestra",
-  "build": "webhook-guards-2026-07-22",
+  "build": "cancel-pro-2026-07-22",
   "features": [
     "mens-only",
     "awin-catalog",
@@ -11,6 +11,7 @@
     "mens-store-directory",
     "legal-pages",
     "webhook-livemode-guard",
-    "webhook-event-idempotency"
+    "webhook-event-idempotency",
+    "cancel-pro"
   ]
 }

@@ -59,6 +59,11 @@ export async function openCustomerPortal() {
   return data;
 }
 
+/** Immediately cancel Pro + refund latest charge (server-side). */
+export async function cancelProSubscription() {
+  return authFetch("/api/cancel-subscription", { method: "POST", body: {} });
+}
+
 export function isProBilling(statusOrFlag) {
   if (statusOrFlag === true) return true;
   if (statusOrFlag && typeof statusOrFlag === "object") {

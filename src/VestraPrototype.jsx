@@ -20,6 +20,7 @@ import {
   fetchBillingStatus,
   startCheckout,
   openCustomerPortal,
+  cancelProSubscription,
   getAccessToken,
   FREE_STYLIST_LIMIT,
 } from "./billingApi";
@@ -196,6 +197,13 @@ const UI = {
     billingUpgradeMonthly: "Upgrade — $8.99/mo",
     billingUpgradeYearly: "Upgrade — $69/yr",
     billingManage: "Manage billing",
+    billingCancelPro: "Cancel Pro",
+    billingCancelConfirmTitle: "Cancel Vestra Pro?",
+    billingCancelConfirmBody: "Are you sure you want to cancel your Pro subscription? You’ll receive a full refund of your most recent payment per our refund policy.",
+    billingCancelConfirmYes: "Yes, cancel & refund",
+    billingCancelConfirmNo: "Keep Pro",
+    billingCancelSuccess: "Pro canceled — your refund is on the way. You’re back on the free plan.",
+    billingCancelBusy: "Canceling…",
     billingSignInHint: "Sign in to upgrade or track your free stylist allowance.",
     billingBusy: "Opening Stripe…",
     billingError: "Couldn’t open billing. Try again in a moment.",
@@ -346,6 +354,13 @@ const UI = {
     billingUpgradeMonthly: "Mejorar — 8,99 $/mes",
     billingUpgradeYearly: "Mejorar — 69 $/año",
     billingManage: "Gestionar facturación",
+    billingCancelPro: "Cancelar Pro",
+    billingCancelConfirmTitle: "¿Cancelar Vestra Pro?",
+    billingCancelConfirmBody: "¿Seguro que quieres cancelar tu suscripción Pro? Recibirás un reembolso completo de tu pago más reciente según nuestra política de reembolsos.",
+    billingCancelConfirmYes: "Sí, cancelar y reembolsar",
+    billingCancelConfirmNo: "Mantener Pro",
+    billingCancelSuccess: "Pro cancelado — el reembolso está en camino. Has vuelto al plan gratis.",
+    billingCancelBusy: "Cancelando…",
     billingSignInHint: "Inicia sesión para mejorar o ver tu cupo gratis.",
     billingBusy: "Abriendo Stripe…",
     billingError: "No se pudo abrir la facturación. Inténtalo de nuevo.",
@@ -496,6 +511,13 @@ const UI = {
     billingUpgradeMonthly: "Passer Pro — 8,99 $/mois",
     billingUpgradeYearly: "Passer Pro — 69 $/an",
     billingManage: "Gérer la facturation",
+    billingCancelPro: "Résilier Pro",
+    billingCancelConfirmTitle: "Résilier Vestra Pro ?",
+    billingCancelConfirmBody: "Voulez-vous vraiment résilier votre abonnement Pro ? Vous recevrez un remboursement intégral de votre dernier paiement selon notre politique de remboursement.",
+    billingCancelConfirmYes: "Oui, résilier et rembourser",
+    billingCancelConfirmNo: "Garder Pro",
+    billingCancelSuccess: "Pro résilié — remboursement en cours. Vous êtes de retour sur l’offre gratuite.",
+    billingCancelBusy: "Résiliation…",
     billingSignInHint: "Connectez-vous pour passer Pro ou suivre votre quota gratuit.",
     billingBusy: "Ouverture de Stripe…",
     billingError: "Facturation indisponible. Réessayez dans un instant.",
@@ -3984,11 +4006,14 @@ function ProfileScreen({
   onRefreshBilling,
   onUpgrade,
   onManageBilling,
+  onCancelPro,
 }) {
   const { t, tOpt } = useLang();
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [billingBusy, setBillingBusy] = useState(null);
   const [billingErr, setBillingErr] = useState("");
+  const [billingOk, setBillingOk] = useState("");
+  const [confirmCancelPro, setConfirmCancelPro] = useState(false);
   const favorites = profile.favoriteStores || [];
   const favSet = new Set(favorites);
   const budgetLabel = tOpt((BUDGET_OPTIONS.find((b) => b.key === profile.budget) || {}).label || "Balanced");
@@ -4004,17 +4029,21 @@ function ProfileScreen({
   ];
   const favoriteNames = STORE_DIRECTORY.filter((s) => favSet.has(s.id)).map((s) => s.name);
   const isPro = Boolean(billing?.pro);
+  const canCancelPro = String(billing?.status || "").toLowerCase() === "active";
   const used = billing?.stylist?.used ?? 0;
   const limit = billing?.stylist?.limit ?? FREE_STYLIST_LIMIT;
 
   async function runBilling(kind, fn) {
     setBillingErr("");
+    setBillingOk("");
     setBillingBusy(kind);
     try {
-      await fn();
+      const result = await fn();
       await onRefreshBilling?.();
+      return result;
     } catch (e) {
       setBillingErr(e?.message || t("billingError"));
+      throw e;
     } finally {
       setBillingBusy(null);
     }
@@ -4045,6 +4074,7 @@ function ProfileScreen({
                 ? t("billingProBlurb")
                 : t("billingFreeBlurb").replace("{used}", String(used)).replace("{limit}", String(limit))}
             </p>
+            {billingOk ? <p className="billing-success" role="status">{billingOk}</p> : null}
             {billingErr ? <p className="billing-error">{billingErr}</p> : null}
             {!isPro ? (
               <div className="billing-actions">
@@ -4066,14 +4096,61 @@ function ProfileScreen({
                 </button>
               </div>
             ) : (
-              <button
-                type="button"
-                className="billing-btn"
-                disabled={!!billingBusy}
-                onClick={() => runBilling("portal", () => onManageBilling?.())}
-              >
-                {billingBusy === "portal" ? t("billingBusy") : t("billingManage")}
-              </button>
+              <div className="billing-actions">
+                <button
+                  type="button"
+                  className="billing-btn"
+                  disabled={!!billingBusy}
+                  onClick={() => runBilling("portal", () => onManageBilling?.())}
+                >
+                  {billingBusy === "portal" ? t("billingBusy") : t("billingManage")}
+                </button>
+                {canCancelPro ? (
+                  confirmCancelPro ? (
+                    <div className="billing-cancel-confirm" role="group" aria-label={t("billingCancelConfirmTitle")}>
+                      <p className="billing-cancel-confirm-title">{t("billingCancelConfirmTitle")}</p>
+                      <p className="billing-cancel-confirm-body">{t("billingCancelConfirmBody")}</p>
+                      <div className="billing-cancel-confirm-actions">
+                        <button
+                          type="button"
+                          className="billing-btn danger"
+                          disabled={!!billingBusy}
+                          onClick={() => {
+                            runBilling("cancel", async () => {
+                              await onCancelPro?.();
+                              setConfirmCancelPro(false);
+                              setBillingOk(t("billingCancelSuccess"));
+                            }).catch(() => {});
+                          }}
+                        >
+                          {billingBusy === "cancel" ? t("billingCancelBusy") : t("billingCancelConfirmYes")}
+                        </button>
+                        <button
+                          type="button"
+                          className="billing-btn"
+                          disabled={!!billingBusy}
+                          onClick={() => setConfirmCancelPro(false)}
+                        >
+                          {t("billingCancelConfirmNo")}
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      className="billing-btn danger-outline"
+                      disabled={!!billingBusy}
+                      onClick={() => {
+                        setBillingErr("");
+                        setBillingOk("");
+                        setConfirmCancelPro(true);
+                      }}
+                    >
+                      {t("billingCancelPro")}
+                    </button>
+                  )
+                ) : null}
+              </div>
             )}
           </>
         )}
@@ -4857,6 +4934,7 @@ export default function VestraPrototype() {
                   onRefreshBilling={refreshBilling}
                   onUpgrade={(price) => startCheckout(price)}
                   onManageBilling={() => openCustomerPortal()}
+                  onCancelPro={() => cancelProSubscription()}
                   onLogOut={handleLogOut}
                   onToggleFavoriteStore={(storeId) => {
                     setProfile((p) => {
