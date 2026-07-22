@@ -1,6 +1,6 @@
 {
   "name": "vestra",
-  "build": "webhook-forensics-cleanup-2026-07-22",
+  "build": "favicon-icons-2026-07-22",
   "features": [
     "mens-only",
     "awin-catalog",
@@ -8,6 +8,7 @@
     "stripe-billing",
     "legal-pages",
     "webhook-livemode-guard",
-    "webhook-event-idempotency"
+    "webhook-event-idempotency",
+    "favicon-icons"
   ]
 }
