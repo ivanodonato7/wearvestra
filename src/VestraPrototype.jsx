@@ -57,7 +57,7 @@ const LANGUAGES = [
 const UI = {
   en: {
     welcomeEyebrow: "Vestra", welcomeTitleLine1: "Let's get you", welcomeTitleLine2: "dressed properly.",
-    welcomeSub: "Streetwear to classy to sexy — a few quick questions, then meet your stylist.", getStarted: "Get Started", skipTesting: "Skip for testing → see the app",
+    welcomeSub: "Vestra is an AI personal stylist for men. Describe an occasion, get a complete coordinated outfit, and buy each piece from top retailers.", getStarted: "Get Started", skipTesting: "Skip for testing → see the app",
     downloadAppLabel: "Get the app",
     downloadIos: "Download for iPhone",
     downloadAndroid: "Download for Android",
@@ -207,7 +207,7 @@ const UI = {
   },
   es: {
     welcomeEyebrow: "Vestra", welcomeTitleLine1: "Vamos a vestirte", welcomeTitleLine2: "como es debido.",
-    welcomeSub: "Streetwear, clásico, sexy — unas preguntas rápidas y luego conoces a tu estilista.", getStarted: "Empezar", skipTesting: "Saltar para probar → ver la app",
+    welcomeSub: "Vestra es un estilista personal con IA para hombres. Describe una ocasión, recibe un outfit completo y compra cada prenda en las mejores tiendas.", getStarted: "Empezar", skipTesting: "Saltar para probar → ver la app",
     downloadAppLabel: "Consigue la app",
     downloadIos: "Descargar para iPhone",
     downloadAndroid: "Descargar para Android",
@@ -357,7 +357,7 @@ const UI = {
   },
   fr: {
     welcomeEyebrow: "Vestra", welcomeTitleLine1: "Habillons-vous", welcomeTitleLine2: "comme il se doit.",
-    welcomeSub: "Streetwear, classique, sexy — quelques questions rapides, puis votre styliste.", getStarted: "Commencer", skipTesting: "Passer pour tester → voir l'app",
+    welcomeSub: "Vestra est un styliste personnel IA pour hommes. Décrivez une occasion, obtenez une tenue complète et achetez chaque pièce chez de grands retailers.", getStarted: "Commencer", skipTesting: "Passer pour tester → voir l'app",
     downloadAppLabel: "Télécharger l'app",
     downloadIos: "Télécharger pour iPhone",
     downloadAndroid: "Télécharger pour Android",

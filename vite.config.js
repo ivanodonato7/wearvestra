@@ -14,7 +14,7 @@ export default defineConfig({
       manifest: {
         name: 'Vestra',
         short_name: 'Vestra',
-        description: "Men's AI stylist — streetwear to classy to sexy — outfits, wardrobe, and shopping.",
+        description: "Vestra is an AI-powered personal stylist for men — describe an occasion and get complete, coordinated outfit recommendations with direct links to buy each piece from top retailers.",
         theme_color: '#0B0B0C',
         background_color: '#0B0B0C',
         display: 'standalone',
