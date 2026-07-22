@@ -1,6 +1,6 @@
 {
   "name": "vestra",
-  "build": "favicon-icons-2026-07-22",
+  "build": "seo-metadata-2026-07-22",
   "features": [
     "mens-only",
     "awin-catalog",
@@ -9,6 +9,7 @@
     "legal-pages",
     "webhook-livemode-guard",
     "webhook-event-idempotency",
-    "favicon-icons"
+    "favicon-icons",
+    "seo-metadata"
   ]
 }
