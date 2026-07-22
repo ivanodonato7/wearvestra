@@ -12,8 +12,11 @@ In Supabase → **SQL Editor**, run these files (in order if this is a new proje
 1. `supabase/schema.sql` (if needed)
 2. `supabase/billing.sql`
 3. `supabase/stripe_webhook_events.sql` — webhook event-id idempotency table
+4. `supabase/profiles_billing_audit.sql` — append-only audit of billing column changes on `profiles`
 
 `stripe_webhook_events.sql` is required in production so the same Stripe `evt_…` is never applied twice.
+`profiles_billing_audit.sql` records every change to `subscription_status` / Stripe IDs (role, uid, old→new) for forensics.
+
 
 
 ## 2. Stripe Products (you already did / should do)
