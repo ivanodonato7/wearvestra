@@ -1,6 +1,6 @@
 {
   "name": "vestra",
-  "build": "portal-fix-report-2026-07-22",
+  "build": "webhook-guards-2026-07-22",
   "features": [
     "mens-only",
     "awin-catalog",
@@ -9,6 +9,8 @@
     "home-polish",
     "profile-polish",
     "mens-store-directory",
-    "legal-pages"
+    "legal-pages",
+    "webhook-livemode-guard",
+    "webhook-event-idempotency"
   ]
 }
