@@ -10,13 +10,13 @@ export default defineConfig({
       // were leaving first-time (and returning) users on a dead landing page.
       selfDestroying: true,
       injectRegister: null,
-      includeAssets: ['favicon.svg', 'icons/*.png', 'icons/*.svg', 'version.json'],
+      includeAssets: ['favicon.ico', 'favicon.svg', 'icons/*.png', 'icons/*.svg', 'version.json'],
       manifest: {
         name: 'Vestra',
         short_name: 'Vestra',
         description: "Men's AI stylist — streetwear to classy to sexy — outfits, wardrobe, and shopping.",
-        theme_color: '#F6F1E7',
-        background_color: '#F6F1E7',
+        theme_color: '#0B0B0C',
+        background_color: '#0B0B0C',
         display: 'standalone',
         orientation: 'portrait',
         scope: '/',
@@ -24,6 +24,11 @@ export default defineConfig({
         lang: 'en',
         categories: ['lifestyle', 'shopping', 'fashion'],
         icons: [
+          {
+            src: '/icons/favicon-32x32.png',
+            sizes: '32x32',
+            type: 'image/png',
+          },
           {
             src: '/icons/icon-192.png',
             sizes: '192x192',
@@ -39,6 +44,11 @@ export default defineConfig({
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable',
+          },
+          {
+            src: '/icons/apple-touch-icon.png',
+            sizes: '180x180',
+            type: 'image/png',
           },
         ],
       },
