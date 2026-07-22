@@ -55,10 +55,21 @@ exports.handler = async (event) => {
     });
     return { statusCode: 200, headers, body: JSON.stringify({ url: session.url }) };
   } catch (err) {
+    console.error("stripe-portal error", {
+      type: err.type || null,
+      code: err.code || null,
+      message: String(err.message || err).slice(0, 400),
+      customerPrefix: String(profile.stripe_customer_id || "").slice(0, 12),
+    });
     return {
       statusCode: 502,
       headers,
-      body: JSON.stringify({ error: "Portal failed", detail: String(err.message || err).slice(0, 300) }),
+      body: JSON.stringify({
+        error: "Portal failed",
+        detail: String(err.message || err).slice(0, 300),
+        code: err.code || null,
+        type: err.type || null,
+      }),
     };
   }
 };

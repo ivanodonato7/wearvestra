@@ -1,6 +1,6 @@
 {
   "name": "vestra",
-  "build": "legal-pages-2026-07-21",
+  "build": "portal-diag-2026-07-22",
   "features": [
     "mens-only",
     "awin-catalog",
@@ -9,6 +9,7 @@
     "home-polish",
     "profile-polish",
     "mens-store-directory",
-    "legal-pages"
+    "legal-pages",
+    "portal-diag"
   ]
 }
