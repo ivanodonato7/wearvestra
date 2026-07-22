@@ -153,6 +153,52 @@ exports.handler = async (event) => {
     report.portalSession = { skipped: true, reason: "no_stripe_customer_id_on_profile" };
   }
 
+  // Search live Stripe for this email (independent of profile customer id)
+  try {
+    const found = await stripe.customers.list({ email, limit: 10 });
+    report.liveCustomersByEmail = (found.data || []).map((c) => ({
+      id: c.id,
+      livemode: c.livemode,
+      created: c.created,
+      deleted: Boolean(c.deleted),
+    }));
+  } catch (err) {
+    report.liveCustomersByEmail = {
+      error: String(err.message || err).slice(0, 300),
+      code: err.code || null,
+    };
+  }
+
+  // If we found live customers, try portal on the newest one
+  try {
+    const liveCust = (report.liveCustomersByEmail || []).filter((c) => c.id && !c.deleted);
+    if (liveCust.length) {
+      const newest = liveCust.sort((a, b) => (b.created || 0) - (a.created || 0))[0];
+      const session = await stripe.billingPortal.sessions.create({
+        customer: newest.id,
+        return_url: report.returnUrl,
+      });
+      report.portalSessionUsingLiveCustomerByEmail = {
+        ok: true,
+        customerId: newest.id,
+        sessionId: session.id,
+        urlHost: session.url ? new URL(session.url).host : null,
+      };
+    } else {
+      report.portalSessionUsingLiveCustomerByEmail = {
+        skipped: true,
+        reason: "no_live_customer_for_email",
+      };
+    }
+  } catch (err) {
+    report.portalSessionUsingLiveCustomerByEmail = {
+      ok: false,
+      code: err.code || null,
+      type: err.type || null,
+      message: String(err.message || err).slice(0, 400),
+    };
+  }
+
   // Also list any Pro-looking profiles for context (ids only)
   try {
     const { data: pros } = await admin
