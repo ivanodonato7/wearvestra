@@ -49,11 +49,6 @@
   status = 200
 
 [[redirects]]
-  from = "/api/stripe-webhook-forensics"
-  to = "/.netlify/functions/stripe-webhook-forensics"
-  status = 200
-
-[[redirects]]
   from = "/api/billing-status"
   to = "/.netlify/functions/billing-status"
   status = 200
