@@ -20,6 +20,8 @@ import {
   fetchBillingStatus,
   startCheckout,
   openCustomerPortal,
+  cancelProSubscription,
+  requestAccountDeletion,
   getAccessToken,
   FREE_STYLIST_LIMIT,
 } from "./billingApi";
@@ -196,6 +198,21 @@ const UI = {
     billingUpgradeMonthly: "Upgrade — $8.99/mo",
     billingUpgradeYearly: "Upgrade — $69/yr",
     billingManage: "Manage billing",
+    billingCancelPro: "Cancel Pro",
+    billingCancelConfirmTitle: "Cancel Vestra Pro?",
+    billingCancelConfirmBody: "Are you sure you want to cancel your Pro subscription? You’ll receive a full refund of your most recent payment per our refund policy.",
+    billingCancelConfirmYes: "Yes, cancel & refund",
+    billingCancelConfirmNo: "Keep Pro",
+    billingCancelSuccess: "Pro canceled — your refund is on the way. You’re back on the free plan.",
+    billingCancelBusy: "Canceling…",
+    deleteAccountLabel: "Delete Account",
+    deleteAccountTitle: "Delete your Vestra account?",
+    deleteAccountBody: "This will permanently delete your account and all your data (Style DNA, saved outfits, account info) in 30 days. You’ll be signed out immediately. If you change your mind, contact support@wearvestra.com before then.",
+    deleteAccountTypePrompt: "Type DELETE to confirm",
+    deleteAccountConfirm: "Permanently delete my account",
+    deleteAccountCancel: "Keep my account",
+    deleteAccountBusy: "Deleting…",
+    deleteAccountError: "Couldn’t delete your account. Try again or email support@wearvestra.com.",
     billingSignInHint: "Sign in to upgrade or track your free stylist allowance.",
     billingBusy: "Opening Stripe…",
     billingError: "Couldn’t open billing. Try again in a moment.",
@@ -346,6 +363,21 @@ const UI = {
     billingUpgradeMonthly: "Mejorar — 8,99 $/mes",
     billingUpgradeYearly: "Mejorar — 69 $/año",
     billingManage: "Gestionar facturación",
+    billingCancelPro: "Cancelar Pro",
+    billingCancelConfirmTitle: "¿Cancelar Vestra Pro?",
+    billingCancelConfirmBody: "¿Seguro que quieres cancelar tu suscripción Pro? Recibirás un reembolso completo de tu pago más reciente según nuestra política de reembolsos.",
+    billingCancelConfirmYes: "Sí, cancelar y reembolsar",
+    billingCancelConfirmNo: "Mantener Pro",
+    billingCancelSuccess: "Pro cancelado — el reembolso está en camino. Has vuelto al plan gratis.",
+    billingCancelBusy: "Cancelando…",
+    deleteAccountLabel: "Eliminar cuenta",
+    deleteAccountTitle: "¿Eliminar tu cuenta de Vestra?",
+    deleteAccountBody: "Esto eliminará permanentemente tu cuenta y todos tus datos (ADN de estilo, looks guardados, info de cuenta) en 30 días. Se cerrará tu sesión de inmediato. Si cambias de opinión, escribe a support@wearvestra.com antes.",
+    deleteAccountTypePrompt: "Escribe DELETE para confirmar",
+    deleteAccountConfirm: "Eliminar mi cuenta definitivamente",
+    deleteAccountCancel: "Conservar mi cuenta",
+    deleteAccountBusy: "Eliminando…",
+    deleteAccountError: "No se pudo eliminar la cuenta. Inténtalo de nuevo o escribe a support@wearvestra.com.",
     billingSignInHint: "Inicia sesión para mejorar o ver tu cupo gratis.",
     billingBusy: "Abriendo Stripe…",
     billingError: "No se pudo abrir la facturación. Inténtalo de nuevo.",
@@ -496,6 +528,21 @@ const UI = {
     billingUpgradeMonthly: "Passer Pro — 8,99 $/mois",
     billingUpgradeYearly: "Passer Pro — 69 $/an",
     billingManage: "Gérer la facturation",
+    billingCancelPro: "Résilier Pro",
+    billingCancelConfirmTitle: "Résilier Vestra Pro ?",
+    billingCancelConfirmBody: "Voulez-vous vraiment résilier votre abonnement Pro ? Vous recevrez un remboursement intégral de votre dernier paiement selon notre politique de remboursement.",
+    billingCancelConfirmYes: "Oui, résilier et rembourser",
+    billingCancelConfirmNo: "Garder Pro",
+    billingCancelSuccess: "Pro résilié — remboursement en cours. Vous êtes de retour sur l’offre gratuite.",
+    billingCancelBusy: "Résiliation…",
+    deleteAccountLabel: "Supprimer le compte",
+    deleteAccountTitle: "Supprimer votre compte Vestra ?",
+    deleteAccountBody: "Cela supprimera définitivement votre compte et toutes vos données (ADN Style, tenues enregistrées, infos de compte) dans 30 jours. Vous serez déconnecté immédiatement. Si vous changez d’avis, contactez support@wearvestra.com avant.",
+    deleteAccountTypePrompt: "Tapez DELETE pour confirmer",
+    deleteAccountConfirm: "Supprimer définitivement mon compte",
+    deleteAccountCancel: "Garder mon compte",
+    deleteAccountBusy: "Suppression…",
+    deleteAccountError: "Impossible de supprimer le compte. Réessayez ou écrivez à support@wearvestra.com.",
     billingSignInHint: "Connectez-vous pour passer Pro ou suivre votre quota gratuit.",
     billingBusy: "Ouverture de Stripe…",
     billingError: "Facturation indisponible. Réessayez dans un instant.",
@@ -3984,11 +4031,19 @@ function ProfileScreen({
   onRefreshBilling,
   onUpgrade,
   onManageBilling,
+  onCancelPro,
+  onDeleteAccount,
 }) {
   const { t, tOpt } = useLang();
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [billingBusy, setBillingBusy] = useState(null);
   const [billingErr, setBillingErr] = useState("");
+  const [billingOk, setBillingOk] = useState("");
+  const [confirmCancelPro, setConfirmCancelPro] = useState(false);
+  const [confirmDeleteAccount, setConfirmDeleteAccount] = useState(false);
+  const [deleteAccountTyped, setDeleteAccountTyped] = useState("");
+  const [deleteAccountErr, setDeleteAccountErr] = useState("");
+  const [deleteAccountBusy, setDeleteAccountBusy] = useState(false);
   const favorites = profile.favoriteStores || [];
   const favSet = new Set(favorites);
   const budgetLabel = tOpt((BUDGET_OPTIONS.find((b) => b.key === profile.budget) || {}).label || "Balanced");
@@ -4004,19 +4059,36 @@ function ProfileScreen({
   ];
   const favoriteNames = STORE_DIRECTORY.filter((s) => favSet.has(s.id)).map((s) => s.name);
   const isPro = Boolean(billing?.pro);
+  const canCancelPro = String(billing?.status || "").toLowerCase() === "active";
   const used = billing?.stylist?.used ?? 0;
   const limit = billing?.stylist?.limit ?? FREE_STYLIST_LIMIT;
+  const deleteConfirmReady = deleteAccountTyped.trim().toUpperCase() === "DELETE";
 
   async function runBilling(kind, fn) {
     setBillingErr("");
+    setBillingOk("");
     setBillingBusy(kind);
     try {
-      await fn();
+      const result = await fn();
       await onRefreshBilling?.();
+      return result;
     } catch (e) {
       setBillingErr(e?.message || t("billingError"));
+      throw e;
     } finally {
       setBillingBusy(null);
+    }
+  }
+
+  async function handleDeleteAccountConfirm() {
+    if (!deleteConfirmReady || deleteAccountBusy) return;
+    setDeleteAccountErr("");
+    setDeleteAccountBusy(true);
+    try {
+      await onDeleteAccount?.();
+    } catch (e) {
+      setDeleteAccountErr(e?.message || t("deleteAccountError"));
+      setDeleteAccountBusy(false);
     }
   }
 
@@ -4045,6 +4117,7 @@ function ProfileScreen({
                 ? t("billingProBlurb")
                 : t("billingFreeBlurb").replace("{used}", String(used)).replace("{limit}", String(limit))}
             </p>
+            {billingOk ? <p className="billing-success" role="status">{billingOk}</p> : null}
             {billingErr ? <p className="billing-error">{billingErr}</p> : null}
             {!isPro ? (
               <div className="billing-actions">
@@ -4066,15 +4139,118 @@ function ProfileScreen({
                 </button>
               </div>
             ) : (
-              <button
-                type="button"
-                className="billing-btn"
-                disabled={!!billingBusy}
-                onClick={() => runBilling("portal", () => onManageBilling?.())}
-              >
-                {billingBusy === "portal" ? t("billingBusy") : t("billingManage")}
-              </button>
+              <div className="billing-actions">
+                <button
+                  type="button"
+                  className="billing-btn"
+                  disabled={!!billingBusy || deleteAccountBusy}
+                  onClick={() => runBilling("portal", () => onManageBilling?.())}
+                >
+                  {billingBusy === "portal" ? t("billingBusy") : t("billingManage")}
+                </button>
+                {canCancelPro ? (
+                  confirmCancelPro ? (
+                    <div className="billing-cancel-confirm" role="group" aria-label={t("billingCancelConfirmTitle")}>
+                      <p className="billing-cancel-confirm-title">{t("billingCancelConfirmTitle")}</p>
+                      <p className="billing-cancel-confirm-body">{t("billingCancelConfirmBody")}</p>
+                      <div className="billing-cancel-confirm-actions">
+                        <button
+                          type="button"
+                          className="billing-btn danger"
+                          disabled={!!billingBusy}
+                          onClick={() => {
+                            runBilling("cancel", async () => {
+                              await onCancelPro?.();
+                              setConfirmCancelPro(false);
+                              setBillingOk(t("billingCancelSuccess"));
+                            }).catch(() => {});
+                          }}
+                        >
+                          {billingBusy === "cancel" ? t("billingCancelBusy") : t("billingCancelConfirmYes")}
+                        </button>
+                        <button
+                          type="button"
+                          className="billing-btn"
+                          disabled={!!billingBusy}
+                          onClick={() => setConfirmCancelPro(false)}
+                        >
+                          {t("billingCancelConfirmNo")}
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      className="billing-btn danger-outline"
+                      disabled={!!billingBusy || deleteAccountBusy}
+                      onClick={() => {
+                        setBillingErr("");
+                        setBillingOk("");
+                        setConfirmCancelPro(true);
+                      }}
+                    >
+                      {t("billingCancelPro")}
+                    </button>
+                  )
+                ) : null}
+              </div>
             )}
+
+            <div className="account-delete-block">
+              {!confirmDeleteAccount ? (
+                <button
+                  type="button"
+                  className="account-delete-link"
+                  disabled={!!billingBusy || deleteAccountBusy}
+                  onClick={() => {
+                    setConfirmDeleteAccount(true);
+                    setDeleteAccountTyped("");
+                    setDeleteAccountErr("");
+                  }}
+                >
+                  {t("deleteAccountLabel")}
+                </button>
+              ) : (
+                <div className="account-delete-confirm" role="group" aria-label={t("deleteAccountTitle")}>
+                  <p className="account-delete-title">{t("deleteAccountTitle")}</p>
+                  <p className="account-delete-body">{t("deleteAccountBody")}</p>
+                  <label className="account-delete-type-label" htmlFor="delete-account-confirm-input">
+                    {t("deleteAccountTypePrompt")}
+                  </label>
+                  <input
+                    id="delete-account-confirm-input"
+                    className="account-delete-input"
+                    type="text"
+                    autoComplete="off"
+                    value={deleteAccountTyped}
+                    onChange={(e) => setDeleteAccountTyped(e.target.value)}
+                    placeholder="DELETE"
+                    disabled={deleteAccountBusy}
+                  />
+                  {deleteAccountErr ? <p className="billing-error">{deleteAccountErr}</p> : null}
+                  <button
+                    type="button"
+                    className="billing-btn danger"
+                    disabled={!deleteConfirmReady || deleteAccountBusy}
+                    onClick={handleDeleteAccountConfirm}
+                  >
+                    {deleteAccountBusy ? t("deleteAccountBusy") : t("deleteAccountConfirm")}
+                  </button>
+                  <button
+                    type="button"
+                    className="profile-reset-cancel"
+                    disabled={deleteAccountBusy}
+                    onClick={() => {
+                      setConfirmDeleteAccount(false);
+                      setDeleteAccountTyped("");
+                      setDeleteAccountErr("");
+                    }}
+                  >
+                    {t("deleteAccountCancel")}
+                  </button>
+                </div>
+              )}
+            </div>
           </>
         )}
       </div>
@@ -4857,6 +5033,13 @@ export default function VestraPrototype() {
                   onRefreshBilling={refreshBilling}
                   onUpgrade={(price) => startCheckout(price)}
                   onManageBilling={() => openCustomerPortal()}
+                  onCancelPro={async () => {
+                    await cancelProSubscription();
+                  }}
+                  onDeleteAccount={async () => {
+                    await requestAccountDeletion();
+                    await handleLogOut();
+                  }}
                   onLogOut={handleLogOut}
                   onToggleFavoriteStore={(storeId) => {
                     setProfile((p) => {

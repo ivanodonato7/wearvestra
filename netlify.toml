@@ -28,6 +28,11 @@
 [functions."catalog-enrich-batch"]
   timeout = 26
 
+[functions."purge-deleted-accounts"]
+  # Daily 08:00 UTC — permanently delete accounts past 30-day grace (see docs/ACCOUNT_DELETION.md)
+  schedule = "0 8 * * *"
+  timeout = 26
+
 [[redirects]]
   from = "/api/stylist"
   to = "/.netlify/functions/stylist"
@@ -41,6 +46,16 @@
 [[redirects]]
   from = "/api/stripe-portal"
   to = "/.netlify/functions/stripe-portal"
+  status = 200
+
+[[redirects]]
+  from = "/api/cancel-subscription"
+  to = "/.netlify/functions/cancel-subscription"
+  status = 200
+
+[[redirects]]
+  from = "/api/delete-account"
+  to = "/.netlify/functions/delete-account"
   status = 200
 
 [[redirects]]

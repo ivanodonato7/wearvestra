@@ -59,6 +59,16 @@ export async function openCustomerPortal() {
   return data;
 }
 
+/** Immediately cancel Pro + refund latest charge. */
+export async function cancelProSubscription() {
+  return authFetch("/api/cancel-subscription", { method: "POST", body: {} });
+}
+
+/** Soft-delete account (30-day grace). Cancels Pro first if needed. */
+export async function requestAccountDeletion() {
+  return authFetch("/api/delete-account", { method: "POST", body: {} });
+}
+
 export function isProBilling(statusOrFlag) {
   if (statusOrFlag === true) return true;
   if (statusOrFlag && typeof statusOrFlag === "object") {
