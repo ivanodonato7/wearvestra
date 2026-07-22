@@ -1,16 +1,14 @@
 {
   "name": "vestra",
-  "build": "webhook-guards-2026-07-22",
+  "build": "portal-diag2-2026-07-22",
   "features": [
     "mens-only",
     "awin-catalog",
     "supabase-auth",
     "stripe-billing",
-    "home-polish",
-    "profile-polish",
-    "mens-store-directory",
     "legal-pages",
     "webhook-livemode-guard",
-    "webhook-event-idempotency"
+    "webhook-event-idempotency",
+    "portal-diag2"
   ]
 }
