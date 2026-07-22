@@ -277,6 +277,26 @@
   color:#C6A567;
   border-color:#0B0B0C;
 }
+.profile-screen .billing-btn.danger-outline{
+  background:#faf6ec;
+  border-color:#8b3a3a;
+  color:#8b3a3a;
+}
+.profile-screen .billing-btn.danger-outline:hover:not(:disabled){
+  background:#8b3a3a;
+  color:#F6F1E7;
+  border-color:#8b3a3a;
+}
+.profile-screen .billing-btn.danger{
+  background:#0B0B0C;
+  color:#F6F1E7;
+  border-color:#0B0B0C;
+}
+.profile-screen .billing-success{ color:#3E4228; }
+.profile-screen .billing-cancel-confirm{
+  background:#fffdf8;
+  border-color:rgba(198,165,103,0.45);
+}
 .profile-screen .profile-reset-btn{
   background:#faf6ec;
   border:1px solid rgba(198,165,103,0.55);
@@ -516,13 +536,31 @@
 .billing-badge.pro{ background:#0B0B0C; color:#C6A567; }
 .billing-blurb{ font-size:13px; color:#5b5748; font-weight:300; line-height:1.45; margin:0 0 12px; }
 .billing-error{ font-size:12.5px; color:#8b3a3a; margin:0 0 10px; }
+.billing-success{ font-size:12.5px; color:#3E4228; margin:0 0 10px; line-height:1.45; }
 .billing-actions{ display:flex; flex-direction:column; gap:8px; }
 .billing-btn{
   width:100%; padding:12px 14px; border-radius:10px; border:1px solid #0B0B0C;
   background:transparent; color:#0B0B0C; font-size:13.5px; font-weight:500; cursor:pointer;
 }
 .billing-btn.primary{ background:#0B0B0C; color:#C6A567; }
+.billing-btn.danger{
+  background:#0B0B0C; color:#F6F1E7; border-color:#0B0B0C;
+}
+.billing-btn.danger-outline{
+  border-color:#8b3a3a; color:#8b3a3a;
+}
 .billing-btn:disabled{ opacity:0.55; cursor:wait; }
+.billing-cancel-confirm{
+  margin-top:4px; padding:12px 12px 10px;
+  border:1px solid #e4dfd0; border-radius:12px; background:#fbf8f1;
+}
+.billing-cancel-confirm-title{
+  margin:0 0 6px; font-family:'Fraunces',serif; font-size:15px; color:#0B0B0C; font-weight:500;
+}
+.billing-cancel-confirm-body{
+  margin:0 0 12px; font-size:12.5px; color:#5b5748; font-weight:300; line-height:1.45;
+}
+.billing-cancel-confirm-actions{ display:flex; flex-direction:column; gap:8px; }
 .billing-toast{
   display:flex; align-items:center; justify-content:space-between; gap:12px;
   margin:12px 16px 0; padding:12px 14px; background:#0B0B0C; color:#F6F1E7;
