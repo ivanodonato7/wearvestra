@@ -7,11 +7,14 @@ Use **Test mode** until you explicitly switch to live.
 
 ## 1. Supabase SQL
 
-In Supabase → **SQL Editor**, run the whole file:
+In Supabase → **SQL Editor**, run these files (in order if this is a new project):
 
-`supabase/billing.sql`
+1. `supabase/schema.sql` (if needed)
+2. `supabase/billing.sql`
+3. `supabase/stripe_webhook_events.sql` — webhook event-id idempotency table
 
-(After `supabase/schema.sql` if this is a new project.)
+`stripe_webhook_events.sql` is required in production so the same Stripe `evt_…` is never applied twice.
+
 
 ## 2. Stripe Products (you already did / should do)
 
@@ -73,3 +76,6 @@ Checkout in test mode — use Stripe’s card:
 ## Going live later
 
 When you say so: create **live** Prices, switch Netlify vars to `sk_live_…` / live price IDs / live webhook secret, and turn Test mode off for the live webhook. Do not mix test and live keys.
+
+The webhook handler **ignores** `livemode: false` events when `STRIPE_SECRET_KEY` starts with `sk_live_` (returns 200 so Stripe stops retrying). Prefer disabling any leftover **test-mode** endpoint that still points at `https://wearvestra.com/api/stripe-webhook`.
+
