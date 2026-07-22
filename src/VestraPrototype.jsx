@@ -221,6 +221,10 @@ const UI = {
     billingAuthRequired: "Create an account to use the live stylist (6 free looks/month).",
     billingSaveProOnly: "Saved outfits are a Pro feature. Upgrade to keep looks across devices.",
     billingSuccessNote: "Welcome to Pro — unlimited styling is on.",
+    signupProNote: "Free plan includes 6 stylist requests/month. Upgrade to Pro anytime for unlimited requests — $8.99/mo or $69/yr.",
+    homeProUsed: "{used} of {limit} stylist requests used this month · Upgrade to Pro for unlimited",
+    homeProTeaser: "Free plan: 6 stylist requests/month · Upgrade to Pro for unlimited",
+    homeProUpgradeCta: "Upgrade to Pro",
   },
   es: {
     welcomeEyebrow: "Vestra", welcomeTitleLine1: "Vamos a vestirte", welcomeTitleLine2: "como es debido.",
@@ -386,6 +390,10 @@ const UI = {
     billingAuthRequired: "Crea una cuenta para el estilista en vivo (6 looks gratis/mes).",
     billingSaveProOnly: "Guardar looks es Pro. Mejora tu plan para sincronizarlos.",
     billingSuccessNote: "Bienvenido a Pro — estilo ilimitado activado.",
+    signupProNote: "El plan gratis incluye 6 peticiones de estilista al mes. Pasa a Pro cuando quieras para peticiones ilimitadas — 8,99 $/mes o 69 $/año.",
+    homeProUsed: "{used} de {limit} peticiones de estilista este mes · Pasa a Pro para ilimitadas",
+    homeProTeaser: "Plan gratis: 6 peticiones de estilista al mes · Pasa a Pro para ilimitadas",
+    homeProUpgradeCta: "Pasar a Pro",
   },
   fr: {
     welcomeEyebrow: "Vestra", welcomeTitleLine1: "Habillons-vous", welcomeTitleLine2: "comme il se doit.",
@@ -551,6 +559,10 @@ const UI = {
     billingAuthRequired: "Créez un compte pour le styliste live (6 looks gratuits/mois).",
     billingSaveProOnly: "Enregistrer des looks est réservé à Pro. Passez Pro pour synchroniser.",
     billingSuccessNote: "Bienvenue sur Pro — stylisme illimité activé.",
+    signupProNote: "L’offre gratuite inclut 6 demandes styliste/mois. Passez à Pro quand vous voulez pour un stylisme illimité — 8,99 $/mois ou 69 $/an.",
+    homeProUsed: "{used} sur {limit} demandes styliste ce mois · Passez à Pro pour l’illimité",
+    homeProTeaser: "Offre gratuite : 6 demandes styliste/mois · Passez à Pro pour l’illimité",
+    homeProUpgradeCta: "Passer à Pro",
   },
 };
 
@@ -3151,6 +3163,9 @@ function SignupScreen({ onContinue, onBack, onAuthSuccess }) {
                 </>
               )}
             </form>
+            {(!cloudOn || mode === "signup") && status !== "check-email" ? (
+              <p className="signup-pro-note">{t("signupProNote")}</p>
+            ) : null}
             <p className="onb-fine-print">{t("signupNote")}</p>
             <SiteFooter className="site-footer-onboarding" />
           </>
@@ -3764,7 +3779,16 @@ const OutfitCard = memo(function OutfitCard({
 });
 
 // ==================== APP SCREENS ====================
-function HomeScreen({ profile, onPrompt, homeInput, setHomeInput }) {
+function HomeScreen({
+  profile,
+  onPrompt,
+  homeInput,
+  setHomeInput,
+  billing,
+  authUser,
+  onUpgrade,
+  onOpenBilling,
+}) {
   const { lang, t, tOpt } = useLang();
   const chipKeys = [
     "chipStreetwear", "chipClassy", "chipSexyNight", "chipModernLook",
@@ -3773,6 +3797,13 @@ function HomeScreen({ profile, onPrompt, homeInput, setHomeInput }) {
   const fitLabel = (FIT_SHORT[lang] && FIT_SHORT[lang][profile.fit]) || FIT_SHORT.en[profile.fit] || profile.fit;
   const budgetLabel = tOpt((BUDGET_OPTIONS.find((b) => b.key === profile.budget) || {}).label || "Balanced");
   const swatchHexes = (profile.palette || []).map((label) => (COLOR_OPTIONS.find((c) => c.label === label) || {}).hex).filter(Boolean).slice(0, 5);
+  const isPro = Boolean(billing?.pro);
+  const showProPrompt = !isPro;
+  const used = billing?.stylist?.used ?? 0;
+  const limit = billing?.stylist?.limit ?? FREE_STYLIST_LIMIT;
+  const promptCopy = authUser && billing
+    ? t("homeProUsed").replace("{used}", String(used)).replace("{limit}", String(limit))
+    : t("homeProTeaser");
 
   return (
     <div className="screen home-screen">
@@ -3786,6 +3817,21 @@ function HomeScreen({ profile, onPrompt, homeInput, setHomeInput }) {
           {swatchHexes.map((hex, i) => <span key={i} className="swatch" style={{ background: hex }} />)}
         </div>
       </div>
+      {showProPrompt ? (
+        <div className="home-pro-prompt" data-testid="home-pro-prompt">
+          <p className="home-pro-prompt-text">{promptCopy}</p>
+          <button
+            type="button"
+            className="home-pro-prompt-cta"
+            onClick={() => {
+              if (authUser) onUpgrade?.("monthly");
+              else onOpenBilling?.();
+            }}
+          >
+            {t("homeProUpgradeCta")}
+          </button>
+        </div>
+      ) : null}
       <div className="section-label">{t("askYourStylist")}</div>
       <form className="home-ask-row" onSubmit={(e) => { e.preventDefault(); if (homeInput.trim()) onPrompt(homeInput); }}>
         <input value={homeInput} onChange={(e) => setHomeInput(e.target.value)} placeholder={t("askPlaceholder")} className="home-ask-input" />
@@ -4993,7 +5039,18 @@ export default function VestraPrototype() {
           {stage === "occasion" && <OccasionScreen onSubmit={finishOnboarding} onSkip={() => finishOnboarding(null)} />}
           {stage === "app" && (
             <>
-              {tab === "home" && <HomeScreen profile={profile} onPrompt={handlePrompt} homeInput={homeInput} setHomeInput={setHomeInput} />}
+              {tab === "home" && (
+                <HomeScreen
+                  profile={profile}
+                  onPrompt={handlePrompt}
+                  homeInput={homeInput}
+                  setHomeInput={setHomeInput}
+                  billing={billing}
+                  authUser={authUser}
+                  onUpgrade={(price) => startCheckout(price)}
+                  onOpenBilling={() => setTab("profile")}
+                />
+              )}
               {tab === "chat" && (
                 <ChatScreen
                   messages={messages}
