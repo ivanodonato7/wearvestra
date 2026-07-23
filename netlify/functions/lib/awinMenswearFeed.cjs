@@ -51,13 +51,13 @@ const FAMILY_RULES = [
 ];
 
 const DEFAULT_CAPS = {
-  blazer: 500,
-  shirt: 700,
-  trouser: 600,
-  shoe: 500,
-  belt: 120,
-  scarf: 80,
-  sunglasses: 80,
+  blazer: 700,
+  shirt: 900,
+  trouser: 750,
+  shoe: 800,
+  belt: 220,
+  scarf: 140,
+  sunglasses: 140,
 };
 
 function cell(row, ...keys) {
