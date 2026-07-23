@@ -36,6 +36,7 @@ import {
   occasionFormalityTarget,
   liveCatalogItems,
   itemFitsOccasion,
+  applyWebProducts,
 } from "./catalogStore";
 import { ensureProductCatalog } from "./productCatalogApi";
 import { formalityScore } from "./formality";
@@ -4751,6 +4752,9 @@ export default function VestraPrototype() {
       } : prev));
     }
     if (live?.outfits?.length) {
+      if (live.webProducts) {
+        applyWebProducts(live.webProducts);
+      }
       const dayLabels = WEEK_DAY_KEYS.map((k) => (UI[lang] && UI[lang][k]) || UI.en[k]);
       const isWeek = weekPlan || live.mode === "week";
       const outfits = live.outfits.map((o, i) => {
