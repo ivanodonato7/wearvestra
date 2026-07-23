@@ -53,20 +53,8 @@
   to = "/.netlify/functions/cancel-subscription"
   status = 200
 
-[[redirects]]
-  from = "/api/cancel-pro-refund-selftest"
-  to = "/.netlify/functions/cancel-pro-refund-selftest"
-  status = 200
 
-[[redirects]]
-  from = "/api/cancel-pro-refund-probe"
-  to = "/.netlify/functions/cancel-pro-refund-probe"
-  status = 200
 
-[[redirects]]
-  from = "/api/cancel-pro-refund-oneshot"
-  to = "/.netlify/functions/cancel-pro-refund-oneshot"
-  status = 200
 
 [[redirects]]
   from = "/api/delete-account"
