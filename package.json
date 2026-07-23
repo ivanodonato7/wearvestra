@@ -13,6 +13,8 @@
     "check:images:deep": "node scripts/check-images.cjs --deep",
     "test:image-fallback": "node scripts/verify-image-fallback.mjs",
     "test:account-deletion": "node scripts/test-account-deletion.cjs",
+    "test:cancel-pro-refund": "node scripts/test-cancel-pro-refund.cjs",
+    "test:cancel-pro-refund-live": "node scripts/test-cancel-pro-refund-live.cjs",
     "deploy:netlify": "npm run build && npx netlify-cli deploy --prod --dir=dist --functions=netlify/functions",
     "netlify:env": "bash scripts/netlify-set-anthropic.sh",
     "cap:sync": "npm run build && npx cap sync",
