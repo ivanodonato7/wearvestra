@@ -25,6 +25,16 @@ exports.handler = async (event) => {
     return { statusCode: 503, headers, body: JSON.stringify({ error: "Stripe not configured" }) };
   }
 
+  if (String((() => { try { return JSON.parse(event.body||"{}"); } catch { return {}; } })().action || "") === "envcheck") {
+    const names = Object.keys(process.env).filter((k) => /stripe|price|cancel_pro/i.test(k)).sort();
+    const modes = {};
+    for (const k of names) {
+      const v = String(process.env[k] || "");
+      modes[k] = v.startsWith("sk_live_") ? "live" : v.startsWith("sk_test_") ? "test" : v.startsWith("price_") ? "price" : v ? "set" : "empty";
+    }
+    return { statusCode: 200, headers, body: JSON.stringify({ ok: true, action: "envcheck", modes }) };
+  }
+
   let body = {};
   try {
     body = JSON.parse(event.body || "{}");
