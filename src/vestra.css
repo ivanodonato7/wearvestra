@@ -216,6 +216,26 @@
   border-color:#C6A567;
   box-shadow:inset 0 -2px 0 #C6A567;
 }
+.home-dna-hero{
+  margin:22px 0 8px;
+  border-radius:10px;
+  overflow:hidden;
+  border:1px solid rgba(198,165,103,0.35);
+  background:#0B0B0C;
+  aspect-ratio:3/4;
+  max-height:420px;
+}
+.home-dna-hero-image{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center 20%;
+  display:block;
+  transition:transform .6s ease;
+}
+.home-dna-hero:hover .home-dna-hero-image{
+  transform:scale(1.03);
+}
 .home-pro-prompt{
   margin:0 0 14px;
   padding:12px 14px;

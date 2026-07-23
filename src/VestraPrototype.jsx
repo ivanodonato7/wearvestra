@@ -25,6 +25,7 @@ import {
   getAccessToken,
   FREE_STYLIST_LIMIT,
 } from "./billingApi";
+import { pickHomeHeroPhoto } from "./homeHeroPhotos";
 import {
   CATALOG,
   ITEM_FAMILY_VARIANTS,
@@ -3852,6 +3853,14 @@ function HomeScreen({
   const promptCopy = authUser && billing
     ? t("homeProUsed").replace("{remaining}", String(remaining)).replace("{limit}", String(limit))
     : t("homeProTeaser");
+  const homeHero = useMemo(
+    () => pickHomeHeroPhoto({
+      archetype: profile.archetype,
+      userId: authUser?.id || null,
+      profileName: profile.name || null,
+    }),
+    [profile.archetype, profile.name, authUser?.id],
+  );
 
   return (
     <div className="screen home-screen">
@@ -3889,6 +3898,15 @@ function HomeScreen({
       </form>
       <div className="chip-row home-chip-row">
         {chipKeys.map((k) => <button key={k} type="button" className="chip home-chip" onClick={() => onPrompt(t(k))}>{t(k)}</button>)}
+      </div>
+      <div className="home-dna-hero" data-testid="home-dna-hero">
+        <img
+          className="home-dna-hero-image"
+          src={homeHero.src}
+          alt=""
+          loading="lazy"
+          decoding="async"
+        />
       </div>
     </div>
   );
