@@ -1,7 +1,9 @@
-# Real-time web product search — scoping report (no build)
+# Real-time web product search — scoping report
 
 **Date:** 2026-07-23  
-**Scope:** Research only for Vestra menswear stylist. Do not implement until approved.
+**Status:** Implemented (hybrid Serper path) — see `netlify/functions/lib/hybridWebSearch.cjs` + `serperShopping.cjs`. Requires `SERPER_API_KEY` on Netlify.
+
+**Original scope:** Research only for Vestra menswear stylist. Do not implement until approved.
 
 ---
 

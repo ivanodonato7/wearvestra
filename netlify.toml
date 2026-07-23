@@ -8,8 +8,10 @@
   CATALOG_ENRICH = "1"
   CATALOG_ENRICH_MODEL = "claude-haiku-4-5"
 
-[functions."generate-hero"]
+[functions."stylist"]
+  # Claude + optional Serper hybrid backfill for thin families (belt/shoe)
   timeout = 26
+
 
 [functions."product-search"]
   timeout = 26

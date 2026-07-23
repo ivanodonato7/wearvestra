@@ -8,6 +8,7 @@
 const { enforceOnePerCategory, fillMissingCoreSlots, hasRequiredFloor, isNonApparelMeta } = require("./lib/outfitAssembly.cjs");
 const { getServiceClient, userFromAuthHeader } = require("./lib/supabaseAdmin.cjs");
 const { checkStylistQuota, consumeStylistRequest } = require("./lib/billing.cjs");
+const { fetchHybridWebProducts, mergeWebCardsIntoCatalog } = require("./lib/hybridWebSearch.cjs");
 const SYSTEM_LOOKS = `You are Vestra, a men's stylist for guys who do NOT already know how to dress.
 They will trust your picks completely. A bad combination is a core failure — not a minor miss.
 You ONLY use catalog product keys from the provided list.
@@ -275,14 +276,50 @@ exports.handler = async (event) => {
     avoidSilhouettes = [],
   } = body;
 
-  const keys = catalogKeys.length
+  const keysIn = catalogKeys.length
     ? catalogKeys
     : (catalogItems || []).map((i) => i.key).filter(Boolean);
-  if (!prompt || !keys.length) {
+  if (!prompt || !keysIn.length) {
     return { statusCode: 400, headers, body: JSON.stringify({ error: "prompt and catalogKeys/catalogItems required" }) };
   }
 
-  const byKey = new Map((catalogItems || []).map((i) => [i.key, i]));
+  // Hybrid: when Awin coverage is thin for belt/shoe/etc., backfill via Serper (no-op if unconfigured).
+  let webMeta = { families: [], queries: {}, skipped: "not_run" };
+  let webProducts = {};
+  let keys = keysIn;
+  let itemsForModel = Array.isArray(catalogItems) ? [...catalogItems] : [];
+  try {
+    const hybrid = await fetchHybridWebProducts({
+      catalogItems: itemsForModel,
+      prompt,
+      profile,
+      formalityTarget,
+      timeoutMs: 2800,
+      maxPerFamily: 5,
+    });
+    webMeta = {
+      families: hybrid.families,
+      queries: hybrid.queries,
+      skipped: hybrid.skipped,
+      cardCount: hybrid.cards.length,
+    };
+    const merged = mergeWebCardsIntoCatalog({
+      catalogKeys: keys,
+      catalogItems: itemsForModel,
+      webCards: hybrid.cards,
+    });
+    keys = merged.catalogKeys;
+    itemsForModel = merged.catalogItems;
+    webProducts = merged.webProducts || {};
+  } catch (err) {
+    console.warn("hybridWebSearch failed", String(err.message || err).slice(0, 200));
+  }
+
+  const byKey = new Map(itemsForModel.map((i) => [i.key, i]));
+  // Full web cards (image/shopUrl) must live in byKey for floor fill + client hydration
+  for (const [k, card] of Object.entries(webProducts)) {
+    byKey.set(k, card);
+  }
   const target = serializeTarget(formalityTarget);
   const week = isWeekMode(body);
   const system = week ? SYSTEM_WEEK : SYSTEM_LOOKS;
@@ -291,7 +328,7 @@ exports.handler = async (event) => {
     avoidSilhouettes?.length ? `Avoid these silhouette strings: ${avoidSilhouettes.join(", ")}` : "",
   ].filter(Boolean).join("\n");
 
-  const catalogBlock = formatCatalogForPrompt(keys, catalogItems);
+  const catalogBlock = formatCatalogForPrompt(keys, itemsForModel);
   const targetBlock = target
     ? `Formality target: label=${target.label}, prefer≈${target.prefer}, window ${target.min}-${target.max}. hardBan=${target.hardBan || "none"}. requireOuter=${!!target.requireOuter}, forbidOuter=${!!target.forbidOuter}. EVERY item must fit this window.`
     : "";
@@ -454,6 +491,8 @@ Build 3 coordinated outfits for someone who does not know how to dress. Each nee
         shoppingList,
         mode: week ? "week" : "looks",
         source: "claude",
+        webProducts: Object.keys(webProducts).length ? webProducts : undefined,
+        hybridSearch: webMeta,
         usage: usage
           ? {
             pro: !!usage.pro,

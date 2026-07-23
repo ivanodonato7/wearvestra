@@ -1,6 +1,6 @@
 {
   "name": "vestra",
-  "build": "pro-100-copy-2026-07-23",
+  "build": "serper-hybrid-search-2026-07-23",
   "features": [
     "mens-only",
     "awin-catalog",
@@ -14,6 +14,7 @@
     "favicon-brand-v",
     "ui-polish-pass",
     "pro-fair-use-soft-cap",
-    "pro-100-looks-copy"
+    "pro-100-looks-copy",
+    "serper-hybrid-search"
   ]
 }

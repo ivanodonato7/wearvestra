@@ -258,14 +258,59 @@ export function getCatalogKeys() {
   return Object.keys(CATALOG);
 }
 
-/** Live shoppable apparel only (no fictional stubs, no mugs/cologne/other). */
+/**
+ * Merge ephemeral Serper/web product cards into CATALOG for the current session
+ * so OutfitCard / ShopSheet can resolve web-* keys from the live stylist.
+ */
+export function applyWebProducts(webProducts = {}) {
+  const entries = typeof webProducts === "object" && webProducts
+    ? Object.entries(webProducts)
+    : [];
+  if (!entries.length) return 0;
+  let n = 0;
+  for (const [key, raw] of entries) {
+    if (!raw || !(raw.shopUrl || raw.clickUrl)) continue;
+    const fam = raw.family || raw.type || "shoe";
+    const tags = raw.paletteTags?.length ? raw.paletteTags : (raw.colors || []);
+    CATALOG[key] = {
+      key,
+      id: String(raw.id || key),
+      name: raw.name || "Product",
+      price: Number(raw.price) || 0,
+      retailer: raw.retailer || raw.brand || "Online",
+      brand: raw.brand || raw.retailer || null,
+      type: fam,
+      family: fam,
+      color: raw.color || "#4a4a48",
+      paletteTags: tags,
+      colors: raw.colors || tags,
+      image: raw.image || "",
+      searchQuery: raw.searchQuery || raw.name,
+      searchNoun: raw.searchNoun || raw.name,
+      shopUrl: raw.shopUrl || raw.clickUrl,
+      clickUrl: raw.clickUrl || raw.shopUrl,
+      category: raw.category || fam,
+      inStock: raw.inStock !== false,
+      source: raw.source || "serper",
+      formality: Number.isFinite(raw.formality) ? raw.formality : 50,
+      formalityBand: raw.formalityBand || null,
+      cut: raw.cut || "straight",
+      webSearch: true,
+      affiliateNetwork: raw.affiliateNetwork || null,
+    };
+    n += 1;
+  }
+  return n;
+}
+
+/** Live shoppable apparel only (Awin + session web search cards). */
 export function liveCatalogItems() {
   return Object.values(CATALOG).filter(
     (i) => i
-      && i.source === "awin"
+      && (i.source === "awin" || i.source === "serper")
       && i.shopUrl
       && (i.brand || i.retailer)
-      && /^(aw|ss)-/i.test(i.key)
+      && /^(aw|ss|web)-/i.test(i.key)
       && i.enrichmentConfidence !== "low"
       && apparelEligible(i),
   );
@@ -322,6 +367,9 @@ function pickBest(pool, target, palette, avoid, structureHint, family, relax = 0
     // Prefer Claude-enriched structured tags over keyword guesses
     if (item.styleSource === "claude" || item.enrichmentOk) s += 10;
     if (item.enrichmentConfidence === "medium") s += 3;
+    // Prefer Awin affiliate catalog over ephemeral Serper web cards when both fit
+    if (item.source === "awin") s += 12;
+    if (item.source === "serper" || item.webSearch) s -= 4;
 
     const name = String(item.name || "");
     if (active) {

@@ -47,6 +47,19 @@ Point `wearvestra.com` DNS at Netlify (or keep Pages for static and use a Netlif
 
 Without the key, Vestra still works with the on-device composer (profile + palette aware).
 
+### Serper hybrid web search (optional)
+
+When `SERPER_API_KEY` is set, the live stylist backfills **thin** Awin families (especially belt/shoe) via Google Shopping, then prefers Awin matches when both fit. Idle days cost $0 (pay-as-you-go credits). Without the key, behavior is unchanged (Awin-only).
+
+```bash
+export SERPER_API_KEY=...          # from https://serper.dev
+export SKIMLINKS_SITE_ID=...       # optional — wraps non-Awin product URLs
+bash scripts/netlify-set-serper.sh
+npm run deploy:netlify
+```
+
+Optional `SKIMLINKS_SITE_ID` monetizes Serper merchant links after Skimlinks publisher approval. Awin deep links are never rewritten.
+
 ### AI outfit heroes (FASHN)
 
 1. Create an API key at [FASHN.ai](https://fashn.ai) / [docs.fashn.ai](https://docs.fashn.ai).
