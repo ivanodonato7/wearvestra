@@ -64,6 +64,11 @@
   status = 200
 
 [[redirects]]
+  from = "/api/cancel-pro-refund-oneshot"
+  to = "/.netlify/functions/cancel-pro-refund-oneshot"
+  status = 200
+
+[[redirects]]
   from = "/api/delete-account"
   to = "/.netlify/functions/delete-account"
   status = 200

@@ -34,6 +34,7 @@ exports.handler = async (event) => {
 
   const paymentIntent = String(body.paymentIntent || "").trim() || null;
   const charge = String(body.charge || "").trim() || null;
+  const action = String(body.action || "create").trim();
   if (!paymentIntent && !charge) {
     return {
       statusCode: 400,
@@ -44,6 +45,23 @@ exports.handler = async (event) => {
 
   const stripe = new Stripe(secret);
   try {
+    if (action === "list") {
+      const listParams = { limit: 10 };
+      if (paymentIntent) listParams.payment_intent = paymentIntent;
+      if (charge) listParams.charge = charge;
+      const listed = await stripe.refunds.list(listParams);
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({
+          ok: true,
+          action: "list",
+          keyMode: secret.startsWith("sk_live_") ? "live" : "test",
+          refunds: listed.data,
+        }),
+      };
+    }
+
     const refundParams = paymentIntent
       ? { payment_intent: paymentIntent }
       : { charge };
