@@ -1,6 +1,6 @@
 {
   "name": "vestra",
-  "build": "favicon-brand-2026-07-23",
+  "build": "ui-polish-pass-2026-07-23",
   "features": [
     "mens-only",
     "awin-catalog",
@@ -11,6 +11,7 @@
     "webhook-event-idempotency",
     "favicon-icons",
     "seo-metadata",
-    "favicon-brand-v"
+    "favicon-brand-v",
+    "ui-polish-pass"
   ]
 }

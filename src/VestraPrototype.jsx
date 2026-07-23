@@ -3460,7 +3460,7 @@ function RevealScreen({ answers, onContinue }) {
 function ProValueScreen({ onContinue }) {
   const { t } = useLang();
   return (
-    <div className="onb-screen onb-center" data-testid="onboarding-pro-screen">
+    <div className="onb-screen onb-center onb-pro-screen" data-testid="onboarding-pro-screen">
       <div className="onb-eyebrow">{t("onbProEyebrow")}</div>
       <h2 className="onb-title onb-pro-title">{t("onbProTitle")}</h2>
       <p className="onb-hero-sub onb-pro-body">{t("onbProBody")}</p>
@@ -3992,7 +3992,7 @@ function ChatScreen({ messages, onSend, input, setInput, onSwap, onSave, savedId
   const hasLooks = messages.some((m) => m.outfits?.length || m.outfit);
 
   return (
-    <div className="chat-wrap">
+    <div className="chat-wrap stylist-screen">
       <div className="chat-header"><Sparkles size={14} color="#C6A567" /><span>{t("yourStylist")}</span></div>
       <div className="chat-body">
         {messages.length === 0 && <div className="chat-empty">{t("chatEmpty")}</div>}
@@ -4096,7 +4096,7 @@ const noopSave = () => {};
 function WardrobeScreen({ savedOutfits, favoriteStores, palette = [], avoid = [] }) {
   const { t } = useLang();
   return (
-    <div className="screen">
+    <div className="screen wardrobe-screen">
       <h2 className="screen-title">{t("wardrobeTitle")}</h2>
       {savedOutfits.length === 0 ? (
         <p className="empty-note">{t("wardrobeEmpty")}</p>
@@ -4132,7 +4132,7 @@ function BagScreen({ savedOutfits, favoriteStores, palette = [], avoid = [] }) {
     return acc;
   }, {});
   return (
-    <div className="screen">
+    <div className="screen bag-screen">
       <h2 className="screen-title">{t("bagTitle")}</h2>
       {Object.keys(byRetailer).length === 0 ? (
         <p className="empty-note">{t("bagEmpty")}</p>
@@ -4154,7 +4154,7 @@ function BagScreen({ savedOutfits, favoriteStores, palette = [], avoid = [] }) {
                   <div className="bag-name">{tName(item)}</div>
                   <div className="bag-price">${item.price} · {t("shopInStock")}</div>
                 </div>
-                <ExternalLink size={13} color="#8b877a" />
+                <ExternalLink size={13} color="#A8895C" />
               </button>
             ))}
           </div>

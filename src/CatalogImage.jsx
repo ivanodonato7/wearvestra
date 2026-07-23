@@ -8,12 +8,12 @@ import React, { useCallback, useState } from "react";
 export const CATALOG_IMAGE_PLACEHOLDER =
   "data:image/svg+xml," +
   encodeURIComponent(
-    `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200" role="img" aria-label="Image unavailable">
-      <rect width="200" height="200" fill="#E8E2D4"/>
-      <rect x="28" y="28" width="144" height="144" rx="12" fill="#F6F1E7" stroke="#C9C2B0" stroke-width="2"/>
-      <path d="M70 118 L90 92 L108 112 L122 98 L140 118 Z" fill="#C9C2B0"/>
-      <circle cx="82" cy="78" r="10" fill="#C9C2B0"/>
-      <text x="100" y="152" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="#8b877a">Image unavailable</text>
+    `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200" role="img" aria-label="No image available">
+      <rect width="200" height="200" fill="#faf6ec"/>
+      <rect x="24" y="24" width="152" height="152" rx="10" fill="#F6F1E7" stroke="rgba(198,165,103,0.55)" stroke-width="1.5"/>
+      <path d="M68 122 L90 94 L108 114 L124 98 L142 122 Z" fill="#C6A567" fill-opacity="0.35"/>
+      <circle cx="80" cy="78" r="9" fill="#C6A567" fill-opacity="0.45"/>
+      <text x="100" y="154" text-anchor="middle" font-family="Georgia, 'Playfair Display', serif" font-size="11" fill="#8b877a">No image available</text>
     </svg>`,
   );
 

@@ -1,6 +1,6 @@
 /**
  * Legal pages: /terms and /privacy
- * Styled with Vestra cream / charcoal / gold + Fraunces + Inter.
+ * Styled with Vestra cream / charcoal / gold + Playfair Display + Satoshi.
  */
 const LEGAL_UPDATED = "July 21, 2026";
 
