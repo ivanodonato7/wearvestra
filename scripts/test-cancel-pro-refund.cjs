@@ -207,6 +207,14 @@ async function testCancelProRefundsViaPayments() {
   const created = [];
   const stripe = {
     subscriptions: {
+      async retrieve(id) {
+        return {
+          id,
+          current_period_start: 1_700_000_000,
+          current_period_end: 1_700_000_000 + 30 * 86400,
+          items: { data: [{ price: { recurring: { interval: "month" } } }] },
+        };
+      },
       async cancel(id) {
         return { id };
       },
@@ -233,6 +241,7 @@ async function testCancelProRefundsViaPayments() {
   assert.strictEqual(result.refunded, true);
   assert.strictEqual(result.refundId, "re_1");
   assert.strictEqual(created[0].payment_intent, "pi_1");
+  assert.strictEqual(created[0].amount, undefined, "monthly must omit amount (full refund)");
   assert.ok(updates.some((u) => u.subscription_status === "free"));
   console.log("ok cancelProForUser refunds via payments[].payment.payment_intent");
 }
@@ -250,6 +259,14 @@ async function testCancelAbortsWithoutRefundTarget() {
   let canceled = false;
   const stripe = {
     subscriptions: {
+      async retrieve(id) {
+        return {
+          id,
+          current_period_start: 1_700_000_000,
+          current_period_end: 1_700_000_000 + 30 * 86400,
+          items: { data: [{ price: { recurring: { interval: "month" } } }] },
+        };
+      },
       async cancel(id) {
         canceled = true;
         return { id };

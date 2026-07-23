@@ -7,7 +7,7 @@ Vestra supports **Delete Account** from Profile when the user is signed in.
 1. Profile → **Delete Account** (destructive control, separate from “Start over”).
 2. Confirmation requires typing **`DELETE`**, then an explicit confirm button.
 3. Server (`POST /api/delete-account`):
-   - If Pro is active/trialing/past_due → cancel Stripe subscription immediately and refund the latest paid invoice (same logic as Cancel Pro).
+   - If Pro is active/trialing/past_due → cancel Stripe subscription immediately and refund per Cancel Pro policy (monthly = full latest payment; annual = prorated unused days).
    - Sets `profiles.deletion_requested_at = now()` (service role only; clients cannot change this column).
    - Bans the auth user so login is blocked during the grace period.
 4. Client signs the user out and clears local session state.

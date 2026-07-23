@@ -126,6 +126,14 @@ async function testCancelPro() {
 
   const stripe = {
     subscriptions: {
+      async retrieve(id) {
+        return {
+          id,
+          current_period_start: 1_700_000_000,
+          current_period_end: 1_700_000_000 + 30 * 86400,
+          items: { data: [{ price: { recurring: { interval: "month" } } }] },
+        };
+      },
       async cancel(id) {
         return { id };
       },
@@ -137,6 +145,7 @@ async function testCancelPro() {
             {
               id: "in_1",
               status: "paid",
+              amount_paid: 899,
               payments: {
                 data: [
                   {
@@ -218,6 +227,14 @@ async function testRequestDeletionCancelsProThenMarks() {
 
   const stripe = {
     subscriptions: {
+      async retrieve(id) {
+        return {
+          id,
+          current_period_start: 1_700_000_000,
+          current_period_end: 1_700_000_000 + 30 * 86400,
+          items: { data: [{ price: { recurring: { interval: "month" } } }] },
+        };
+      },
       async cancel(id) {
         return { id };
       },
@@ -229,6 +246,7 @@ async function testRequestDeletionCancelsProThenMarks() {
             {
               id: "in_1",
               status: "paid",
+              amount_paid: 899,
               payments: {
                 data: [
                   {
