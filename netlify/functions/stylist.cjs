@@ -220,6 +220,20 @@ exports.handler = async (event) => {
     try {
       const q = await checkStylistQuota(admin, billingUser.id);
       if (!q.ok) {
+        if (q.code === "fair_use_soft_cap") {
+          return {
+            statusCode: 429,
+            headers,
+            body: JSON.stringify({
+              error: "You've been styling a lot this month — take a short breather and try again next month, or refine looks you already have.",
+              code: "fair_use_soft_cap",
+              used: q.used,
+              limit: q.limit,
+              remaining: 0,
+              pro: true,
+            }),
+          };
+        }
         return {
           statusCode: 402,
           headers,
@@ -423,7 +437,7 @@ Build 3 coordinated outfits for someone who does not know how to dress. Each nee
       : undefined;
 
     let usage = quotaMeta;
-    if (billingOn && billingUser && !quotaMeta?.pro) {
+    if (billingOn && billingUser) {
       try {
         const admin = getServiceClient();
         usage = await consumeStylistRequest(admin, billingUser.id);

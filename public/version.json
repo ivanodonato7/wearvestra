@@ -1,6 +1,6 @@
 {
   "name": "vestra",
-  "build": "ui-polish-pass-2026-07-23",
+  "build": "pro-fair-use-cap-2026-07-23",
   "features": [
     "mens-only",
     "awin-catalog",
@@ -12,6 +12,7 @@
     "favicon-icons",
     "seo-metadata",
     "favicon-brand-v",
-    "ui-polish-pass"
+    "ui-polish-pass",
+    "pro-fair-use-soft-cap"
   ]
 }

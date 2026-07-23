@@ -1,9 +1,12 @@
 /**
  * Vestra billing helpers (Netlify / Stripe).
- * Free: 3 live stylist requests per UTC calendar month.
- * Pro: subscription_status active|trialing → unlimited.
+ * Free: 3 live stylist requests per UTC calendar month (hard gate).
+ * Pro: soft fair-use cap (100/month) — feels unlimited for real users;
+ *       excess is logged and softly paused with a friendly notice (not a hard error).
  */
 const FREE_STYLIST_LIMIT = 3;
+/** Soft fair-use ceiling for Pro. Not shown in marketing UI as a hard "limit". */
+const PRO_STYLIST_SOFT_LIMIT = 100;
 const PRO_STATUSES = new Set(["active", "trialing"]);
 
 function currentPeriodYm(d = new Date()) {
@@ -41,9 +44,30 @@ function corsHeaders() {
   };
 }
 
+function periodUsed(row, period) {
+  let used = Number(row?.stylist_requests_used) || 0;
+  if (row?.stylist_requests_period !== period) used = 0;
+  return used;
+}
+
+function logProFairUse({ userId, used, period, phase }) {
+  console.warn(
+    JSON.stringify({
+      event: "PRO_FAIR_USE_EXCEEDED",
+      phase,
+      userId,
+      used,
+      softLimit: PRO_STYLIST_SOFT_LIMIT,
+      period,
+      ts: new Date().toISOString(),
+    }),
+  );
+}
+
 /**
- * After a successful live stylist response, increment free-tier usage.
- * Pro users are not incremented.
+ * After a successful live stylist response, increment usage for free AND Pro.
+ * Free still hard-caps at FREE_STYLIST_LIMIT via checkStylistQuota before the call.
+ * Pro increments for fair-use observability; soft-cap is enforced in checkStylistQuota.
  */
 async function consumeStylistRequest(admin, userId) {
   const period = currentPeriodYm();
@@ -54,14 +78,10 @@ async function consumeStylistRequest(admin, userId) {
     .maybeSingle();
   if (error) throw error;
 
-  if (isProStatus(row?.subscription_status)) {
-    return { ok: true, pro: true, used: 0, limit: null, remaining: null };
-  }
+  const pro = isProStatus(row?.subscription_status);
+  let used = periodUsed(row, period);
 
-  let used = Number(row?.stylist_requests_used) || 0;
-  if (row?.stylist_requests_period !== period) used = 0;
-
-  if (used >= FREE_STYLIST_LIMIT) {
+  if (!pro && used >= FREE_STYLIST_LIMIT) {
     return {
       ok: false,
       pro: false,
@@ -82,6 +102,21 @@ async function consumeStylistRequest(admin, userId) {
     .eq("id", userId);
   if (upErr) throw upErr;
 
+  if (pro && next >= PRO_STYLIST_SOFT_LIMIT) {
+    logProFairUse({ userId, used: next, period, phase: "consume" });
+  }
+
+  if (pro) {
+    return {
+      ok: true,
+      pro: true,
+      used: next,
+      // Keep marketing "unlimited" — soft limit is internal only
+      limit: null,
+      remaining: null,
+    };
+  }
+
   return {
     ok: true,
     pro: false,
@@ -100,20 +135,35 @@ async function checkStylistQuota(admin, userId) {
     .maybeSingle();
   if (error) throw error;
 
+  const used = periodUsed(row, period);
+  const stripeCustomerId = row?.stripe_customer_id || null;
+
   if (isProStatus(row?.subscription_status)) {
+    if (used >= PRO_STYLIST_SOFT_LIMIT) {
+      logProFairUse({ userId, used, period, phase: "check" });
+      return {
+        ok: false,
+        pro: true,
+        status: row.subscription_status,
+        used,
+        // Internal soft limit only — UI should not present this as free-tier quota
+        limit: PRO_STYLIST_SOFT_LIMIT,
+        remaining: 0,
+        stripeCustomerId,
+        code: "fair_use_soft_cap",
+      };
+    }
     return {
       ok: true,
       pro: true,
       status: row.subscription_status,
-      used: 0,
+      used,
       limit: null,
       remaining: null,
-      stripeCustomerId: row.stripe_customer_id || null,
+      stripeCustomerId,
     };
   }
 
-  let used = Number(row?.stylist_requests_used) || 0;
-  if (row?.stylist_requests_period !== period) used = 0;
   const remaining = Math.max(0, FREE_STYLIST_LIMIT - used);
   return {
     ok: remaining > 0,
@@ -122,7 +172,7 @@ async function checkStylistQuota(admin, userId) {
     used,
     limit: FREE_STYLIST_LIMIT,
     remaining,
-    stripeCustomerId: row?.stripe_customer_id || null,
+    stripeCustomerId,
     code: remaining > 0 ? null : "quota_exceeded",
   };
 }
@@ -139,6 +189,7 @@ function mapStripeSubscriptionStatus(stripeStatus) {
 
 module.exports = {
   FREE_STYLIST_LIMIT,
+  PRO_STYLIST_SOFT_LIMIT,
   PRO_STATUSES,
   currentPeriodYm,
   isProStatus,
