@@ -216,15 +216,24 @@ const UI = {
     billingSignInHint: "Sign in to upgrade or track your free stylist allowance.",
     billingBusy: "Opening Stripe…",
     billingError: "Couldn’t open billing. Try again in a moment.",
-    billingQuotaTitle: "You’ve used your 6 free stylist looks this month.",
+    billingQuotaTitle: "You’ve used your 3 free stylist looks this month.",
     billingQuotaBody: "Upgrade to Vestra Pro for unlimited styling — or refine pieces on looks you already have.",
-    billingAuthRequired: "Create an account to use the live stylist (6 free looks/month).",
+    billingAuthRequired: "Create an account to use the live stylist (3 free looks/month).",
     billingSaveProOnly: "Saved outfits are a Pro feature. Upgrade to keep looks across devices.",
     billingSuccessNote: "Welcome to Pro — unlimited styling is on.",
-    signupProNote: "Free plan includes 6 stylist requests/month. Upgrade to Pro anytime for unlimited requests — $8.99/mo or $69/yr.",
-    homeProUsed: "{used} of {limit} stylist requests used this month · Upgrade to Pro for unlimited",
-    homeProTeaser: "Free plan: 6 stylist requests/month · Upgrade to Pro for unlimited",
+    signupProNote: "Free plan includes 3 stylist requests/month. Upgrade to Pro anytime for unlimited requests — $8.99/mo or $69/yr.",
+    homeProUsed: "{remaining} of {limit} looks left this month",
+    homeProTeaser: "Get 3 free looks a month · Upgrade to Pro for unlimited",
     homeProUpgradeCta: "Upgrade to Pro",
+    onbProEyebrow: "Vestra Pro",
+    onbProTitle: "3 free looks a month — or go unlimited.",
+    onbProBody: "Free gets you started. Pro keeps every look going: unlimited stylist requests, saved outfits across devices, and AI hero images as they roll out.",
+    onbProBullet1: "Unlimited stylist requests",
+    onbProBullet2: "Saved outfits, synced",
+    onbProBullet3: "AI hero images (coming soon)",
+    onbProContinue: "Continue with free",
+    onbProSkipNote: "You can upgrade anytime from Home or Profile.",
+    billingQuotaUpgradeCta: "Upgrade to Pro",
   },
   es: {
     welcomeEyebrow: "Vestra", welcomeTitleLine1: "Vamos a vestirte", welcomeTitleLine2: "como es debido.",
@@ -385,15 +394,24 @@ const UI = {
     billingSignInHint: "Inicia sesión para mejorar o ver tu cupo gratis.",
     billingBusy: "Abriendo Stripe…",
     billingError: "No se pudo abrir la facturación. Inténtalo de nuevo.",
-    billingQuotaTitle: "Has usado tus 6 looks gratis de este mes.",
+    billingQuotaTitle: "Has usado tus 3 looks gratis de este mes.",
     billingQuotaBody: "Pasa a Vestra Pro para estilo ilimitado — o ajusta piezas en looks que ya tengas.",
-    billingAuthRequired: "Crea una cuenta para el estilista en vivo (6 looks gratis/mes).",
+    billingAuthRequired: "Crea una cuenta para el estilista en vivo (3 looks gratis/mes).",
     billingSaveProOnly: "Guardar looks es Pro. Mejora tu plan para sincronizarlos.",
     billingSuccessNote: "Bienvenido a Pro — estilo ilimitado activado.",
-    signupProNote: "El plan gratis incluye 6 peticiones de estilista al mes. Pasa a Pro cuando quieras para peticiones ilimitadas — 8,99 $/mes o 69 $/año.",
-    homeProUsed: "{used} de {limit} peticiones de estilista este mes · Pasa a Pro para ilimitadas",
-    homeProTeaser: "Plan gratis: 6 peticiones de estilista al mes · Pasa a Pro para ilimitadas",
+    signupProNote: "El plan gratis incluye 3 peticiones de estilista al mes. Pasa a Pro cuando quieras para peticiones ilimitadas — 8,99 $/mes o 69 $/año.",
+    homeProUsed: "{remaining} de {limit} looks restantes este mes",
+    homeProTeaser: "3 looks gratis al mes · Pasa a Pro para ilimitadas",
     homeProUpgradeCta: "Pasar a Pro",
+    onbProEyebrow: "Vestra Pro",
+    onbProTitle: "3 looks gratis al mes — o ilimitados con Pro.",
+    onbProBody: "Gratis te pone en marcha. Pro mantiene el ritmo: estilista ilimitado, looks guardados en todos tus dispositivos y hero images con IA cuando lleguen.",
+    onbProBullet1: "Peticiones de estilista ilimitadas",
+    onbProBullet2: "Looks guardados, sincronizados",
+    onbProBullet3: "Hero images con IA (próximamente)",
+    onbProContinue: "Seguir con el plan gratis",
+    onbProSkipNote: "Puedes pasar a Pro cuando quieras desde Inicio o Perfil.",
+    billingQuotaUpgradeCta: "Pasar a Pro",
   },
   fr: {
     welcomeEyebrow: "Vestra", welcomeTitleLine1: "Habillons-vous", welcomeTitleLine2: "comme il se doit.",
@@ -554,15 +572,24 @@ const UI = {
     billingSignInHint: "Connectez-vous pour passer Pro ou suivre votre quota gratuit.",
     billingBusy: "Ouverture de Stripe…",
     billingError: "Facturation indisponible. Réessayez dans un instant.",
-    billingQuotaTitle: "Vous avez utilisé vos 6 looks gratuits ce mois-ci.",
+    billingQuotaTitle: "Vous avez utilisé vos 3 looks gratuits ce mois-ci.",
     billingQuotaBody: "Passez à Vestra Pro pour un stylisme illimité — ou affinez les looks déjà obtenus.",
-    billingAuthRequired: "Créez un compte pour le styliste live (6 looks gratuits/mois).",
+    billingAuthRequired: "Créez un compte pour le styliste live (3 looks gratuits/mois).",
     billingSaveProOnly: "Enregistrer des looks est réservé à Pro. Passez Pro pour synchroniser.",
     billingSuccessNote: "Bienvenue sur Pro — stylisme illimité activé.",
-    signupProNote: "L’offre gratuite inclut 6 demandes styliste/mois. Passez à Pro quand vous voulez pour un stylisme illimité — 8,99 $/mois ou 69 $/an.",
-    homeProUsed: "{used} sur {limit} demandes styliste ce mois · Passez à Pro pour l’illimité",
-    homeProTeaser: "Offre gratuite : 6 demandes styliste/mois · Passez à Pro pour l’illimité",
+    signupProNote: "L’offre gratuite inclut 3 demandes styliste/mois. Passez à Pro quand vous voulez pour un stylisme illimité — 8,99 $/mois ou 69 $/an.",
+    homeProUsed: "{remaining} sur {limit} looks restants ce mois",
+    homeProTeaser: "3 looks gratuits par mois · Passez à Pro pour l’illimité",
     homeProUpgradeCta: "Passer à Pro",
+    onbProEyebrow: "Vestra Pro",
+    onbProTitle: "3 looks gratuits par mois — ou l’illimité avec Pro.",
+    onbProBody: "L’offre gratuite vous lance. Pro garde le rythme : stylisme illimité, looks enregistrés sur tous vos appareils, et hero images IA à venir.",
+    onbProBullet1: "Demandes styliste illimitées",
+    onbProBullet2: "Looks enregistrés, synchronisés",
+    onbProBullet3: "Hero images IA (bientôt)",
+    onbProContinue: "Continuer en gratuit",
+    onbProSkipNote: "Passez à Pro quand vous voulez depuis Accueil ou Profil.",
+    billingQuotaUpgradeCta: "Passer à Pro",
   },
 };
 
@@ -2620,7 +2647,7 @@ const EMPTY_PROFILE = {
   favoriteStores: [],
 };
 
-const APP_STAGES = new Set(["welcome", "signup", "onboarding", "reveal", "occasion", "app"]);
+const APP_STAGES = new Set(["welcome", "signup", "onboarding", "reveal", "pro", "occasion", "app"]);
 const STORAGE_KEY = "vestra.profile.v1";
 
 /** Strip legacy gender/audience fields from profiles saved before men's-only. */
@@ -3428,6 +3455,26 @@ function RevealScreen({ answers, onContinue }) {
   );
 }
 
+function ProValueScreen({ onContinue }) {
+  const { t } = useLang();
+  return (
+    <div className="onb-screen onb-center" data-testid="onboarding-pro-screen">
+      <div className="onb-eyebrow">{t("onbProEyebrow")}</div>
+      <h2 className="onb-title onb-pro-title">{t("onbProTitle")}</h2>
+      <p className="onb-hero-sub onb-pro-body">{t("onbProBody")}</p>
+      <ul className="onb-pro-list" aria-label="Pro benefits">
+        <li>{t("onbProBullet1")}</li>
+        <li>{t("onbProBullet2")}</li>
+        <li>{t("onbProBullet3")}</li>
+      </ul>
+      <button type="button" className="onb-primary-btn" onClick={onContinue} data-testid="onboarding-pro-continue">
+        {t("onbProContinue")}
+      </button>
+      <p className="onb-pro-note">{t("onbProSkipNote")}</p>
+    </div>
+  );
+}
+
 function OccasionScreen({ onSubmit, onSkip }) {
   const { t } = useLang();
   const [text, setText] = useState("");
@@ -3801,8 +3848,9 @@ function HomeScreen({
   const showProPrompt = !isPro;
   const used = billing?.stylist?.used ?? 0;
   const limit = billing?.stylist?.limit ?? FREE_STYLIST_LIMIT;
+  const remaining = billing?.stylist?.remaining ?? Math.max(0, limit - used);
   const promptCopy = authUser && billing
-    ? t("homeProUsed").replace("{used}", String(used)).replace("{limit}", String(limit))
+    ? t("homeProUsed").replace("{remaining}", String(remaining)).replace("{limit}", String(limit))
     : t("homeProTeaser");
 
   return (
@@ -3817,6 +3865,7 @@ function HomeScreen({
           {swatchHexes.map((hex, i) => <span key={i} className="swatch" style={{ background: hex }} />)}
         </div>
       </div>
+      <div className="section-label">{t("askYourStylist")}</div>
       {showProPrompt ? (
         <div className="home-pro-prompt" data-testid="home-pro-prompt">
           <p className="home-pro-prompt-text">{promptCopy}</p>
@@ -3832,7 +3881,6 @@ function HomeScreen({
           </button>
         </div>
       ) : null}
-      <div className="section-label">{t("askYourStylist")}</div>
       <form className="home-ask-row" onSubmit={(e) => { e.preventDefault(); if (homeInput.trim()) onPrompt(homeInput); }}>
         <input value={homeInput} onChange={(e) => setHomeInput(e.target.value)} placeholder={t("askPlaceholder")} className="home-ask-input" />
         <button type="submit" className="send-btn home-ask-send" aria-label={t("askYourStylist")}>
@@ -3889,7 +3937,7 @@ function WeekShoppingList({ shoppingList, favoriteStores, palette = [], avoid = 
   );
 }
 
-function ChatScreen({ messages, onSend, input, setInput, onSwap, onSave, savedIds, pending, favoriteStores, palette = [], avoid = [] }) {
+function ChatScreen({ messages, onSend, input, setInput, onSwap, onSave, savedIds, pending, favoriteStores, palette = [], avoid = [], onUpgrade, onOpenBilling }) {
   const { t } = useLang();
   const endRef = useRef(null);
   useEffect(() => {
@@ -3958,6 +4006,23 @@ function ChatScreen({ messages, onSend, input, setInput, onSwap, onSave, savedId
                   palette={palette}
                   avoid={avoid}
                 />
+              </div>
+            );
+          }
+          if (m.billingGate) {
+            return (
+              <div key={i} className="bubble-assistant-text billing-gate-bubble" data-testid="billing-gate">
+                <div className="billing-gate-text">{m.text}</div>
+                <button
+                  type="button"
+                  className="billing-gate-cta"
+                  onClick={() => {
+                    if (onUpgrade) onUpgrade("monthly");
+                    else onOpenBilling?.();
+                  }}
+                >
+                  {t("billingQuotaUpgradeCta")}
+                </button>
               </div>
             );
           }
@@ -5035,7 +5100,8 @@ export default function VestraPrototype() {
               onNext={() => (step === STEPS.length - 1 ? setStage("reveal") : setStep(step + 1))}
             />
           )}
-          {stage === "reveal" && <RevealScreen answers={answers} onContinue={() => setStage("occasion")} />}
+          {stage === "reveal" && <RevealScreen answers={answers} onContinue={() => setStage("pro")} />}
+          {stage === "pro" && <ProValueScreen onContinue={() => setStage("occasion")} />}
           {stage === "occasion" && <OccasionScreen onSubmit={finishOnboarding} onSkip={() => finishOnboarding(null)} />}
           {stage === "app" && (
             <>
@@ -5064,6 +5130,8 @@ export default function VestraPrototype() {
                   favoriteStores={profile.favoriteStores || []}
                   palette={profile.palette || []}
                   avoid={profile.avoid || []}
+                  onUpgrade={(price) => startCheckout(price)}
+                  onOpenBilling={() => setTab("profile")}
                 />
               )}
               {tab === "wardrobe" && (

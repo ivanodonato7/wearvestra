@@ -3,7 +3,7 @@
  */
 import { supabase, supabaseConfigured } from "./supabaseClient.js";
 
-export const FREE_STYLIST_LIMIT = 6;
+export const FREE_STYLIST_LIMIT = 3;
 
 async function accessToken() {
   if (!supabaseConfigured || !supabase) return null;

@@ -1,9 +1,9 @@
 /**
  * Vestra billing helpers (Netlify / Stripe).
- * Free: 6 live stylist requests per UTC calendar month.
+ * Free: 3 live stylist requests per UTC calendar month.
  * Pro: subscription_status active|trialing → unlimited.
  */
-const FREE_STYLIST_LIMIT = 6;
+const FREE_STYLIST_LIMIT = 3;
 const PRO_STATUSES = new Set(["active", "trialing"]);
 
 function currentPeriodYm(d = new Date()) {

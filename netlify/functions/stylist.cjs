@@ -222,7 +222,7 @@ exports.handler = async (event) => {
           statusCode: 402,
           headers,
           body: JSON.stringify({
-            error: "Free stylist limit reached (6/month). Upgrade to Pro for unlimited.",
+            error: "Free stylist limit reached (3/month). Upgrade to Pro for unlimited.",
             code: "quota_exceeded",
             used: q.used,
             limit: q.limit,
