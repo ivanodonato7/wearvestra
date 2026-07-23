@@ -45,7 +45,10 @@ exports.handler = async (event) => {
   } catch (err) {
     const code = err.code || "cancel_failed";
     const status =
-      code === "not_pro" || code === "no_subscription" || code === "profile_missing"
+      code === "not_pro" ||
+      code === "no_subscription" ||
+      code === "profile_missing" ||
+      code === "no_refundable_payment"
         ? 400
         : 502;
     console.error("cancel-subscription error", {

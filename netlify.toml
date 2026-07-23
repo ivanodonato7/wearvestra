@@ -53,6 +53,9 @@
   to = "/.netlify/functions/cancel-subscription"
   status = 200
 
+
+
+
 [[redirects]]
   from = "/api/delete-account"
   to = "/.netlify/functions/delete-account"

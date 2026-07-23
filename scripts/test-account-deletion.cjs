@@ -132,12 +132,29 @@ async function testCancelPro() {
     },
     invoices: {
       async list() {
-        return { data: [{ id: "in_1", payment_intent: "pi_1", charge: null }] };
+        return {
+          data: [
+            {
+              id: "in_1",
+              status: "paid",
+              payments: {
+                data: [
+                  {
+                    id: "inpay_1",
+                    status: "paid",
+                    created: 1,
+                    payment: { type: "payment_intent", payment_intent: "pi_1" },
+                  },
+                ],
+              },
+            },
+          ],
+        };
       },
     },
     refunds: {
       async create() {
-        return { id: "re_1" };
+        return { id: "re_1", status: "succeeded", amount: 899, currency: "usd" };
       },
     },
   };
@@ -207,12 +224,29 @@ async function testRequestDeletionCancelsProThenMarks() {
     },
     invoices: {
       async list() {
-        return { data: [{ id: "in_1", payment_intent: "pi_1", charge: null }] };
+        return {
+          data: [
+            {
+              id: "in_1",
+              status: "paid",
+              payments: {
+                data: [
+                  {
+                    id: "inpay_1",
+                    status: "paid",
+                    created: 1,
+                    payment: { type: "payment_intent", payment_intent: "pi_1" },
+                  },
+                ],
+              },
+            },
+          ],
+        };
       },
     },
     refunds: {
       async create() {
-        return { id: "re_1" };
+        return { id: "re_1", status: "succeeded", amount: 899, currency: "usd" };
       },
     },
   };
