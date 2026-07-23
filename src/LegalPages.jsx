@@ -58,8 +58,8 @@ export function TermsPage() {
 
       <h2>3. Subscriptions and Billing</h2>
       <p>
-        Vestra offers a free tier (limited monthly stylist requests) and a paid &quot;Pro&quot; tier billed monthly or annually
-        through our payment processor, Stripe.
+        Vestra offers a free tier (3 stylist looks per calendar month) and a paid &quot;Pro&quot; tier
+        (100 stylist looks per calendar month) billed monthly or annually through our payment processor, Stripe.
       </p>
       <ul>
         <li>By subscribing to Pro, you authorize us to charge your chosen payment method on a recurring basis until you cancel.</li>

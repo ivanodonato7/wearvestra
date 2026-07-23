@@ -24,6 +24,7 @@ import {
   requestAccountDeletion,
   getAccessToken,
   FREE_STYLIST_LIMIT,
+  PRO_STYLIST_SOFT_LIMIT,
 } from "./billingApi";
 import { pickHomeHeroPhoto } from "./homeHeroPhotos";
 import { pickOutfitHeroPhoto } from "./outfitHeroPhotos";
@@ -195,8 +196,8 @@ const UI = {
     billingTitle: "Plan & billing",
     billingFreePlan: "Free",
     billingProPlan: "Vestra Pro",
-    billingFreeBlurb: "{used} of {limit} stylist requests used this month. Pro unlocks unlimited styling and saved outfits.",
-    billingProBlurb: "Unlimited stylist requests and saved outfits.",
+    billingFreeBlurb: "{used} of {limit} stylist requests used this month. Pro unlocks 100 looks/month and saved outfits.",
+    billingProBlurb: "100 stylist looks per month and saved outfits.",
     billingUpgradeMonthly: "Upgrade — $8.99/mo",
     billingUpgradeYearly: "Upgrade — $69/yr",
     billingManage: "Manage billing",
@@ -219,20 +220,20 @@ const UI = {
     billingBusy: "Opening Stripe…",
     billingError: "Couldn’t open billing. Try again in a moment.",
     billingQuotaTitle: "You’ve used your 3 free stylist looks this month.",
-    billingQuotaBody: "Upgrade to Vestra Pro for unlimited styling — or refine pieces on looks you already have.",
+    billingQuotaBody: "Upgrade to Vestra Pro for 100 looks/month — or refine pieces on looks you already have.",
     billingFairUseTitle: "You’ve been styling a lot this month — nice.",
-    billingFairUseBody: "Give the system a short breather and try again next month, or refine looks you already have. Pro still feels unlimited for normal use.",
+    billingFairUseBody: "You’ve used your 100 Pro looks for this month. Try again next month, or refine looks you already have.",
     billingAuthRequired: "Create an account to use the live stylist (3 free looks/month).",
     billingSaveProOnly: "Saved outfits are a Pro feature. Upgrade to keep looks across devices.",
-    billingSuccessNote: "Welcome to Pro — unlimited styling is on.",
-    signupProNote: "Free plan includes 3 stylist requests/month. Upgrade to Pro anytime for unlimited requests — $8.99/mo or $69/yr.",
+    billingSuccessNote: "Welcome to Pro — 100 looks/month are on.",
+    signupProNote: "Free plan includes 3 stylist requests/month. Upgrade to Pro anytime for 100 looks/month — $8.99/mo or $69/yr.",
     homeProUsed: "{remaining} of {limit} looks left this month",
-    homeProTeaser: "Get 3 free looks a month · Upgrade to Pro for unlimited",
+    homeProTeaser: "Get 3 free looks a month · Upgrade to Pro for 100 looks/month",
     homeProUpgradeCta: "Upgrade to Pro",
     onbProEyebrow: "Vestra Pro",
-    onbProTitle: "3 free looks a month — or go unlimited.",
-    onbProBody: "Free gets you started. Pro keeps every look going: unlimited stylist requests, saved outfits across devices, and AI hero images as they roll out.",
-    onbProBullet1: "Unlimited stylist requests",
+    onbProTitle: "3 free looks a month — or 100 with Pro.",
+    onbProBody: "Free gets you started. Pro keeps every look going: 100 stylist looks a month, saved outfits across devices, and AI hero images as they roll out.",
+    onbProBullet1: "100 stylist looks per month",
     onbProBullet2: "Saved outfits, synced",
     onbProBullet3: "AI hero images (coming soon)",
     onbProContinue: "Continue with free",
@@ -375,8 +376,8 @@ const UI = {
     billingTitle: "Plan y facturación",
     billingFreePlan: "Gratis",
     billingProPlan: "Vestra Pro",
-    billingFreeBlurb: "{used} de {limit} peticiones de estilista este mes. Pro desbloquea estilo ilimitado y looks guardados.",
-    billingProBlurb: "Estilista ilimitado y looks guardados.",
+    billingFreeBlurb: "{used} de {limit} peticiones de estilista este mes. Pro desbloquea 100 looks/mes y looks guardados.",
+    billingProBlurb: "100 looks de estilista al mes y looks guardados.",
     billingUpgradeMonthly: "Mejorar — 8,99 $/mes",
     billingUpgradeYearly: "Mejorar — 69 $/año",
     billingManage: "Gestionar facturación",
@@ -399,20 +400,20 @@ const UI = {
     billingBusy: "Abriendo Stripe…",
     billingError: "No se pudo abrir la facturación. Inténtalo de nuevo.",
     billingQuotaTitle: "Has usado tus 3 looks gratis de este mes.",
-    billingQuotaBody: "Pasa a Vestra Pro para estilo ilimitado — o ajusta piezas en looks que ya tengas.",
+    billingQuotaBody: "Pasa a Vestra Pro para 100 looks/mes — o ajusta piezas en looks que ya tengas.",
     billingFairUseTitle: "Has estilizado mucho este mes — genial.",
-    billingFairUseBody: "Dale un breve respiro al sistema y vuelve el mes que viene, o afina looks que ya tengas. Pro sigue sintiéndose ilimitado en el uso normal.",
+    billingFairUseBody: "Has usado tus 100 looks Pro de este mes. Vuelve el mes que viene, o afina looks que ya tengas.",
     billingAuthRequired: "Crea una cuenta para el estilista en vivo (3 looks gratis/mes).",
     billingSaveProOnly: "Guardar looks es Pro. Mejora tu plan para sincronizarlos.",
-    billingSuccessNote: "Bienvenido a Pro — estilo ilimitado activado.",
-    signupProNote: "El plan gratis incluye 3 peticiones de estilista al mes. Pasa a Pro cuando quieras para peticiones ilimitadas — 8,99 $/mes o 69 $/año.",
+    billingSuccessNote: "Bienvenido a Pro — 100 looks/mes activados.",
+    signupProNote: "El plan gratis incluye 3 peticiones de estilista al mes. Pasa a Pro cuando quieras para 100 looks/mes — 8,99 $/mes o 69 $/año.",
     homeProUsed: "{remaining} de {limit} looks restantes este mes",
-    homeProTeaser: "3 looks gratis al mes · Pasa a Pro para ilimitadas",
+    homeProTeaser: "3 looks gratis al mes · Pasa a Pro para 100 looks/mes",
     homeProUpgradeCta: "Pasar a Pro",
     onbProEyebrow: "Vestra Pro",
-    onbProTitle: "3 looks gratis al mes — o ilimitados con Pro.",
-    onbProBody: "Gratis te pone en marcha. Pro mantiene el ritmo: estilista ilimitado, looks guardados en todos tus dispositivos y hero images con IA cuando lleguen.",
-    onbProBullet1: "Peticiones de estilista ilimitadas",
+    onbProTitle: "3 looks gratis al mes — o 100 con Pro.",
+    onbProBody: "Gratis te pone en marcha. Pro mantiene el ritmo: 100 looks de estilista al mes, looks guardados en todos tus dispositivos y hero images con IA cuando lleguen.",
+    onbProBullet1: "100 looks de estilista al mes",
     onbProBullet2: "Looks guardados, sincronizados",
     onbProBullet3: "Hero images con IA (próximamente)",
     onbProContinue: "Seguir con el plan gratis",
@@ -555,8 +556,8 @@ const UI = {
     billingTitle: "Offre et facturation",
     billingFreePlan: "Gratuit",
     billingProPlan: "Vestra Pro",
-    billingFreeBlurb: "{used} sur {limit} demandes styliste ce mois. Pro : stylisme illimité et looks enregistrés.",
-    billingProBlurb: "Stylisme illimité et looks enregistrés.",
+    billingFreeBlurb: "{used} sur {limit} demandes styliste ce mois. Pro : 100 looks/mois et looks enregistrés.",
+    billingProBlurb: "100 looks styliste par mois et looks enregistrés.",
     billingUpgradeMonthly: "Passer Pro — 8,99 $/mois",
     billingUpgradeYearly: "Passer Pro — 69 $/an",
     billingManage: "Gérer la facturation",
@@ -579,20 +580,20 @@ const UI = {
     billingBusy: "Ouverture de Stripe…",
     billingError: "Facturation indisponible. Réessayez dans un instant.",
     billingQuotaTitle: "Vous avez utilisé vos 3 looks gratuits ce mois-ci.",
-    billingQuotaBody: "Passez à Vestra Pro pour un stylisme illimité — ou affinez les looks déjà obtenus.",
+    billingQuotaBody: "Passez à Vestra Pro pour 100 looks/mois — ou affinez les looks déjà obtenus.",
     billingFairUseTitle: "Vous avez beaucoup stylisé ce mois-ci — super.",
-    billingFairUseBody: "Laissez le système souffler un peu et réessayez le mois prochain, ou affinez des looks déjà obtenus. Pro reste illimité pour un usage normal.",
+    billingFairUseBody: "Vous avez utilisé vos 100 looks Pro ce mois-ci. Réessayez le mois prochain, ou affinez des looks déjà obtenus.",
     billingAuthRequired: "Créez un compte pour le styliste live (3 looks gratuits/mois).",
     billingSaveProOnly: "Enregistrer des looks est réservé à Pro. Passez Pro pour synchroniser.",
-    billingSuccessNote: "Bienvenue sur Pro — stylisme illimité activé.",
-    signupProNote: "L’offre gratuite inclut 3 demandes styliste/mois. Passez à Pro quand vous voulez pour un stylisme illimité — 8,99 $/mois ou 69 $/an.",
+    billingSuccessNote: "Bienvenue sur Pro — 100 looks/mois activés.",
+    signupProNote: "L’offre gratuite inclut 3 demandes styliste/mois. Passez à Pro quand vous voulez pour 100 looks/mois — 8,99 $/mois ou 69 $/an.",
     homeProUsed: "{remaining} sur {limit} looks restants ce mois",
-    homeProTeaser: "3 looks gratuits par mois · Passez à Pro pour l’illimité",
+    homeProTeaser: "3 looks gratuits par mois · Passez à Pro pour 100 looks/mois",
     homeProUpgradeCta: "Passer à Pro",
     onbProEyebrow: "Vestra Pro",
-    onbProTitle: "3 looks gratuits par mois — ou l’illimité avec Pro.",
-    onbProBody: "L’offre gratuite vous lance. Pro garde le rythme : stylisme illimité, looks enregistrés sur tous vos appareils, et hero images IA à venir.",
-    onbProBullet1: "Demandes styliste illimitées",
+    onbProTitle: "3 looks gratuits par mois — ou 100 avec Pro.",
+    onbProBody: "L’offre gratuite vous lance. Pro garde le rythme : 100 looks styliste par mois, looks enregistrés sur tous vos appareils, et hero images IA à venir.",
+    onbProBullet1: "100 looks styliste par mois",
     onbProBullet2: "Looks enregistrés, synchronisés",
     onbProBullet3: "Hero images IA (bientôt)",
     onbProContinue: "Continuer en gratuit",
@@ -3875,13 +3876,13 @@ function HomeScreen({
   const budgetLabel = tOpt((BUDGET_OPTIONS.find((b) => b.key === profile.budget) || {}).label || "Balanced");
   const swatchHexes = (profile.palette || []).map((label) => (COLOR_OPTIONS.find((c) => c.label === label) || {}).hex).filter(Boolean).slice(0, 5);
   const isPro = Boolean(billing?.pro);
-  const showProPrompt = !isPro;
   const used = billing?.stylist?.used ?? 0;
-  const limit = billing?.stylist?.limit ?? FREE_STYLIST_LIMIT;
+  const limit = billing?.stylist?.limit ?? (isPro ? PRO_STYLIST_SOFT_LIMIT : FREE_STYLIST_LIMIT);
   const remaining = billing?.stylist?.remaining ?? Math.max(0, limit - used);
-  const promptCopy = authUser && billing
-    ? t("homeProUsed").replace("{remaining}", String(remaining)).replace("{limit}", String(limit))
-    : t("homeProTeaser");
+  const usageCopy = t("homeProUsed")
+    .replace("{remaining}", String(remaining))
+    .replace("{limit}", String(limit));
+  const promptCopy = authUser && billing ? usageCopy : t("homeProTeaser");
   const homeHero = useMemo(
     () => pickHomeHeroPhoto({
       archetype: profile.archetype,
@@ -3904,9 +3905,10 @@ function HomeScreen({
         </div>
       </div>
       <div className="section-label">{t("askYourStylist")}</div>
-      {showProPrompt ? (
+      {(authUser && billing) || !isPro ? (
         <div className="home-pro-prompt" data-testid="home-pro-prompt">
-          <p className="home-pro-prompt-text">{promptCopy}</p>
+          <p className="home-pro-prompt-text" data-testid={isPro ? "home-pro-usage" : undefined}>{promptCopy}</p>
+          {!isPro ? (
           <button
             type="button"
             className="home-pro-prompt-cta"
@@ -3917,6 +3919,7 @@ function HomeScreen({
           >
             {t("homeProUpgradeCta")}
           </button>
+          ) : null}
         </div>
       ) : null}
       <form className="home-ask-row" onSubmit={(e) => { e.preventDefault(); if (homeInput.trim()) onPrompt(homeInput); }}>
@@ -4219,7 +4222,7 @@ function ProfileScreen({
   const isPro = Boolean(billing?.pro);
   const canCancelPro = String(billing?.status || "").toLowerCase() === "active";
   const used = billing?.stylist?.used ?? 0;
-  const limit = billing?.stylist?.limit ?? FREE_STYLIST_LIMIT;
+  const limit = billing?.stylist?.limit ?? (isPro ? PRO_STYLIST_SOFT_LIMIT : FREE_STYLIST_LIMIT);
   const deleteConfirmReady = deleteAccountTyped.trim().toUpperCase() === "DELETE";
 
   async function runBilling(kind, fn) {
@@ -4270,9 +4273,9 @@ function ProfileScreen({
                 {isPro ? t("billingProPlan") : t("billingFreePlan")}
               </span>
             </div>
-            <p className="billing-blurb">
+            <p className="billing-blurb" data-testid="billing-plan-blurb">
               {isPro
-                ? t("billingProBlurb")
+                ? `${t("billingProBlurb")} ${t("homeProUsed").replace("{remaining}", String(Math.max(0, limit - used))).replace("{limit}", String(limit))}`
                 : t("billingFreeBlurb").replace("{used}", String(used)).replace("{limit}", String(limit))}
             </p>
             {billingOk ? <p className="billing-success" role="status">{billingOk}</p> : null}

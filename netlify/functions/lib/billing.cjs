@@ -1,11 +1,10 @@
 /**
  * Vestra billing helpers (Netlify / Stripe).
  * Free: 3 live stylist requests per UTC calendar month (hard gate).
- * Pro: soft fair-use cap (100/month) — feels unlimited for real users;
- *       excess is logged and softly paused with a friendly notice (not a hard error).
+ * Pro: 100 stylist requests per UTC calendar month (soft fair-use pause when exceeded).
  */
 const FREE_STYLIST_LIMIT = 3;
-/** Soft fair-use ceiling for Pro. Not shown in marketing UI as a hard "limit". */
+/** Pro monthly stylist allowance (also used for marketing / billing-status). */
 const PRO_STYLIST_SOFT_LIMIT = 100;
 const PRO_STATUSES = new Set(["active", "trialing"]);
 
@@ -111,9 +110,8 @@ async function consumeStylistRequest(admin, userId) {
       ok: true,
       pro: true,
       used: next,
-      // Keep marketing "unlimited" — soft limit is internal only
-      limit: null,
-      remaining: null,
+      limit: PRO_STYLIST_SOFT_LIMIT,
+      remaining: Math.max(0, PRO_STYLIST_SOFT_LIMIT - next),
     };
   }
 
@@ -158,8 +156,8 @@ async function checkStylistQuota(admin, userId) {
       pro: true,
       status: row.subscription_status,
       used,
-      limit: null,
-      remaining: null,
+      limit: PRO_STYLIST_SOFT_LIMIT,
+      remaining: Math.max(0, PRO_STYLIST_SOFT_LIMIT - used),
       stripeCustomerId,
     };
   }
