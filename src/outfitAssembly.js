@@ -138,7 +138,8 @@ export function fillMissingCoreSlots(keys, {
     ? ["blazer", ...REQUIRED_FLOOR_FAMILIES]
     : [...REQUIRED_FLOOR_FAMILIES];
 
-  for (let attempt = 0; attempt < 4; attempt += 1) {
+  // attempt 0 strict → 1 out-of-band OK → 2–3 any coherent item in family
+  for (let attempt = 0; attempt < 5; attempt += 1) {
     out = enforceOnePerCategory(out, resolve);
     const byFam = new Map();
     for (const key of out) {
@@ -148,16 +149,20 @@ export function fillMissingCoreSlots(keys, {
     }
 
     let added = false;
+    const relax = attempt === 0 ? 0 : attempt === 1 ? 1 : 2;
     for (const fam of needed) {
       if (byFam.has(fam)) continue;
       if (typeof pickFamily !== "function") continue;
-      // Closest reasonable match: pickFamily may relax occasion filters internally
-      const picked = pickFamily(fam, used, { byFam, resolve, relax: attempt > 0 });
+      // Closest reasonable match: never drop a required category silently
+      const picked = pickFamily(fam, used, { byFam, resolve, relax });
       if (picked?.key) {
         used.add(picked.key);
         out.push(picked.key);
         added = true;
       }
+    }
+    if (!added && hasRequiredFloor(out, resolve) && (!requireOuter || byFam.has("blazer"))) {
+      break;
     }
     if (!added) break;
   }

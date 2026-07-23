@@ -4751,15 +4751,13 @@ export default function VestraPrototype() {
             prompt: finalText,
           }),
         };
-        const cleaned = sanitizeOutfitForOccasion(raw, finalText, promptOccasions, activeProfile) || {
-          ...raw,
-          items: remapOutfitItemsToLive(raw.items, finalText, promptOccasions, activeProfile),
-        };
+        const cleaned = sanitizeOutfitForOccasion(raw, finalText, promptOccasions, activeProfile);
+        if (!cleaned?.items?.length) return null;
         const resolved = (cleaned.items || []).map((k) => CATALOG[k]).filter(Boolean);
         // Always describe the FINAL pieces — never keep a stale Claude why after remaps
         const why = buildWhyThisWorks(resolved, finalText, promptOccasions);
         return { ...cleaned, rationale: why, whyThisWorks: why };
-      }).filter((o) => o.items.length >= 3 && o.whyThisWorks);
+      }).filter((o) => o && o.items.length >= 4 && o.whyThisWorks);
       if (outfits.length) {
         const shoppingList = isWeek
           ? (Array.isArray(live.shoppingList) && live.shoppingList.length

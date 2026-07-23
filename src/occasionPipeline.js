@@ -20,6 +20,7 @@ import {
   apparelEligible,
   validateLookShape,
   isFullSuitProduct,
+  hasRequiredFloor,
 } from "./outfitAssembly.js";
 
 export { detectOccasions, OCCASION_KEYWORDS };
@@ -223,7 +224,7 @@ export function sanitizeOutfitForOccasion(outfit, prompt, occasions, profile = {
   remapped = fillMissingCoreSlots(remapped, {
     resolve: (k) => CATALOG[k],
     requireOuter: !!target.requireOuter,
-    pickFamily: (fam, usedKeys) => {
+    pickFamily: (fam, usedKeys, opts = {}) => {
       // When outer is already a full suit, never refill trousers with another suit
       const blazerKey = [...usedKeys].find((k) => CATALOG[k]?.family === "blazer");
       const blazer = blazerKey ? CATALOG[blazerKey] : null;
@@ -233,6 +234,7 @@ export function sanitizeOutfitForOccasion(outfit, prompt, occasions, profile = {
         palette: profile?.palette || [],
         avoid: profile?.avoid || [],
         usedKeys,
+        relax: opts.relax || 0,
       });
       if (fam === "trouser" && blazer && isFullSuitProduct(blazer) && picked && isFullSuitProduct(picked)) {
         usedKeys.add(picked.key);
@@ -242,6 +244,7 @@ export function sanitizeOutfitForOccasion(outfit, prompt, occasions, profile = {
           palette: profile?.palette || [],
           avoid: profile?.avoid || [],
           usedKeys,
+          relax: opts.relax || 0,
         });
         return alt && !isFullSuitProduct(alt) ? alt : null;
       }
@@ -249,12 +252,44 @@ export function sanitizeOutfitForOccasion(outfit, prompt, occasions, profile = {
     },
   });
 
+  // Replace any remaining hard-banned pieces rather than discarding the whole look
+  {
+    const used = new Set(remapped);
+    remapped = remapped.map((k) => {
+      const item = CATALOG[k];
+      if (!item) return null;
+      if (itemFitsOccasion(item, target).reason !== "hardBan") return k;
+      const fam = item.family || familyOfKey(k);
+      used.delete(k);
+      return pickLiveForFamily(fam, {
+        prompt,
+        occasions,
+        usedKeys: used,
+        palette: profile?.palette || [],
+        avoid: profile?.avoid || [],
+        relax: 2,
+      })?.key || null;
+    }).filter(Boolean);
+    remapped = fillMissingCoreSlots(remapped, {
+      resolve: (k) => CATALOG[k],
+      requireOuter: !!target.requireOuter,
+      pickFamily: (fam, usedKeys, opts = {}) => pickLiveForFamily(fam, {
+        prompt,
+        occasions,
+        palette: profile?.palette || [],
+        avoid: profile?.avoid || [],
+        usedKeys,
+        relax: opts.relax || 0,
+      }),
+    });
+  }
+
+  if (!hasRequiredFloor(remapped, (k) => CATALOG[k])) return null;
   if (remapped.length < 4) return null;
   for (const k of remapped) {
     const item = CATALOG[k];
     if (!item?.shopUrl || !(item.brand || item.retailer)) return null;
     if (!apparelEligible(item)) return null;
-    if (itemFitsOccasion(item, target).reason === "hardBan") return null;
   }
   const shape = validateLookShape(remapped.map((k) => CATALOG[k]).filter(Boolean), {
     requireFloor: true,

@@ -281,6 +281,8 @@ export function pickLiveForFamily(family, {
   avoid = [],
   usedKeys = new Set(),
   structureHint = null,
+  /** 0 = strict occasion fit; 1 = allow out-of-band; 2 = any coherent item in family */
+  relax = 0,
 } = {}) {
   const target = occasionFormalityTarget(prompt, occasions);
   const pool = liveCatalogItems().filter(
@@ -291,22 +293,25 @@ export function pickLiveForFamily(family, {
       (i) => i.family === family && i.shopUrl && !usedKeys.has(i.key) && familyCoherent(i, family),
     );
     if (!fallback.length) return null;
-    return pickBest(fallback, target, palette, avoid, structureHint, family);
+    return pickBest(fallback, target, palette, avoid, structureHint, family, relax);
   }
-  return pickBest(pool, target, palette, avoid, structureHint, family);
+  return pickBest(pool, target, palette, avoid, structureHint, family, relax);
 }
 
-function pickBest(pool, target, palette, avoid, structureHint, family) {
+function pickBest(pool, target, palette, avoid, structureHint, family, relax = 0) {
   let best = null;
   let bestScore = -Infinity;
   const active = target?.label === "active";
   const formal = target?.label === "formal" || target?.label === "formal-dark" || target?.label === "smart";
+  const relaxLevel = Number(relax) || 0;
   for (const item of pool) {
     if (!familyCoherent(item, family || item.family)) continue;
     // Never use a full suit SKU as the trouser slot — that stacks competing outers
     if ((family || item.family) === "trouser" && isFullSuitProduct(item)) continue;
     const fit = itemFitsOccasion(item, target);
-    if (!fit.ok && fit.score < -100) continue;
+    if (relaxLevel < 2 && fit.reason === "hardBan") continue;
+    if (relaxLevel < 1 && !fit.ok && fit.score < -100) continue;
+    if (relaxLevel === 1 && fit.reason === "hardBan") continue;
     let s = fit.score;
     for (const tag of item.paletteTags || []) {
       if (avoid.includes(tag)) s -= 30;

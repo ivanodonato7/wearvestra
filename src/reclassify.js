@@ -55,7 +55,10 @@ function nameLooksLikeFamily(name, family) {
   }
   if (family === "shirt") return /\b(shirt|tee|t-shirt|polo|hoodie|sweater|jumper|turtleneck|knit|sweatshirt)\b/i.test(n) && !/\bsock/i.test(n);
   if (family === "blazer") return /\b(blazer|suit|jacket|coat|tuxedo|tux|sport\s*coat|overcoat|parka)\b/i.test(n);
-  if (family === "belt") return /\bbelts?\b/i.test(n) && !/\bbelt(?:ed|-?\s*coat)\b/i.test(n);
+  if (family === "belt") {
+    if (/\b(dress|gown|skirt|blouse)\b/i.test(n) && !/\bbelts?\b/i.test(n)) return false;
+    return /\bbelts?\b/i.test(n) && !/\bbelt(?:ed|-?\s*coat)\b/i.test(n);
+  }
   if (family === "scarf") return /\b(scarf|pocket\s*square)\b/i.test(n);
   if (family === "sunglasses") return /\b(sunglass|eyewear|eyeglasses?)\b/i.test(n);
   return false;
