@@ -118,4 +118,4 @@ Assumptions for **current / near-term Vestra traffic** (conservative product gue
 4. Keep soft Pro fair-use at **100** before turning search on for Pro.
 5. Spot-check 20 menswear queries for field quality (image HTTPS, price parse, retailer name, deep link usability).
 
-**No code written for this feature in this pass.**
+**Implemented.** Enable with `SERPER_API_KEY` (optional `SKIMLINKS_SITE_ID`).
