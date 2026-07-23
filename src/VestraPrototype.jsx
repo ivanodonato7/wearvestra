@@ -26,6 +26,7 @@ import {
   FREE_STYLIST_LIMIT,
 } from "./billingApi";
 import { pickHomeHeroPhoto } from "./homeHeroPhotos";
+import { pickOutfitHeroPhoto } from "./outfitHeroPhotos";
 import {
   CATALOG,
   ITEM_FAMILY_VARIANTS,
@@ -3510,21 +3511,38 @@ function OccasionScreen({ onSubmit, onSkip }) {
 }
 
 // ==================== OUTFIT HERO ====================
-// Static stock mood photo by occasion (men's inspiration — not a literal product shot).
-const OutfitHero = memo(function OutfitHero({ occasion = "default", palette = [] }) {
+// Stock mood photo matched to this look's garment colors + formality.
+const OutfitHero = memo(function OutfitHero({
+  occasion = "default",
+  styleFamily = null,
+  promptHint = "",
+  itemKeys = [],
+  seed = "",
+  palette = [],
+}) {
   const { t } = useLang();
-  const slug = HERO_OCCASION_SLUGS.has(occasion)
-    ? occasion
-    : resolveHeroOccasionSlug({ occasion });
-  const src = heroStockUrl(slug);
-  const fallback = heroStockUrl("default");
+  const itemKeySig = Array.isArray(itemKeys) ? itemKeys.join("|") : "";
+  const picked = useMemo(
+    () => pickOutfitHeroPhoto({
+      items: itemKeys,
+      catalog: CATALOG,
+      occasion,
+      styleFamily,
+      prompt: promptHint,
+      seed,
+    }),
+    // itemKeySig captures items contents; CATALOG is module-stable
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [itemKeySig, occasion, styleFamily, promptHint, seed],
+  );
+  const fallback = assetUrl("/heroes/home/00-default-A.jpg");
   const swatches = (palette || [])
     .map((label) => (COLOR_OPTIONS.find((c) => c.label === label) || {}).hex)
     .filter(Boolean)
     .slice(0, 4);
 
   return (
-    <div className="model-wrap outfit-hero-wrap outfit-hero-stock">
+    <div className="model-wrap outfit-hero-wrap outfit-hero-stock" data-testid="outfit-hero" data-hero-file={picked.file}>
       {swatches.length > 0 && (
         <div className="outfit-hero-swatches outfit-hero-swatches-overlay" aria-hidden="true">
           {swatches.map((hex) => <span key={hex} style={{ background: hex }} />)}
@@ -3532,7 +3550,7 @@ const OutfitHero = memo(function OutfitHero({ occasion = "default", palette = []
       )}
       <img
         className="model-photo"
-        src={src}
+        src={picked.src}
         alt=""
         loading="lazy"
         decoding="async"
@@ -3763,13 +3781,18 @@ const OutfitCard = memo(function OutfitCard({
     styleFamily,
     prompt: promptHint,
   });
+  const itemKeys = Array.isArray(outfit.items) ? outfit.items : [];
 
   return (
-    <div className="card">
+    <div className="card outfit-card" data-testid="outfit-card">
       <div className="eyebrow gold">{header}</div>
       <div className="outfit-visual">
         <OutfitHero
           occasion={heroOccasion}
+          styleFamily={styleFamily}
+          promptHint={promptHint}
+          itemKeys={itemKeys}
+          seed={`${msgIndex}:${outfitIndex}:${itemKeys.join("|")}`}
           palette={palette}
         />
         <div className="item-list" data-testid="item-list">
