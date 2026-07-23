@@ -4,7 +4,12 @@
  * Returns plan + stylist usage for the signed-in user.
  */
 const { getServiceClient, userFromAuthHeader } = require("./lib/supabaseAdmin.cjs");
-const { corsHeaders, checkStylistQuota, FREE_STYLIST_LIMIT } = require("./lib/billing.cjs");
+const {
+  corsHeaders,
+  checkStylistQuota,
+  FREE_STYLIST_LIMIT,
+  PRO_STYLIST_SOFT_LIMIT,
+} = require("./lib/billing.cjs");
 
 exports.handler = async (event) => {
   const headers = corsHeaders();
@@ -29,6 +34,9 @@ exports.handler = async (event) => {
 
   try {
     const q = await checkStylistQuota(admin, user.id);
+    const defaultLimit = q.pro ? PRO_STYLIST_SOFT_LIMIT : FREE_STYLIST_LIMIT;
+    const limit = q.limit ?? defaultLimit;
+    const remaining = q.remaining ?? Math.max(0, limit - (Number(q.used) || 0));
     return {
       statusCode: 200,
       headers,
@@ -38,8 +46,8 @@ exports.handler = async (event) => {
         status: q.status,
         stylist: {
           used: q.used,
-          limit: q.pro ? null : (q.limit ?? FREE_STYLIST_LIMIT),
-          remaining: q.pro ? null : q.remaining,
+          limit,
+          remaining,
         },
         hasStripeCustomer: Boolean(q.stripeCustomerId),
         prices: {

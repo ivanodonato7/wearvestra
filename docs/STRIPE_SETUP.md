@@ -1,7 +1,7 @@
 # Vestra Pro — Stripe setup (test mode)
 
 Free tier: **3 live stylist requests / month**.  
-Pro: **$8.99/month** or **$69/year** — unlimited stylist + saved outfits.
+Pro: **$8.99/month** or **$69/year** — 100 stylist looks/month + saved outfits.
 
 Use **Test mode** until you explicitly switch to live.
 

@@ -59,3 +59,6 @@ assert(/3 free looks a month/.test(ui), "onboarding Pro copy must mention 3 free
 assert(/\{remaining\} of \{limit\} looks left/.test(ui), "home upsell must use remaining/limit");
 
 console.log("PASS free-tier limit=3; request #4 blocked with quota_exceeded");
+
+assert(/100 stylist looks per month/.test(ui), "Pro onboarding bullet must say 100 looks");
+assert(!/Unlimited stylist requests/.test(ui), "Pro copy must not say Unlimited stylist requests");

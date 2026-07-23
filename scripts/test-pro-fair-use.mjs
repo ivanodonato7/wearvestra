@@ -51,7 +51,7 @@ function checkPro(used, period, nowPeriod = currentPeriodYm()) {
       code: "fair_use_soft_cap",
     };
   }
-  return { ok: true, pro: true, used: u, limit: null, remaining: null, code: null };
+  return { ok: true, pro: true, used: u, limit: serverSoft, remaining: Math.max(0, serverSoft - u), code: null };
 }
 
 /** Mirror free branch — must stay independent. */
@@ -71,6 +71,8 @@ function checkFree(used, period, nowPeriod = currentPeriodYm()) {
 
 const period = currentPeriodYm();
 assert(checkPro(0, period).ok, "Pro used=0 allowed");
+assert(checkPro(0, period).limit === 100, "Pro ok path limit must be 100");
+assert(checkPro(0, period).remaining === 100, "Pro unused remaining must be 100");
 assert(checkPro(99, period).ok, "Pro used=99 still allowed (soft)");
 const softBlocked = checkPro(100, period);
 assert(!softBlocked.ok && softBlocked.code === "fair_use_soft_cap", "Pro used=100 soft-paused");
