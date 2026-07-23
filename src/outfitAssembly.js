@@ -1,17 +1,31 @@
 /**
  * Hard outfit-assembly rules shared by Claude sanitize + local coordinator.
- * One garment per core family; apparel only; regenerate why from final pieces.
+ * Floor for every look: shirt + trouser + shoe + belt.
+ * Optional outer: blazer. Bonus accessory: scarf or sunglasses (≤1).
  */
 
+/** Optional outer + required garments (belt handled separately as required floor). */
 export const CORE_FAMILIES = ["blazer", "shirt", "trouser", "shoe"];
+
+/** Every outfit must include these four (top, bottom, shoes, belt). */
+export const REQUIRED_FLOOR_FAMILIES = ["shirt", "trouser", "shoe", "belt"];
+
+/** Optional bonus — never required; at most one. */
+export const BONUS_ACCESSORY_FAMILIES = ["scarf", "sunglasses"];
+
+/** @deprecated use BONUS_ACCESSORY_FAMILIES; kept for swap UI compatibility */
 export const ACCESSORY_FAMILIES = ["belt", "scarf", "sunglasses"];
-export const APPAREL_FAMILIES = [...CORE_FAMILIES, ...ACCESSORY_FAMILIES];
+
+export const APPAREL_FAMILIES = [
+  ...CORE_FAMILIES,
+  "belt",
+  ...BONUS_ACCESSORY_FAMILIES,
+];
 
 /** Full suit / tuxedo products that should not stack with another outer. */
 export function isFullSuitProduct(item = {}) {
   const name = String(item.name || "");
   if (!/\b(suits?|tuxedo|tux|three[\s-]?piece|two[\s-]?piece)\b/i.test(name)) return false;
-  // Suit jacket / blazer alone is an outer, not a competing full suit stack by itself
   if (/\b(suit\s*jacket|sport\s*coat)\b/i.test(name) && !/\b(suits?\b|tuxedo|three[\s-]?piece|two[\s-]?piece)\b/i.test(name.replace(/suit\s*jacket/gi, ""))) {
     return false;
   }
@@ -40,7 +54,6 @@ export function isNonApparelProduct(item = {}) {
   }
   if (/\b(bags?|backpack|tote|duffel|briefcase|wallet|phone\s*case)\b/i.test(category)
     || /\bnovelty\b/i.test(category)) {
-    // Novelty T-Shirts category is full of mug SKUs; real tees still have shirt-like names
     if (/\bmugs?\b/i.test(name) || /\bcase\b/i.test(name) || corrected === "other") return true;
     if (/^novelty/i.test(category) && !/\b(t-?shirt|tee|shirt)\b/i.test(name)) return true;
   }
@@ -62,37 +75,29 @@ export function apparelEligible(item) {
 }
 
 /**
- * Collapse an item-key list to ≤1 per core family and ≤1 accessory.
- * Prefer keeping the first occurrence (Claude order) unless a later piece is
- * clearly better for a slot that already has a competing full-suit.
+ * Collapse an item-key list to ≤1 per garment family, keep belt, ≤1 bonus accessory.
  *
  * @param {string[]} keys
  * @param {(key: string) => object|null|undefined} resolve
  * @returns {string[]}
  */
 export function enforceOnePerCategory(keys, resolve) {
-  const coreOrder = [];
   const byFam = new Map();
-  let accessory = null;
+  let bonus = null;
 
   for (const key of keys || []) {
     const item = typeof resolve === "function" ? resolve(key) : key;
     if (!item || !apparelEligible(item)) continue;
     const fam = item.family || item.type;
-    if (ACCESSORY_FAMILIES.includes(fam)) {
-      if (!accessory) accessory = item.key || key;
+    if (BONUS_ACCESSORY_FAMILIES.includes(fam)) {
+      if (!bonus) bonus = item.key || key;
       continue;
     }
-    if (!CORE_FAMILIES.includes(fam)) continue;
+    if (![...CORE_FAMILIES, "belt"].includes(fam)) continue;
 
     if (!byFam.has(fam)) {
       byFam.set(fam, item.key || key);
-      coreOrder.push(fam);
-      continue;
     }
-
-    // Competing second item in same family — keep the first (never stack suits/jackets)
-    continue;
   }
 
   // Full suit in blazer + full suit wrongly filed as trouser → drop the suit-trouser
@@ -107,19 +112,18 @@ export function enforceOnePerCategory(keys, resolve) {
   }
 
   const out = [];
-  for (const fam of CORE_FAMILIES) {
-    if (byFam.has(fam)) out.push(byFam.get(fam));
-  }
-  // Preserve original relative order for any core fams we walked (belt last)
-  // Re-sort out to match first-seen order among kept keys
   const rank = new Map((keys || []).map((k, i) => [k, i]));
-  out.sort((a, b) => (rank.get(a) ?? 99) - (rank.get(b) ?? 99));
-  if (accessory) out.push(accessory);
+  const order = ["blazer", "shirt", "trouser", "shoe", "belt"];
+  const kept = order.filter((fam) => byFam.has(fam)).map((fam) => byFam.get(fam));
+  kept.sort((a, b) => (rank.get(a) ?? 99) - (rank.get(b) ?? 99));
+  out.push(...kept);
+  if (bonus) out.push(bonus);
   return out;
 }
 
 /**
- * After dedupe, ensure core slots are filled when possible.
+ * After dedupe, ensure required floor slots are filled (and blazer when requireOuter).
+ * Uses pickFamily fallbacks — never drops a required category silently.
  */
 export function fillMissingCoreSlots(keys, {
   resolve,
@@ -130,7 +134,11 @@ export function fillMissingCoreSlots(keys, {
   const used = usedKeys || new Set(keys);
   let out = [...keys];
 
-  for (let attempt = 0; attempt < 3; attempt += 1) {
+  const needed = requireOuter
+    ? ["blazer", ...REQUIRED_FLOOR_FAMILIES]
+    : [...REQUIRED_FLOOR_FAMILIES];
+
+  for (let attempt = 0; attempt < 4; attempt += 1) {
     out = enforceOnePerCategory(out, resolve);
     const byFam = new Map();
     for (const key of out) {
@@ -140,11 +148,11 @@ export function fillMissingCoreSlots(keys, {
     }
 
     let added = false;
-    for (const fam of CORE_FAMILIES) {
+    for (const fam of needed) {
       if (byFam.has(fam)) continue;
-      if (fam === "blazer" && !requireOuter) continue;
       if (typeof pickFamily !== "function") continue;
-      const picked = pickFamily(fam, used, { byFam, resolve });
+      // Closest reasonable match: pickFamily may relax occasion filters internally
+      const picked = pickFamily(fam, used, { byFam, resolve, relax: attempt > 0 });
       if (picked?.key) {
         used.add(picked.key);
         out.push(picked.key);
@@ -158,23 +166,33 @@ export function fillMissingCoreSlots(keys, {
 
 /**
  * Assert look shape for tests / runtime guards.
+ * Floor: shirt + trouser + shoe + belt (always).
  */
-export function validateLookShape(items = []) {
+export function validateLookShape(items = [], { requireFloor = true, requireOuter = false } = {}) {
   const apparel = items.filter(apparelEligible);
   if (apparel.length !== items.length) {
     return { ok: false, reason: "non-apparel" };
   }
   const counts = {};
-  let accessories = 0;
+  let bonusAccessories = 0;
   for (const item of apparel) {
     const fam = item.family || item.type;
     counts[fam] = (counts[fam] || 0) + 1;
-    if (ACCESSORY_FAMILIES.includes(fam)) accessories += 1;
+    if (BONUS_ACCESSORY_FAMILIES.includes(fam)) bonusAccessories += 1;
   }
-  for (const fam of CORE_FAMILIES) {
+  for (const fam of [...CORE_FAMILIES, "belt"]) {
     if ((counts[fam] || 0) > 1) return { ok: false, reason: `duplicate-${fam}` };
   }
-  if (accessories > 1) return { ok: false, reason: "too-many-accessories" };
+  if (bonusAccessories > 1) return { ok: false, reason: "too-many-accessories" };
+
+  if (requireFloor) {
+    for (const fam of REQUIRED_FLOOR_FAMILIES) {
+      if (!(counts[fam] > 0)) return { ok: false, reason: `missing-${fam}` };
+    }
+  }
+  if (requireOuter && !(counts.blazer > 0)) {
+    return { ok: false, reason: "missing-blazer" };
+  }
 
   const blazer = apparel.find((i) => i.family === "blazer");
   const trouser = apparel.find((i) => i.family === "trouser");
@@ -186,4 +204,20 @@ export function validateLookShape(items = []) {
     return { ok: false, reason: "competing-outers" };
   }
   return { ok: true, counts };
+}
+
+/** Families present in an item-key list. */
+export function familiesInKeys(keys, resolve) {
+  const set = new Set();
+  for (const key of keys || []) {
+    const item = resolve(key);
+    if (!item) continue;
+    set.add(item.family || item.type);
+  }
+  return set;
+}
+
+export function hasRequiredFloor(keys, resolve) {
+  const set = familiesInKeys(keys, resolve);
+  return REQUIRED_FLOOR_FAMILIES.every((f) => set.has(f));
 }
