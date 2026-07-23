@@ -65,9 +65,11 @@ export function TermsPage() {
         <li>By subscribing to Pro, you authorize us to charge your chosen payment method on a recurring basis until you cancel.</li>
         <li>Subscriptions automatically renew at the then-current price unless canceled before the renewal date.</li>
         <li>
-          Cancellation and refunds: You may cancel your subscription at any time through your account settings. If you cancel,
-          you will receive a full refund of your most recent payment (monthly or annual), regardless of how much of the term
-          has elapsed. You will not be charged again after cancellation.
+          Cancellation and refunds: You may cancel your subscription at any time through your account settings.
+          If you cancel a <strong>monthly</strong> Pro plan, you will receive a full refund of your most recent
+          monthly payment. If you cancel an <strong>annual</strong> Pro plan, you will receive a prorated refund
+          for the unused portion of the paid year only (based on days remaining in the current billing period).
+          You will not be charged again after cancellation.
         </li>
       </ul>
 
