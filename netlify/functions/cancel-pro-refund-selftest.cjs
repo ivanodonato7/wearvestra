@@ -47,7 +47,14 @@ exports.handler = async (event) => {
     return { statusCode: 405, headers, body: JSON.stringify({ error: "POST only" }) };
   }
 
-  const gate = String(process.env.CANCEL_PRO_SELFTEST_GATE || "").trim();
+  const gateEnv = String(process.env.CANCEL_PRO_SELFTEST_GATE || "").trim();
+  // Temporary deploy-preview gate so we can POST a sk_test_ key in the body without
+  // requiring a new Netlify env var. Remove with this selftest function.
+  const gate =
+    gateEnv ||
+    (String(process.env.CONTEXT || "") === "deploy-preview"
+      ? "vestra-cancel-pro-selftest-2026-07-23"
+      : "");
   const got = String(event.headers["x-vestra-gate"] || event.headers["X-Vestra-Gate"] || "").trim();
   if (!gate || got !== gate) {
     return { statusCode: 401, headers, body: JSON.stringify({ error: "Unauthorized" }) };
