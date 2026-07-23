@@ -220,6 +220,8 @@ const UI = {
     billingError: "Couldn’t open billing. Try again in a moment.",
     billingQuotaTitle: "You’ve used your 3 free stylist looks this month.",
     billingQuotaBody: "Upgrade to Vestra Pro for unlimited styling — or refine pieces on looks you already have.",
+    billingFairUseTitle: "You’ve been styling a lot this month — nice.",
+    billingFairUseBody: "Give the system a short breather and try again next month, or refine looks you already have. Pro still feels unlimited for normal use.",
     billingAuthRequired: "Create an account to use the live stylist (3 free looks/month).",
     billingSaveProOnly: "Saved outfits are a Pro feature. Upgrade to keep looks across devices.",
     billingSuccessNote: "Welcome to Pro — unlimited styling is on.",
@@ -398,6 +400,8 @@ const UI = {
     billingError: "No se pudo abrir la facturación. Inténtalo de nuevo.",
     billingQuotaTitle: "Has usado tus 3 looks gratis de este mes.",
     billingQuotaBody: "Pasa a Vestra Pro para estilo ilimitado — o ajusta piezas en looks que ya tengas.",
+    billingFairUseTitle: "Has estilizado mucho este mes — genial.",
+    billingFairUseBody: "Dale un breve respiro al sistema y vuelve el mes que viene, o afina looks que ya tengas. Pro sigue sintiéndose ilimitado en el uso normal.",
     billingAuthRequired: "Crea una cuenta para el estilista en vivo (3 looks gratis/mes).",
     billingSaveProOnly: "Guardar looks es Pro. Mejora tu plan para sincronizarlos.",
     billingSuccessNote: "Bienvenido a Pro — estilo ilimitado activado.",
@@ -576,6 +580,8 @@ const UI = {
     billingError: "Facturation indisponible. Réessayez dans un instant.",
     billingQuotaTitle: "Vous avez utilisé vos 3 looks gratuits ce mois-ci.",
     billingQuotaBody: "Passez à Vestra Pro pour un stylisme illimité — ou affinez les looks déjà obtenus.",
+    billingFairUseTitle: "Vous avez beaucoup stylisé ce mois-ci — super.",
+    billingFairUseBody: "Laissez le système souffler un peu et réessayez le mois prochain, ou affinez des looks déjà obtenus. Pro reste illimité pour un usage normal.",
     billingAuthRequired: "Créez un compte pour le styliste live (3 looks gratuits/mois).",
     billingSaveProOnly: "Enregistrer des looks est réservé à Pro. Passez Pro pour synchroniser.",
     billingSuccessNote: "Bienvenue sur Pro — stylisme illimité activé.",
@@ -4709,6 +4715,16 @@ export default function VestraPrototype() {
       mode: weekPlan ? "week" : "looks",
       accessToken,
     });
+    if (live?.code === "fair_use_soft_cap") {
+      setMessages((m) => [...m, {
+        role: "assistant",
+        text: `${t("billingFairUseTitle")}\n\n${t("billingFairUseBody")}`,
+        fairUseNotice: true,
+      }]);
+      refreshBilling();
+      setPending(false);
+      return;
+    }
     if (live?.code === "quota_exceeded") {
       setMessages((m) => [...m, {
         role: "assistant",

@@ -45,13 +45,19 @@ async function postStylist(endpoint, payload, signal, accessToken) {
     signal,
   });
   const data = await res.json().catch(() => ({}));
-  if (res.status === 401 || res.status === 402) {
+  if (res.status === 401 || res.status === 402 || res.status === 429) {
+    const fallbackCode = res.status === 401
+      ? "auth_required"
+      : res.status === 429
+        ? "fair_use_soft_cap"
+        : "quota_exceeded";
     return {
       error: data.error || (res.status === 401 ? "Sign in required" : "Quota exceeded"),
-      code: data.code || (res.status === 401 ? "auth_required" : "quota_exceeded"),
+      code: data.code || fallbackCode,
       used: data.used,
       limit: data.limit,
       remaining: data.remaining,
+      pro: data.pro,
     };
   }
   if (!res.ok) return null;

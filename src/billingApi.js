@@ -4,6 +4,8 @@
 import { supabase, supabaseConfigured } from "./supabaseClient.js";
 
 export const FREE_STYLIST_LIMIT = 3;
+/** Soft Pro fair-use ceiling (server-enforced). Not shown in marketing UI. */
+export const PRO_STYLIST_SOFT_LIMIT = 100;
 
 async function accessToken() {
   if (!supabaseConfigured || !supabase) return null;
