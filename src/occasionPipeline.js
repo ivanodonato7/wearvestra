@@ -38,38 +38,38 @@ export function familyOfKey(key) {
  */
 const OCCASION_FAMILY_TEMPLATES = {
   wedding: [
-    ["blazer", "shirt", "trouser", "shoe"],
     ["blazer", "shirt", "trouser", "shoe", "belt"],
-    ["blazer", "shirt", "trouser", "shoe", "scarf"],
+    ["blazer", "shirt", "trouser", "shoe", "belt"],
+    ["blazer", "shirt", "trouser", "shoe", "belt", "scarf"],
   ],
   funeral: [
-    ["blazer", "shirt", "trouser", "shoe"],
+    ["blazer", "shirt", "trouser", "shoe", "belt"],
     ["blazer", "shirt", "trouser", "shoe", "belt"],
   ],
   work: [
-    ["blazer", "shirt", "trouser", "shoe"],
+    ["blazer", "shirt", "trouser", "shoe", "belt"],
     ["blazer", "shirt", "trouser", "shoe", "belt"],
     ["shirt", "trouser", "shoe", "belt"],
   ],
   dinner: [
-    ["blazer", "shirt", "trouser", "shoe"],
+    ["blazer", "shirt", "trouser", "shoe", "belt"],
     ["shirt", "trouser", "shoe", "belt"],
-    ["blazer", "shirt", "trouser", "shoe", "scarf"],
+    ["blazer", "shirt", "trouser", "shoe", "belt", "scarf"],
   ],
   active: [
-    ["shirt", "trouser", "shoe"],
-    ["shirt", "trouser", "shoe"],
-    ["shirt", "trouser", "shoe"],
+    ["shirt", "trouser", "shoe", "belt"],
+    ["shirt", "trouser", "shoe", "belt"],
+    ["shirt", "trouser", "shoe", "belt"],
   ],
   weekend: [
-    ["shirt", "trouser", "shoe"],
-    ["shirt", "trouser", "shoe", "sunglasses"],
-    ["blazer", "shirt", "trouser", "shoe"],
+    ["shirt", "trouser", "shoe", "belt"],
+    ["shirt", "trouser", "shoe", "belt", "sunglasses"],
+    ["blazer", "shirt", "trouser", "shoe", "belt"],
   ],
   default: [
-    ["blazer", "shirt", "trouser", "shoe"],
+    ["blazer", "shirt", "trouser", "shoe", "belt"],
     ["shirt", "trouser", "shoe", "belt"],
-    ["shirt", "trouser", "shoe", "sunglasses"],
+    ["shirt", "trouser", "shoe", "belt", "sunglasses"],
   ],
 };
 
@@ -136,7 +136,7 @@ export function sanitizeOutfitForOccasion(outfit, prompt, occasions, profile = {
   if (!outfit?.items?.length) return null;
   const target = occasionFormalityTarget(prompt, occasions);
   let remapped = remapOutfitItemsToLive(outfit.items, prompt, occasions, profile);
-  if (remapped.length < 3) {
+  if (remapped.length < 4) {
     // If keys were already family names / missing, try building from families in items
     remapped = [];
   }
@@ -249,14 +249,17 @@ export function sanitizeOutfitForOccasion(outfit, prompt, occasions, profile = {
     },
   });
 
-  if (remapped.length < 3) return null;
+  if (remapped.length < 4) return null;
   for (const k of remapped) {
     const item = CATALOG[k];
     if (!item?.shopUrl || !(item.brand || item.retailer)) return null;
     if (!apparelEligible(item)) return null;
     if (itemFitsOccasion(item, target).reason === "hardBan") return null;
   }
-  const shape = validateLookShape(remapped.map((k) => CATALOG[k]).filter(Boolean));
+  const shape = validateLookShape(remapped.map((k) => CATALOG[k]).filter(Boolean), {
+    requireFloor: true,
+    requireOuter: !!target.requireOuter,
+  });
   if (!shape.ok) return null;
   return { ...outfit, items: remapped };
 }

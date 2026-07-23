@@ -19,7 +19,8 @@
     "netlify:env": "bash scripts/netlify-set-anthropic.sh",
     "cap:sync": "npm run build && npx cap sync",
     "cap:android": "npm run cap:sync && npx cap open android",
-    "android": "npm run cap:sync && npx cap run android"
+    "android": "npm run cap:sync && npx cap run android",
+    "test:outfit-floor": "node scripts/test-outfit-floor.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.4.2",
